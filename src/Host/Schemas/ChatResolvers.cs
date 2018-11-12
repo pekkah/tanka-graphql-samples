@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using fugu.graphql.resolvers;
+using Microsoft.AspNetCore.Hosting.Internal;
 using static fugu.graphql.resolvers.Resolve;
 
 namespace fugu.graphql.samples.Host.Schemas
@@ -11,31 +13,77 @@ namespace fugu.graphql.samples.Host.Schemas
             // roots
             this["Query"] = new FieldResolverMap
             {
-                {"hello", resolver.Hello}
+                {"channels", resolver.Channels},
+                {"channel", resolver.Channel}
             };
 
             this["Mutation"] = new FieldResolverMap();
             this["Subscription"] = new FieldResolverMap();
 
             // domain
-            this["Hello"] = new FieldResolverMap()
+            this["Channel"] = new FieldResolverMap
             {
-                {"message", PropertyOf<Message>(m => m.Content)}
+                {"id", PropertyOf<Channel>(c => c.Id)},
+                {"name", PropertyOf<Channel>(c => c.Name)},
+                {"members", PropertyOf<Channel>(c => c.Members)}
+            };
+
+            this["Member"] = new FieldResolverMap()
+            {
+                {"id", PropertyOf<Member>(c => c.Id)},
+                {"name", PropertyOf<Member>(c => c.Name)},
+            };
+
+            this["Message"] = new FieldResolverMap
+            {
+                {"content", PropertyOf<Message>(m => m.Content)}
             };
         }
     }
 
     public class ChatResolverService
     {
-        public Task<IResolveResult> Hello(ResolverContext context)
+        public Task<IResolveResult> Channels(ResolverContext context)
         {
-            var message = new Message
+            var channels = new[]
             {
-                Content = "world"
+                new Channel
+                {
+                    Id = 1,
+                    Name = "General"
+                }
             };
 
-            return Task.FromResult(As(message));
+            return Task.FromResult(As(channels));
         }
+
+        public Task<IResolveResult> Channel(ResolverContext context)
+        {
+            var id = context.GetArgument<string>("id");
+            var channel = new Channel
+            {
+                Id = int.Parse(id), //todo(pekka): fix bug in the GetArgument
+                Name = "General"
+            };
+
+            return Task.FromResult(As(channel));
+        }
+    }
+
+    public class Channel
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+         
+        public ConcurrentBag<Member> Members { get; set; } = new ConcurrentBag<Member>();
+    }
+
+    public class Member
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
     }
 
 

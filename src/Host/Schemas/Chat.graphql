@@ -1,19 +1,32 @@
-﻿type Hello {
-	message: String!
+﻿type Message {
+	content: String!
+}
+
+input InputMessage {
+    content: String!
+}
+
+type Member {
+	id: ID!
+	name: String!
+}
+
+type Channel {
+    id: ID!
+	name: String!
+	members: [Member!]!
 }
 
 type Query {
-	hello: Hello!
+	channels: [Channel!]!
+	channel(id: Int!): Channel
 }
 
 type Mutation {
-}
-
-type Subscription {
+    postMessage(message: InputMessage): Message!
 }
 
 schema {
     query: Query
     mutation: Mutation
-    subscription: Subscription
 }
