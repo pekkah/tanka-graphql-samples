@@ -28,11 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Schemas\Chat.gql" />
+    <None Remove="Schemas\Chat.graphql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schemas\Chat.gql" />
+    <EmbeddedResource Include="Schemas\Chat.graphql" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

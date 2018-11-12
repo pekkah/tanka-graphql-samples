@@ -26,7 +26,7 @@ namespace fugu.graphql.samples.Host.Schemas
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceStream =
-                assembly.GetManifestResourceStream("fugu.graphql.samples.Host.Schemas.Chat.gql");
+                assembly.GetManifestResourceStream("fugu.graphql.samples.Host.Schemas.Chat.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {
