@@ -1,3 +1,7 @@
+using fugu.graphql.introspection;
+using fugu.graphql.samples.Host.AsyncInitializer;
+using fugu.graphql.server;
+using fugu.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +24,21 @@ namespace fugu.graphql.samples.Host
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // add schema initializer
+            services.AddSingleton<IAsyncInitializer>(provider => provider.GetRequiredService<ChatSchemaInitializer>());
+            services.AddSingleton<ChatSchemaInitializer>();
+
+            // this will handle query, mutation, and subscription execution
+            services.AddSingleton(provider =>
+            {
+                var schema = provider.GetRequiredService<ChatSchemaInitializer>().Schema;
+                return new QueryStreamService(schema);
+            });
+        
+            // add signalr
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; });
+
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -46,6 +65,10 @@ namespace fugu.graphql.samples.Host
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            // use fugu signalr server hub
+            app.UseSignalR(routes => routes.MapHub<ServerHub>("/hubs/graphql"));
+            
+            // use mvc
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

@@ -1,0 +1,19 @@
+﻿type Hello {
+	message: String!
+}
+
+type Query {
+	hello: Hello!
+}
+
+type Mutation {
+}
+
+type Subscription {
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
