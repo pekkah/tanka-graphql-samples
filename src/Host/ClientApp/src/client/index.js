@@ -8,8 +8,19 @@ const fuguClient = new Client("/hubs/graphql");
 const fuguLink = new SignalrLink(fuguClient);
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  link: fuguLink
+  link: ApolloLink.from([
+    onError(({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.map(({ message, locations, path }) =>
+          console.log(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+          ),
+        );
+      if (networkError) console.log(`[Network error]: ${networkError}`);
+    }),
+    fuguLink
+  ]),
+  cache: new InMemoryCache()
 });
 
 export default client;

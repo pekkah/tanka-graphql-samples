@@ -17,7 +17,7 @@ const Home = () => (
       if (error) return `Error! ${error.message}`;
 
       return (
-        <p>Hello, {data}</p>
+        <p>Hello, {data.hello.message}</p>
       );
     }}
   </Query>
