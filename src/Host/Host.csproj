@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="fugu.graphql" Version="0.1.0-beta.74" />
-    <PackageReference Include="fugu.graphql.server" Version="0.1.0-beta.74" />
+    <PackageReference Include="fugu.graphql" Version="0.1.0-beta.78" />
+    <PackageReference Include="fugu.graphql.server" Version="0.1.0-beta.78" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0-preview3-35497" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0-preview3-35497" />
