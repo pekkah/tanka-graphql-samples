@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using fugu.graphql.samples.Host.AsyncInitializer;
-using fugu.graphql.samples.Host.Schemas;
+using fugu.graphql.samples.Host.Logic.Schemas;
 using fugu.graphql.type;
 using static fugu.graphql.tools.SchemaTools;
 

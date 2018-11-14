@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using fugu.graphql.sdl;
 using fugu.graphql.type;
 
-namespace fugu.graphql.samples.Host.Schemas
+namespace fugu.graphql.samples.Host.Logic.Schemas
 {
     public static class SchemaLoader
     {
@@ -26,7 +26,7 @@ namespace fugu.graphql.samples.Host.Schemas
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceStream =
-                assembly.GetManifestResourceStream("fugu.graphql.samples.Host.Schemas.Chat.graphql");
+                assembly.GetManifestResourceStream("fugu.graphql.samples.Host.Logic.Schemas.Chat.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

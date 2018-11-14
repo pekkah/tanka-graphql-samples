@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using fugu.graphql.resolvers;
-using Microsoft.AspNetCore.Hosting.Internal;
+using fugu.graphql.samples.Host.Logic.Domain;
 using static fugu.graphql.resolvers.Resolve;
 
-namespace fugu.graphql.samples.Host.Schemas
+namespace fugu.graphql.samples.Host.Logic.Schemas
 {
     public class ChatResolvers : ResolverMap
     {
@@ -30,10 +28,10 @@ namespace fugu.graphql.samples.Host.Schemas
                 {"messages", resolver.ChannelMessages}
             };
 
-            this["Member"] = new FieldResolverMap()
+            this["Member"] = new FieldResolverMap
             {
                 {"id", PropertyOf<Member>(c => c.Id)},
-                {"name", PropertyOf<Member>(c => c.Name)},
+                {"name", PropertyOf<Member>(c => c.Name)}
             };
 
             this["Message"] = new FieldResolverMap
@@ -73,10 +71,10 @@ namespace fugu.graphql.samples.Host.Schemas
 
         public Task<IResolveResult> ChannelMessages(ResolverContext context)
         {
-            var channel = (Channel)context.ObjectValue;
-            var latest = (long)context.Arguments["latest"];
+            var channel = (Channel) context.ObjectValue;
+            var latest = (long) context.Arguments["latest"];
 
-            var message = new Message()
+            var message = new Message
             {
                 Content = "message"
             };
@@ -87,7 +85,7 @@ namespace fugu.graphql.samples.Host.Schemas
 
         public Task<IResolveResult> ChannelMembers(ResolverContext context)
         {
-            var member = new Member()
+            var member = new Member
             {
                 Id = 1,
                 Name = "Fugu"
@@ -95,25 +93,5 @@ namespace fugu.graphql.samples.Host.Schemas
 
             return Task.FromResult(As(new[] {member}));
         }
-    }
-
-    public class Channel
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-    }
-
-    public class Member
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-    }
-
-
-    public class Message
-    {
-        public string Content { get; set; }
     }
 }
