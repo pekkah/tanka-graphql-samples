@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using fugu.graphql.resolvers;
 using Microsoft.AspNetCore.Hosting.Internal;
@@ -25,7 +26,8 @@ namespace fugu.graphql.samples.Host.Schemas
             {
                 {"id", PropertyOf<Channel>(c => c.Id)},
                 {"name", PropertyOf<Channel>(c => c.Name)},
-                {"members", PropertyOf<Channel>(c => c.Members)}
+                {"members", resolver.ChannelMembers},
+                {"messages", resolver.ChannelMessages}
             };
 
             this["Member"] = new FieldResolverMap()
@@ -68,6 +70,31 @@ namespace fugu.graphql.samples.Host.Schemas
 
             return Task.FromResult(As(channel));
         }
+
+        public Task<IResolveResult> ChannelMessages(ResolverContext context)
+        {
+            var channel = (Channel)context.ObjectValue;
+            var latest = (long)context.Arguments["latest"];
+
+            var message = new Message()
+            {
+                Content = "message"
+            };
+            var messages = new[] {message};
+
+            return Task.FromResult(As(messages));
+        }
+
+        public Task<IResolveResult> ChannelMembers(ResolverContext context)
+        {
+            var member = new Member()
+            {
+                Id = 1,
+                Name = "Fugu"
+            };
+
+            return Task.FromResult(As(new[] {member}));
+        }
     }
 
     public class Channel
@@ -75,8 +102,6 @@ namespace fugu.graphql.samples.Host.Schemas
         public int Id { get; set; }
 
         public string Name { get; set; }
-         
-        public ConcurrentBag<Member> Members { get; set; } = new ConcurrentBag<Member>();
     }
 
     public class Member

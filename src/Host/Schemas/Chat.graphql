@@ -15,6 +15,7 @@ type Channel {
     id: ID!
 	name: String!
 	members: [Member!]!
+	messages(latest: Int!): [Message!]!
 }
 
 type Query {
