@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using fugu.graphql.samples.Host.Logic.Domain;
 using Xunit;
+using Channel = System.Threading.Channels.Channel;
 
 namespace Host.Facts
 {
@@ -50,6 +51,20 @@ namespace Host.Facts
 
             /* Then */
             Assert.NotNull(exception.Message);
+        }
+
+        [Fact]
+        public async Task Create_channel()
+        {
+            /* Given */
+            var sut = new Chat();
+
+            /* When */
+            var channel = await sut.CreateChannelAsync(new InputChannel() {Name = "General"});
+
+            /* Then */
+            Assert.NotNull(channel);
+            Assert.NotNull(await sut.GetChannelAsync(channel.Id));
         }
     }
 }
