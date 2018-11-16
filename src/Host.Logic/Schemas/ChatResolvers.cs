@@ -43,44 +43,33 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
 
     public class ChatResolverService
     {
-        public Task<IResolveResult> Channels(ResolverContext context)
-        {
-            var channels = new[]
-            {
-                new Channel
-                {
-                    Id = 1,
-                    Name = "General"
-                }
-            };
+        private readonly Chat _chat;
 
-            return Task.FromResult(As(channels));
+        public ChatResolverService(Chat chat)
+        {
+            _chat = chat;
         }
 
-        public Task<IResolveResult> Channel(ResolverContext context)
+        public async Task<IResolveResult> Channels(ResolverContext context)
         {
-            var id = context.GetArgument<string>("id");
-            var channel = new Channel
-            {
-                Id = int.Parse(id), //todo(pekka): fix bug in the GetArgument
-                Name = "General"
-            };
-
-            return Task.FromResult(As(channel));
+            var channels = await _chat.GetChannelsAsync();
+            return As(channels);
         }
 
-        public Task<IResolveResult> ChannelMessages(ResolverContext context)
+        public async Task<IResolveResult> Channel(ResolverContext context)
+        {
+            var id = (string)context.Arguments["id"]; //todo: fix bug in lib side
+            var channel = await _chat.GetChannelAsync(int.Parse(id));
+            return As(channel);
+        }
+
+        public async Task<IResolveResult> ChannelMessages(ResolverContext context)
         {
             var channel = (Channel) context.ObjectValue;
-            var latest = (long) context.Arguments["latest"];
+            var latest = (int)(long) context.Arguments["latest"]; //todo: ix bug in lib side
 
-            var message = new Message
-            {
-                Content = "message"
-            };
-            var messages = new[] {message};
-
-            return Task.FromResult(As(messages));
+            var messages = await _chat.GetMessagesAsync(channel.Id, latest);
+            return As(messages);
         }
 
         public Task<IResolveResult> ChannelMembers(ResolverContext context)

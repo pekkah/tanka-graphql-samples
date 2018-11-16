@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,9 +23,9 @@ namespace fugu.graphql.samples.Host.Logic.Domain
             });
         }
 
-        public IEnumerable<Message> GetMessagesAsync(int channelId, int latest = 100)
+        public Task<IEnumerable<Message>> GetMessagesAsync(int channelId, int latest = 100)
         {
-            return _messages.ToArray();
+            return Task.FromResult(_messages.AsEnumerable());
         }
 
         public Task<Channel> CreateChannelAsync(InputChannel inputChannel)
@@ -44,6 +45,11 @@ namespace fugu.graphql.samples.Host.Logic.Domain
         {
             var channel = _channels.SingleOrDefault(c => c.Id == channelId);
             return Task.FromResult(channel);
+        }
+
+        public Task<IEnumerable<Channel>> GetChannelsAsync()
+        {
+            return Task.FromResult(_channels.AsEnumerable());
         }
     }
 

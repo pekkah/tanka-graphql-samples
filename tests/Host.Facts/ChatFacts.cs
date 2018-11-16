@@ -26,7 +26,7 @@ namespace Host.Facts
             await sut.PostMessageAsync(channel.Id, inputMessage);
 
             /* Then */
-            var messages = sut.GetMessagesAsync(channel.Id);
+            var messages = await sut.GetMessagesAsync(channel.Id);
             Assert.Single(messages, m => m.Content == inputMessage.Content);
         }
 
