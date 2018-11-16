@@ -13,19 +13,23 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
             this["Query"] = new FieldResolverMap
             {
                 {"channels", resolver.Channels},
-                {"channel", resolver.Channel}
+                {"channel", resolver.Channel},
+                {"members", resolver.ChannelMembers},
+                {"messages", resolver.ChannelMessages}
             };
 
-            this["Mutation"] = new FieldResolverMap();
+            this["Mutation"] = new FieldResolverMap()
+            {
+                {"postMessage", resolver.PostMessage}
+            };
+
             this["Subscription"] = new FieldResolverMap();
 
             // domain
             this["Channel"] = new FieldResolverMap
             {
                 {"id", PropertyOf<Channel>(c => c.Id)},
-                {"name", PropertyOf<Channel>(c => c.Name)},
-                {"members", resolver.ChannelMembers},
-                {"messages", resolver.ChannelMessages}
+                {"name", PropertyOf<Channel>(c => c.Name)}
             };
 
             this["Member"] = new FieldResolverMap
@@ -36,6 +40,7 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
 
             this["Message"] = new FieldResolverMap
             {
+                {"id", PropertyOf<Message>(m => m.Id)},
                 {"content", PropertyOf<Message>(m => m.Content)}
             };
         }
@@ -56,19 +61,11 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
             return As(channels);
         }
 
-        public async Task<IResolveResult> Channel(ResolverContext context)
-        {
-            var id = (string)context.Arguments["id"]; //todo: fix bug in lib side
-            var channel = await _chat.GetChannelAsync(int.Parse(id));
-            return As(channel);
-        }
-
         public async Task<IResolveResult> ChannelMessages(ResolverContext context)
         {
-            var channel = (Channel) context.ObjectValue;
-            var latest = (int)(long) context.Arguments["latest"]; //todo: ix bug in lib side
+            var channelId = (int) (long) context.Arguments["channelId"];
 
-            var messages = await _chat.GetMessagesAsync(channel.Id, latest);
+            var messages = await _chat.GetMessagesAsync(channelId, 100);
             return As(messages);
         }
 
@@ -81,6 +78,24 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
             };
 
             return Task.FromResult(As(new[] {member}));
+        }
+
+        public async Task<IResolveResult> PostMessage(ResolverContext context)
+        {
+            var channelId = (int) (long) context.Arguments["channelId"];
+            var inputMessage = context.GetArgument<InputMessage>("message");
+
+            var message = await _chat.PostMessageAsync(channelId, inputMessage); //todo: fix bug in lib
+
+            return As(message);
+        }
+
+        public async Task<IResolveResult> Channel(ResolverContext context)
+        {
+            var channelId = (int) (long) context.Arguments["channelId"];
+            var channel = await _chat.GetChannelAsync(channelId);
+
+            return As(channel);
         }
     }
 }

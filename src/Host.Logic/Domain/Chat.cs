@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,16 +10,26 @@ namespace fugu.graphql.samples.Host.Logic.Domain
         private readonly List<Channel> _channels = new List<Channel>();
         private readonly List<Message> _messages = new List<Message>();
 
-        public async Task PostMessageAsync(int channelId, InputMessage message)
+        private int _nextMessageId = 1;
+
+        public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
         {
             var channel = await GetChannelAsync(channelId);
 
             if (channel == null) throw new InvalidOperationException($"Channel '{channelId}' not found");
 
-            _messages.Add(new Message
+            var message = new Message
             {
-                Content = message.Content
-            });
+                Id = NextId(),
+                Content = inputMessage.Content
+            };
+            _messages.Add(message);
+            return message;
+        }
+
+        private int NextId()
+        {
+            return _nextMessageId++;
         }
 
         public Task<IEnumerable<Message>> GetMessagesAsync(int channelId, int latest = 100)
@@ -80,6 +89,8 @@ namespace fugu.graphql.samples.Host.Logic.Domain
 
     public class Message
     {
+        public int Id { get; set; }
+
         public string Content { get; set; }
     }
 }

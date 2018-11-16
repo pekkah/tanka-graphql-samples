@@ -1,4 +1,5 @@
 ﻿type Message {
+	id: ID!
 	content: String!
 }
 
@@ -14,17 +15,16 @@ type Member {
 type Channel {
     id: ID!
 	name: String!
-	members: [Member!]!
-	messages(latest: Int!): [Message!]!
 }
 
 type Query {
 	channels: [Channel!]!
-	channel(id: Int!): Channel
+	channel(channelId: Int!): Channel
+	messages(channelId: Int!): [Message!]!
 }
 
 type Mutation {
-    postMessage(message: InputMessage): Message!
+    postMessage(channelId: Int!,message: InputMessage!): Message!
 }
 
 schema {
