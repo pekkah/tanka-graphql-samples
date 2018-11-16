@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using fugu.graphql.samples.Host.Logic.Domain;
 using Xunit;
-using Channel = System.Threading.Channels.Channel;
 
 namespace Host.Facts
 {
@@ -16,19 +15,18 @@ namespace Host.Facts
             {
                 Content = "123"
             };
-            var channelId = 1;
             var sut = new Chat();
-            await sut.CreateChannelAsync(new InputChannel()
+            var channel = await sut.CreateChannelAsync(new InputChannel()
             {
                 Name = "General"
             });
 
 
             /* When */
-            await sut.PostMessageAsync(channelId, inputMessage);
+            await sut.PostMessageAsync(channel.Id, inputMessage);
 
             /* Then */
-            var messages = sut.GetMessagesAsync(channelId);
+            var messages = sut.GetMessagesAsync(channel.Id);
             Assert.Single(messages, m => m.Content == inputMessage.Content);
         }
 
