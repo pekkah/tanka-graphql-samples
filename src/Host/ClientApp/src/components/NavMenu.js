@@ -1,19 +1,14 @@
 ﻿import React, { Component } from "react";
-import {
-  Collapse,
-  Container,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  NavItem,
-  NavLink,
-  Nav
-} from "reactstrap";
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+
 import { Link } from "react-router-dom";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 
-import "./NavMenu.css";
 
 const GET_CHANNELS = gql`
   {
@@ -51,42 +46,33 @@ export class NavMenu extends Component {
             if (error) return `Error! ${error.message}`;
 
             return (
-              <div>
-                <Navbar
-                  className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3"
-                  light
-                >
-                  <Container>
-                    <NavbarBrand tag={Link} to="/">
-                      Chat
-                    </NavbarBrand>
-                    <NavbarToggler
-                      onClick={this.toggleNavbar}
-                      className="mr-2"
-                    />
-                    <Collapse
-                      className="d-sm-inline-flex flex-sm-row-reverse"
-                      isOpen={!this.state.collapsed}
-                      navbar
-                    >
-                      <ul className="navbar-nav flex-grow" />
-                    </Collapse>
-                  </Container>
-                </Navbar>
-                <Nav pills>
+              <>
+                <List>
                   {data.channels.map(channel => (
-                    <NavItem key={channel.id}>
-                      <NavLink tag={Link} to={`/channels/${channel.id}`}>
-                        {channel.name}
-                      </NavLink>
-                    </NavItem>
+                    <ListItemLink to={`/channels/${channel.id}`} primary={channel.name} icon={<InboxIcon />} key={channel.id}/>
                   ))}
-                </Nav>
-              </div>
+                </List>
+              </>
             );
           }}
         </Query>
       </header>
+    );
+  }
+}
+
+class ListItemLink extends React.Component {
+  renderLink = itemProps => <Link to={this.props.to} {...itemProps} />;
+
+  render() {
+    const { icon, primary, secondary } = this.props;
+    return (
+      <li>
+        <ListItem button component={this.renderLink}>
+          {icon && <ListItemIcon>{icon}</ListItemIcon>}
+          <ListItemText inset primary={primary} secondary={secondary} />
+        </ListItem>
+      </li>
     );
   }
 }
