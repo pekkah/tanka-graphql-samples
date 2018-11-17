@@ -17,13 +17,9 @@ namespace fugu.graphql.samples.Host
             await idl.InitializeAsync();
 
             var chat = new Chat();
-            var channel = await chat.CreateChannelAsync(new InputChannel()
+            await chat.CreateChannelAsync(new InputChannel()
             {
                 Name = "General"
-            });
-            await chat.PostMessageAsync(channel.Id, new InputMessage()
-            {
-                Content = "Hardcoded message from initializer"
             });
 
             var service = new ChatResolverService(chat);

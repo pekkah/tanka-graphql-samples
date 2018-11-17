@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
 using fugu.graphql.samples.Host.Logic.Domain;
 using static fugu.graphql.resolvers.Resolve;
@@ -23,7 +24,10 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
                 {"postMessage", resolver.PostMessage}
             };
 
-            this["Subscription"] = new FieldResolverMap();
+            this["Subscription"] = new FieldResolverMap()
+            {
+                {"messageAdded", resolver.SubscribeToChannel, resolver.Message}
+            };
 
             // domain
             this["Channel"] = new FieldResolverMap
@@ -96,6 +100,25 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
             var channel = await _chat.GetChannelAsync(channelId);
 
             return As(channel);
+        }
+
+        public async Task<ISubscribeResult> SubscribeToChannel(ResolverContext context)
+        {
+            var channelId = (int) (long) context.Arguments["channelId"];
+            var target = new BufferBlock<Message>();
+            var subscription = await _chat.JoinAsync(channelId, target);
+
+            return Stream(target, async () =>
+            {
+                target.Complete();
+                await target.Completion;
+                subscription.Dispose();
+            });
+        }
+
+        public Task<IResolveResult> Message(ResolverContext context)
+        {
+            return Task.FromResult(As(context.ObjectValue));
         }
     }
 }

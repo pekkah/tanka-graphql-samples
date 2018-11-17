@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace fugu.graphql.samples.Host.Logic.Domain
 {
@@ -11,6 +12,12 @@ namespace fugu.graphql.samples.Host.Logic.Domain
         private readonly List<Message> _messages = new List<Message>();
 
         private int _nextMessageId = 1;
+        private readonly BroadcastBlock<Message> _messageAdded;
+
+        public Chat()
+        {
+            _messageAdded = new BroadcastBlock<Message>(message => message);
+        }
 
         public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
         {
@@ -24,6 +31,8 @@ namespace fugu.graphql.samples.Host.Logic.Domain
                 Content = inputMessage.Content
             };
             _messages.Add(message);
+
+            await _messageAdded.SendAsync(message);
             return message;
         }
 
@@ -59,6 +68,17 @@ namespace fugu.graphql.samples.Host.Logic.Domain
         public Task<IEnumerable<Channel>> GetChannelsAsync()
         {
             return Task.FromResult(_channels.AsEnumerable());
+        }
+
+        public async Task<IDisposable> JoinAsync(int channelId, BufferBlock<Message> target)
+        {
+            //todo: filter by channel
+            var sub = _messageAdded.LinkTo(target, new DataflowLinkOptions()
+            {
+                PropagateCompletion = true
+            });
+
+            return sub;
         }
     }
 

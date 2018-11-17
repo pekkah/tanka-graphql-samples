@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { Query, Mutation } from "react-apollo";
+import { Query, Mutation, Subscription } from "react-apollo";
 
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
@@ -48,6 +47,15 @@ const GET_MESSAGES = gql`
   }
 `;
 
+const MESSAGES_SUBSCRIPTION = gql`
+  subscription MessageAdded($channelId: Int!) {
+    messageAdded(channelId: $channelId) {
+      id
+      content
+    }
+  }
+`;
+
 const channelMessagesStyles = {
   card: {
     minHeight: 75,
@@ -56,31 +64,55 @@ const channelMessagesStyles = {
 };
 
 
-const ChannelMessages = withStyles(channelMessagesStyles)(({ id, classes }) => {
-  return (
-    <Query query={GET_MESSAGES} variables={{ id }}>
-      {({ loading, error, data }) => {
-        if (loading) return "Loading..";
-        if (error) return `Error: ${error}`;
+const ChannelMessages = withStyles(channelMessagesStyles)(class extends Component {
+  constructor(props) {
+    super(props);
+    this.messages = [];
+  }
 
-        const messages = data.messages;
+  render() {
+    const { classes, id } = this.props;
+    return (
+      <>
+        <Subscription
+          subscription={MESSAGES_SUBSCRIPTION}
+          variables={{ channelId: id }}
+        >
+          {({ data, loading }) => {
+            let messageAdded = null;
+            if (data === undefined) {
+              console.warn("Fix bug somewhere sending an null message from sub");
+              messageAdded = {
+                id: -1,
+                content: "---Fix bug somewhere sending an null message from sub--"
+              };
+            }
+            else{
+              messageAdded = data.messageAdded;
+            }
 
-        return (
-          <div>
-            {messages.map(message => (
-              <Card className={classes.card} key={message.id}>
-                <CardContent>
-                  <Typography component="p">
-                    {message.content}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        );
-      }}
-    </Query>
-  );
+
+            console.log("messageAdded", messageAdded);
+
+            this.messages = this.messages.concat([messageAdded]);
+            return (
+              <div>
+                {this.messages.map(message => (
+                  <Card className={classes.card} key={message.id}>
+                    <CardContent>
+                      <Typography component="p">
+                        {message.content}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )
+          }}
+        </Subscription>
+      </>
+    )
+  }
 });
 
 const POST_MESSAGE = gql`
@@ -96,11 +128,11 @@ class PostMessage extends Component {
   constructor(props) {
     super(props);
     this.onMessageChanged = this.onMessageChanged.bind(this);
-    this.state = {message: ""};
+    this.state = { message: "" };
   }
 
   onMessageChanged(e) {
-    this.setState({message: e.target.value});
+    this.setState({ message: e.target.value });
   }
 
   render() {
