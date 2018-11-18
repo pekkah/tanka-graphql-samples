@@ -70,7 +70,7 @@ namespace fugu.graphql.samples.Host.Logic.Domain
             return Task.FromResult(_channels.AsEnumerable());
         }
 
-        public async Task<IDisposable> JoinAsync(int channelId, BufferBlock<Message> target)
+        public Task<IDisposable> JoinAsync(int channelId, BufferBlock<Message> target)
         {
             //todo: filter by channel
             var sub = _messageAdded.LinkTo(target, new DataflowLinkOptions()
@@ -78,7 +78,7 @@ namespace fugu.graphql.samples.Host.Logic.Domain
                 PropagateCompletion = true
             });
 
-            return sub;
+            return Task.FromResult(sub);
         }
     }
 
