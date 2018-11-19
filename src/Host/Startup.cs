@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace fugu.graphql.samples.Host
 {
@@ -33,7 +34,7 @@ namespace fugu.graphql.samples.Host
             services.AddSingleton(provider =>
             {
                 var schema = provider.GetRequiredService<ChatSchemaInitializer>().Schema;
-                return new QueryStreamService(schema);
+                return new QueryStreamService(schema, provider.GetRequiredService<ILoggerFactory>());
             });
         
             // add signalr
