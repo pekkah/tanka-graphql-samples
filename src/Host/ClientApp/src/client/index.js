@@ -8,6 +8,7 @@ const fuguClient = new Client("/hubs/graphql");
 const fuguLink = new SignalrLink(fuguClient);
 
 const client = new ApolloClient({
+  connectToDevTools: true,
   link: ApolloLink.from([
     onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors)
