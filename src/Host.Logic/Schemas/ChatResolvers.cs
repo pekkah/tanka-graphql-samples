@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using fugu.graphql.resolvers;
 using fugu.graphql.samples.Host.Logic.Domain;
@@ -102,18 +103,18 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
             return As(channel);
         }
 
-        public async Task<ISubscribeResult> SubscribeToChannel(ResolverContext context)
+        public async Task<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
             var target = new BufferBlock<Message>();
             var subscription = await _chat.JoinAsync(channelId, target);
-
-            return Stream(target, async () =>
+            unsubscribe.Register(() =>
             {
-                target.Complete();
-                await target.Completion;
                 subscription.Dispose();
+                target.Complete();
             });
+
+            return Stream(target);
         }
 
         public Task<IResolveResult> Message(ResolverContext context)
