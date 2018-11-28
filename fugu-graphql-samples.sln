@@ -7,7 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Host", "src\Host\Host.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Host.Facts", "tests\Host.Facts\Host.Facts.csproj", "{6BAC1982-B1EB-496F-833F-5F7E7BA1A4BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host.Logic", "src\Host.Logic\Host.Logic.csproj", "{F0EB8372-2E96-40B9-B397-B6959AA9AF4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Host.Logic", "src\Host.Logic\Host.Logic.csproj", "{F0EB8372-2E96-40B9-B397-B6959AA9AF4F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{67C50D29-9C72-41B8-8B51-F078FAD9463D}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
