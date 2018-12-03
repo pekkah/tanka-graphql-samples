@@ -2,10 +2,10 @@ import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { SignalrLink, Client } from '@fugu-fw/fugu-graphql-server-link';
+import { FuguLink, FuguClient } from '@fugu-fw/fugu-graphql-server-link';
 
-const fuguClient = new Client("/hubs/graphql");
-const fuguLink = new SignalrLink(fuguClient);
+const fuguClient = new FuguClient("/hubs/graphql");
+const fuguLink = new FuguLink(fuguClient);
 
 const client = new ApolloClient({
   connectToDevTools: true,
