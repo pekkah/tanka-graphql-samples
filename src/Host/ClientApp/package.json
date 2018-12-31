@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@fugu-fw/fugu-graphql-server-link": "0.1.0-beta.123",
+    "@fugu-fw/fugu-graphql-server-link": "0.1.0-beta.125",
     "@material-ui/core": "^3.7.1",
     "@material-ui/icons": "^3.0.1",
     "apollo-cache-inmemory": "^1.3.12",
