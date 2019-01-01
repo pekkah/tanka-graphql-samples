@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using fugu.graphql.samples.Host.AsyncInitializer;
-using fugu.graphql.samples.Host.Logic.Domain;
-using fugu.graphql.samples.Host.Logic.Schemas;
-using fugu.graphql.type;
-using static fugu.graphql.tools.SchemaTools;
+using tanka.graphql.samples.Host.AsyncInitializer;
+using tanka.graphql.samples.Host.Logic.Domain;
+using tanka.graphql.samples.Host.Logic.Schemas;
+using tanka.graphql.type;
+using static tanka.graphql.tools.SchemaTools;
 
-namespace fugu.graphql.samples.Host
+namespace tanka.graphql.samples.Host
 {
     public class ChatSchemaInitializer : IAsyncInitializer
     {

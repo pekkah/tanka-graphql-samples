@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using fugu.graphql.resolvers;
-using fugu.graphql.samples.Host.Logic.Domain;
-using static fugu.graphql.resolvers.Resolve;
+using tanka.graphql.resolvers;
+using tanka.graphql.samples.Host.Logic.Domain;
+using static tanka.graphql.resolvers.Resolve;
 
-namespace fugu.graphql.samples.Host.Logic.Schemas
+namespace tanka.graphql.samples.Host.Logic.Schemas
 {
     public class ChatResolvers : ResolverMap
     {

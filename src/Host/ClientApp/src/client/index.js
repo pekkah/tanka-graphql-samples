@@ -2,10 +2,10 @@ import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { FuguLink, FuguClient } from '@fugu-fw/fugu-graphql-server-link';
+import { TankaLink, TankaClient } from '@tanka/tanka-graphql-server-link';
 
-const fuguClient = new FuguClient("/hubs/graphql");
-const fuguLink = new FuguLink(fuguClient);
+const serverClient = new TankaClient("/hubs/graphql");
+const serverLink = new TankaLink(serverClient);
 
 const client = new ApolloClient({
   connectToDevTools: true,
@@ -19,7 +19,7 @@ const client = new ApolloClient({
         );
       if (networkError) console.log(`[Network error]: ${networkError}`);
     }),
-    fuguLink
+    serverLink
   ]),
   cache: new InMemoryCache()
 });

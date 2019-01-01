@@ -1,6 +1,6 @@
-# fugu-graphql-samples
+# Tanka GraphQL sample
 
-Example of using fugu-graphql with Apollo
+Example of using tanka-graphql with Apollo
 
 ## Requirements
 

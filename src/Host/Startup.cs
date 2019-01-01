@@ -1,7 +1,7 @@
-using fugu.graphql.introspection;
-using fugu.graphql.samples.Host.AsyncInitializer;
-using fugu.graphql.server;
-using fugu.graphql.type;
+using tanka.graphql.introspection;
+using tanka.graphql.samples.Host.AsyncInitializer;
+using tanka.graphql.server;
+using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace fugu.graphql.samples.Host
+namespace tanka.graphql.samples.Host
 {
     public class Startup
     {

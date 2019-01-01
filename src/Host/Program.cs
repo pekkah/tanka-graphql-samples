@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
-using fugu.graphql.samples.Host.AsyncInitializer;
+using tanka.graphql.samples.Host.AsyncInitializer;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace fugu.graphql.samples.Host
+namespace tanka.graphql.samples.Host
 {
     public class Program
     {

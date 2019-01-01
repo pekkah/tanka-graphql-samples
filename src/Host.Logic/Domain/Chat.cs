@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace fugu.graphql.samples.Host.Logic.Domain
+namespace tanka.graphql.samples.Host.Logic.Domain
 {
     public class Chat
     {

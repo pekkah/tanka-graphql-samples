@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace fugu.graphql.samples.Host.AsyncInitializer
+namespace tanka.graphql.samples.Host.AsyncInitializer
 {
     public static class AsyncInitializerExtensions
     {

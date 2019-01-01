@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using fugu.graphql.samples.Host.Logic.Domain;
+using tanka.graphql.samples.Host.Logic.Domain;
 using Xunit;
 
 namespace Host.Facts

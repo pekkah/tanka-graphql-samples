@@ -7,8 +7,8 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-    <AssemblyName>fugu.graphql.samples.Host</AssemblyName>
-    <RootNamespace>fugu.graphql.samples.Host</RootNamespace>
+    <AssemblyName>tanka.graphql.samples.Host</AssemblyName>
+    <RootNamespace>tanka.graphql.samples.Host</RootNamespace>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
@@ -16,8 +16,8 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="fugu.graphql" Version="0.1.0-beta.125" />
-    <PackageReference Include="fugu.graphql.server" Version="0.1.0-beta.125" />
+    <PackageReference Include="tanka.graphql" Version="0.1.0-beta.127" />
+    <PackageReference Include="tanka.graphql.server" Version="0.1.0-beta.127" />
   </ItemGroup>
 
   <ItemGroup>

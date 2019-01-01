@@ -1,4 +1,4 @@
-﻿namespace fugu.graphql.samples.Host.Logic
+﻿namespace ftanka.raphql.samples.Host.Logic
 {
     public class Result<TError>
     {

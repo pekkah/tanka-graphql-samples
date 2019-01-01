@@ -3,10 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using fugu.graphql.sdl;
-using fugu.graphql.type;
+using tanka.graphql.sdl;
+using tanka.graphql.type;
 
-namespace fugu.graphql.samples.Host.Logic.Schemas
+namespace tanka.graphql.samples.Host.Logic.Schemas
 {
     public static class SchemaLoader
     {
@@ -26,7 +26,7 @@ namespace fugu.graphql.samples.Host.Logic.Schemas
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceStream =
-                assembly.GetManifestResourceStream("fugu.graphql.samples.Host.Logic.Schemas.Chat.graphql");
+                assembly.GetManifestResourceStream("tanka.graphql.samples.Host.Logic.Schemas.Chat.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {
