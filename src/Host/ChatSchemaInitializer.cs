@@ -14,7 +14,6 @@ namespace tanka.graphql.samples.Host
         public async Task InitializeAsync()
         {
             var idl = await SchemaLoader.LoadAsync();
-            await idl.InitializeAsync();
 
             var chat = new Chat();
             await chat.CreateChannelAsync(new InputChannel()
