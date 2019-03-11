@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="tanka.graphql" Version="0.3.1" />
+    <PackageReference Include="tanka.graphql" Version="0.3.2" />
     <PackageReference Include="tanka.graphql.server" Version="0.3.1" />
   </ItemGroup>
 
