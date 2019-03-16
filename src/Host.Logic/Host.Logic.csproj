@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="tanka.graphql" Version="0.3.1" />
-    <PackageReference Include="tanka.graphql.server" Version="0.3.1" />
+    <PackageReference Include="tanka.graphql.server" Version="0.4.0" />
   </ItemGroup>
 
 
