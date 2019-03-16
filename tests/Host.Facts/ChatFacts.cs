@@ -39,7 +39,7 @@ namespace Host.Facts
             {
                 Content = "123"
             };
-            var channelId = 1;
+            var channelId = -1;
             var sut = new Chat();
 
 

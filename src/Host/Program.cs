@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using tanka.graphql.samples.Host.AsyncInitializer;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
@@ -10,7 +9,6 @@ namespace tanka.graphql.samples.Host
         public static async Task Main(string[] args)
         {
             var host = CreateWebHostBuilder(args).Build();
-            await host.InitializeAsyncServices();
             host.Run();
         }
 

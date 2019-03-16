@@ -60,13 +60,13 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             _chat = chat;
         }
 
-        public async Task<IResolveResult> Channels(ResolverContext context)
+        public async ValueTask<IResolveResult> Channels(ResolverContext context)
         {
             var channels = await _chat.GetChannelsAsync();
             return As(channels);
         }
 
-        public async Task<IResolveResult> ChannelMessages(ResolverContext context)
+        public async ValueTask<IResolveResult> ChannelMessages(ResolverContext context)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
 
@@ -74,7 +74,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             return As(messages);
         }
 
-        public Task<IResolveResult> ChannelMembers(ResolverContext context)
+        public ValueTask<IResolveResult> ChannelMembers(ResolverContext context)
         {
             var member = new Member
             {
@@ -82,10 +82,10 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
                 Name = "Fugu"
             };
 
-            return Task.FromResult(As(new[] {member}));
+            return new ValueTask<IResolveResult>(As(new[] {member}));
         }
 
-        public async Task<IResolveResult> PostMessage(ResolverContext context)
+        public async ValueTask<IResolveResult> PostMessage(ResolverContext context)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
             var inputMessage = context.GetArgument<InputMessage>("message");
@@ -95,7 +95,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             return As(message);
         }
 
-        public async Task<IResolveResult> Channel(ResolverContext context)
+        public async ValueTask<IResolveResult> Channel(ResolverContext context)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
             var channel = await _chat.GetChannelAsync(channelId);
@@ -103,7 +103,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             return As(channel);
         }
 
-        public async Task<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
+        public async ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
             var target = new BufferBlock<Message>();
@@ -117,9 +117,9 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             return Stream(target);
         }
 
-        public Task<IResolveResult> Message(ResolverContext context)
+        public ValueTask<IResolveResult> Message(ResolverContext context)
         {
-            return Task.FromResult(As(context.ObjectValue));
+            return new ValueTask<IResolveResult>(As(context.ObjectValue));
         }
     }
 }

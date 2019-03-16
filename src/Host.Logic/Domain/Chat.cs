@@ -9,14 +9,19 @@ namespace tanka.graphql.samples.Host.Logic.Domain
     public class Chat
     {
         private readonly List<Channel> _channels = new List<Channel>();
+        private readonly BroadcastBlock<Message> _messageAdded;
         private readonly List<Message> _messages = new List<Message>();
 
         private int _nextMessageId = 1;
-        private readonly BroadcastBlock<Message> _messageAdded;
 
         public Chat()
         {
             _messageAdded = new BroadcastBlock<Message>(message => message);
+            _channels.Add(new Channel
+            {
+                Id = 1,
+                Name = "General"
+            });
         }
 
         public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
@@ -36,11 +41,6 @@ namespace tanka.graphql.samples.Host.Logic.Domain
             return message;
         }
 
-        private int NextId()
-        {
-            return _nextMessageId++;
-        }
-
         public Task<IEnumerable<Message>> GetMessagesAsync(int channelId, int latest = 100)
         {
             return Task.FromResult(_messages.AsEnumerable());
@@ -50,7 +50,7 @@ namespace tanka.graphql.samples.Host.Logic.Domain
         {
             var channel = new Channel
             {
-                Id = 1,
+                Id = _channels.Count + 1,
                 Name = inputChannel.Name
             };
 
@@ -73,12 +73,17 @@ namespace tanka.graphql.samples.Host.Logic.Domain
         public Task<IDisposable> JoinAsync(int channelId, BufferBlock<Message> target)
         {
             //todo: filter by channel
-            var sub = _messageAdded.LinkTo(target, new DataflowLinkOptions()
+            var sub = _messageAdded.LinkTo(target, new DataflowLinkOptions
             {
                 PropagateCompletion = true
             });
 
             return Task.FromResult(sub);
+        }
+
+        private int NextId()
+        {
+            return _nextMessageId++;
         }
     }
 

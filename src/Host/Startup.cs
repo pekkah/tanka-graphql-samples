@@ -1,14 +1,13 @@
-using tanka.graphql.introspection;
-using tanka.graphql.samples.Host.AsyncInitializer;
-using tanka.graphql.server;
-using tanka.graphql.type;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using tanka.graphql.samples.Host.Logic.Domain;
+using tanka.graphql.samples.Host.Logic.Schemas;
+using tanka.graphql.server;
+using tanka.graphql.tools;
 
 namespace tanka.graphql.samples.Host
 {
@@ -26,24 +25,31 @@ namespace tanka.graphql.samples.Host
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            // add schema initializer
-            services.AddSingleton<IAsyncInitializer>(
-                provider => provider.GetRequiredService<ChatSchemaInitializer>());
-            services.AddSingleton<ChatSchemaInitializer>();
+            // add schema
+            services.AddSingleton(
+                provider =>
+                {
+                    var schemaBuilder = SchemaLoader.Load();
 
-            services.AddSingleton<ISchema>(
-                provider => provider.GetRequiredService<ChatSchemaInitializer>().Schema);
-        
+                    var chat = new Chat();
+                    var service = new ChatResolverService(chat);
+                    var resolvers = new ChatResolvers(service);
+
+                    var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
+                        schemaBuilder,
+                        resolvers,
+                        resolvers);
+
+                    return schema;
+                });
+
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
 
 
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
+            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,23 +72,20 @@ namespace tanka.graphql.samples.Host
 
             // use fugu signalr server hub
             app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
-            
+
             // use mvc
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    "default",
+                    "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
+                if (env.IsDevelopment()) spa.UseReactDevelopmentServer("start");
             });
         }
     }
