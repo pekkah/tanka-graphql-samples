@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
+using tanka.graphql.channels;
+using tanka.graphql.resolvers;
 
 namespace tanka.graphql.samples.Host.Logic.Domain
 {
     public class Chat
     {
         private readonly List<Channel> _channels = new List<Channel>();
-        private readonly BroadcastBlock<Message> _messageAdded;
+        private readonly PoliteEventChannel<Message> _messageAdded;
         private readonly List<Message> _messages = new List<Message>();
 
         private int _nextMessageId = 1;
 
         public Chat()
         {
-            _messageAdded = new BroadcastBlock<Message>(message => message);
+            _messageAdded = new PoliteEventChannel<Message>(new Message
+            {
+                Id = -1,
+                Content = "Welcome!"
+            });
+
             _channels.Add(new Channel
             {
                 Id = 1,
@@ -37,7 +44,7 @@ namespace tanka.graphql.samples.Host.Logic.Domain
             };
             _messages.Add(message);
 
-            await _messageAdded.SendAsync(message);
+            await _messageAdded.WriteAsync(message);
             return message;
         }
 
@@ -70,15 +77,9 @@ namespace tanka.graphql.samples.Host.Logic.Domain
             return Task.FromResult(_channels.AsEnumerable());
         }
 
-        public Task<IDisposable> JoinAsync(int channelId, BufferBlock<Message> target)
+        public ISubscribeResult Join(int channelId, CancellationToken unsubscribe)
         {
-            //todo: filter by channel
-            var sub = _messageAdded.LinkTo(target, new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            });
-
-            return Task.FromResult(sub);
+            return _messageAdded.Subscribe(unsubscribe);
         }
 
         private int NextId()

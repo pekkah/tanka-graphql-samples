@@ -103,18 +103,10 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             return As(channel);
         }
 
-        public async ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
+        public ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
-            var target = new BufferBlock<Message>();
-            var subscription = await _chat.JoinAsync(channelId, target);
-            unsubscribe.Register(() =>
-            {
-                subscription.Dispose();
-                target.Complete();
-            });
-
-            return Stream(target);
+            return new ValueTask<ISubscribeResult>(_chat.Join(channelId, unsubscribe));
         }
 
         public ValueTask<IResolveResult> Message(ResolverContext context)
