@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 
-namespace tanka.graphql.samples.Host.Logic.Domain
+namespace tanka.graphql.samples.Chat.Host.Domain
 {
     public class Chat
     {

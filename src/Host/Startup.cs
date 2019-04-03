@@ -4,10 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.samples.Host.Logic.Domain;
-using tanka.graphql.samples.Host.Logic.Schemas;
-using tanka.graphql.server;
-using tanka.graphql.tools;
 
 namespace tanka.graphql.samples.Host
 {
@@ -24,28 +20,6 @@ namespace tanka.graphql.samples.Host
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            // add schema
-            services.AddSingleton(
-                provider =>
-                {
-                    var schemaBuilder = SchemaLoader.Load();
-
-                    var chat = new Chat();
-                    var service = new ChatResolverService(chat);
-                    var resolvers = new ChatResolvers(service);
-
-                    var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                        schemaBuilder,
-                        resolvers,
-                        resolvers);
-
-                    return schema;
-                });
-
-            // add signalr
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddQueryStreamHubWithTracing();
 
 
             // In production, the React files will be served from this directory
@@ -69,9 +43,6 @@ namespace tanka.graphql.samples.Host
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
-            // use fugu signalr server hub
-            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
 
             // use mvc
             app.UseMvc(routes =>

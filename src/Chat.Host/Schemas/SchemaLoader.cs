@@ -5,7 +5,7 @@ using System.Text;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 
-namespace tanka.graphql.samples.Host.Logic.Schemas
+namespace tanka.graphql.samples.Chat.Host.Schemas
 {
     public static class SchemaLoader
     {
@@ -27,7 +27,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
         {
             var assembly = Assembly.GetExecutingAssembly();
             var resourceStream =
-                assembly.GetManifestResourceStream("tanka.graphql.samples.Host.Logic.Schemas.Chat.graphql");
+                assembly.GetManifestResourceStream("tanka.graphql.samples.Chat.Host.Schemas.Chat.graphql");
             using (var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
             {

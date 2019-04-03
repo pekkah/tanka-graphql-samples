@@ -1,11 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using tanka.graphql.resolvers;
-using tanka.graphql.samples.Host.Logic.Domain;
-using static tanka.graphql.resolvers.Resolve;
+using tanka.graphql.samples.Chat.Host.Domain;
 
-namespace tanka.graphql.samples.Host.Logic.Schemas
+namespace tanka.graphql.samples.Chat.Host.Schemas
 {
     public class ChatResolvers : ResolverMap
     {
@@ -33,29 +31,29 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             // domain
             this["Channel"] = new FieldResolverMap
             {
-                {"id", PropertyOf<Channel>(c => c.Id)},
-                {"name", PropertyOf<Channel>(c => c.Name)}
+                {"id", Resolve.PropertyOf<Channel>(c => c.Id)},
+                {"name", Resolve.PropertyOf<Channel>(c => c.Name)}
             };
 
             this["Member"] = new FieldResolverMap
             {
-                {"id", PropertyOf<Member>(c => c.Id)},
-                {"name", PropertyOf<Member>(c => c.Name)}
+                {"id", Resolve.PropertyOf<Member>(c => c.Id)},
+                {"name", Resolve.PropertyOf<Member>(c => c.Name)}
             };
 
             this["Message"] = new FieldResolverMap
             {
-                {"id", PropertyOf<Message>(m => m.Id)},
-                {"content", PropertyOf<Message>(m => m.Content)}
+                {"id", Resolve.PropertyOf<Message>(m => m.Id)},
+                {"content", Resolve.PropertyOf<Message>(m => m.Content)}
             };
         }
     }
 
     public class ChatResolverService
     {
-        private readonly Chat _chat;
+        private readonly Domain.Chat _chat;
 
-        public ChatResolverService(Chat chat)
+        public ChatResolverService(Domain.Chat chat)
         {
             _chat = chat;
         }
@@ -63,7 +61,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
         public async ValueTask<IResolveResult> Channels(ResolverContext context)
         {
             var channels = await _chat.GetChannelsAsync();
-            return As(channels);
+            return Resolve.As(channels);
         }
 
         public async ValueTask<IResolveResult> ChannelMessages(ResolverContext context)
@@ -71,7 +69,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             var channelId = (int) (long) context.Arguments["channelId"];
 
             var messages = await _chat.GetMessagesAsync(channelId, 100);
-            return As(messages);
+            return Resolve.As(messages);
         }
 
         public ValueTask<IResolveResult> ChannelMembers(ResolverContext context)
@@ -82,7 +80,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
                 Name = "Fugu"
             };
 
-            return new ValueTask<IResolveResult>(As(new[] {member}));
+            return new ValueTask<IResolveResult>(Resolve.As(new[] {member}));
         }
 
         public async ValueTask<IResolveResult> PostMessage(ResolverContext context)
@@ -92,7 +90,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
 
             var message = await _chat.PostMessageAsync(channelId, inputMessage); //todo: fix bug in lib
 
-            return As(message);
+            return Resolve.As(message);
         }
 
         public async ValueTask<IResolveResult> Channel(ResolverContext context)
@@ -100,7 +98,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
             var channelId = (int) (long) context.Arguments["channelId"];
             var channel = await _chat.GetChannelAsync(channelId);
 
-            return As(channel);
+            return Resolve.As(channel);
         }
 
         public ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
@@ -111,7 +109,7 @@ namespace tanka.graphql.samples.Host.Logic.Schemas
 
         public ValueTask<IResolveResult> Message(ResolverContext context)
         {
-            return new ValueTask<IResolveResult>(As(context.ObjectValue));
+            return new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue));
         }
     }
 }

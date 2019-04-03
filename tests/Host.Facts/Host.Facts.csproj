@@ -15,8 +15,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Host.Logic\Host.Logic.csproj" />
-  </ItemGroup>
-
 </Project>

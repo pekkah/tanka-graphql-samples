@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <AssemblyName>tanka.graphql.samples.Chat.Host</AssemblyName>
+    <RootNamespace>tanka.graphql.samples.Chat.Host</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Schemas\Chat.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Schemas\Chat.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="tanka.graphql" Version="0.5.1-beta.21" />
+    <PackageReference Include="tanka.graphql.server" Version="0.5.1-beta.21" />
+  </ItemGroup>
+
+</Project>
