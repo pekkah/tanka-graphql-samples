@@ -1,9 +1,23 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Channels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using tanka.graphql.introspection;
+using tanka.graphql.language;
+using tanka.graphql.links;
+using tanka.graphql.requests;
+using tanka.graphql.server;
+using tanka.graphql.tools;
+using tanka.graphql.type;
 
 namespace tanka.graphql.samples.Host
 {
@@ -21,6 +35,31 @@ namespace tanka.graphql.samples.Host
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            // add schema
+            services.AddSingleton(
+                provider =>
+                {
+                    var builder = new SchemaBuilder();
+
+                    // execute introspection query
+                    var link = Links.Signalr("https://localhost:5010/hubs/graphql");
+                    var channel = link(
+                            Parser.ParseDocument(Introspect.DefaultQuery),
+                            null,
+                            CancellationToken.None)
+                        .GetAwaiter().GetResult();
+
+                    var result = channel.ReadAsync().AsTask().GetAwaiter().GetResult();
+                    var json = JsonConvert.SerializeObject(result);
+                    builder.ImportIntrospectedSchema(json);
+                    return RemoteSchemaTools.MakeRemoteExecutable(
+                        builder,
+                        link);
+                });
+
+            // add signalr
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+                .AddQueryStreamHubWithTracing();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -44,6 +83,9 @@ namespace tanka.graphql.samples.Host
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            // use signalr server hub
+            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
+
             // use mvc
             app.UseMvc(routes =>
             {
@@ -58,6 +100,29 @@ namespace tanka.graphql.samples.Host
 
                 if (env.IsDevelopment()) spa.UseReactDevelopmentServer("start");
             });
+        }
+    }
+
+    public static class Links 
+    {
+        public static ExecutionResultLink Signalr(string url)
+        {
+            var connection = new HubConnectionBuilder()
+                .WithUrl(url)
+                .Build();
+
+            connection.StartAsync().GetAwaiter().GetResult();
+
+            return async (document, variables, cancellationToken) =>
+            {
+                var channel = await connection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
+                {
+                    Query = document.ToGraphQL(),
+                    Variables = variables != null ? new Dictionary<string, object>(variables) : null
+                }, cancellationToken);
+
+                return channel;
+            };
         }
     }
 }
