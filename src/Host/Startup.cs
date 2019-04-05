@@ -1,17 +1,10 @@
-using System.Collections.Generic;
-using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using tanka.graphql.introspection;
-using tanka.graphql.language;
-using tanka.graphql.links;
-using tanka.graphql.requests;
 using tanka.graphql.server;
 using tanka.graphql.tools;
 using tanka.graphql.type;
@@ -90,20 +83,6 @@ namespace tanka.graphql.samples.Host
 
                 if (env.IsDevelopment()) spa.UseReactDevelopmentServer("start");
             });
-        }
-    }
-
-    public static class Links
-    {
-        public static ExecutionResultLink Signalr(string url)
-        {
-            var connection = new HubConnectionBuilder()
-                .WithUrl(url)
-                .Build();
-
-            connection.StartAsync().GetAwaiter().GetResult();
-
-            return RemoteLinks.Server(connection);
         }
     }
 }
