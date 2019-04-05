@@ -1,8 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
-using System.Threading.Channels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -41,17 +38,10 @@ namespace tanka.graphql.samples.Host
                 {
                     var builder = new SchemaBuilder();
 
-                    // execute introspection query
+                    // build schema by introspecting the chat schema
                     var link = Links.Signalr("https://localhost:5010/hubs/graphql");
-                    var channel = link(
-                            Parser.ParseDocument(Introspect.DefaultQuery),
-                            null,
-                            CancellationToken.None)
-                        .GetAwaiter().GetResult();
+                    builder.ImportIntrospectedSchema(link).GetAwaiter().GetResult();
 
-                    var result = channel.ReadAsync().AsTask().GetAwaiter().GetResult();
-                    var json = JsonConvert.SerializeObject(result);
-                    builder.ImportIntrospectedSchema(json);
                     return RemoteSchemaTools.MakeRemoteExecutable(
                         builder,
                         link);
@@ -103,7 +93,7 @@ namespace tanka.graphql.samples.Host
         }
     }
 
-    public static class Links 
+    public static class Links
     {
         public static ExecutionResultLink Signalr(string url)
         {
@@ -113,16 +103,7 @@ namespace tanka.graphql.samples.Host
 
             connection.StartAsync().GetAwaiter().GetResult();
 
-            return async (document, variables, cancellationToken) =>
-            {
-                var channel = await connection.StreamAsChannelAsync<ExecutionResult>("query", new QueryRequest
-                {
-                    Query = document.ToGraphQL(),
-                    Variables = variables != null ? new Dictionary<string, object>(variables) : null
-                }, cancellationToken);
-
-                return channel;
-            };
+            return RemoteLinks.Server(connection);
         }
     }
 }
