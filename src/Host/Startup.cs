@@ -29,15 +29,34 @@ namespace tanka.graphql.samples.Host
             services.AddSingleton(
                 provider =>
                 {
-                    var builder = new SchemaBuilder();
+                    // create channelsSchema by introspecting channels service
+                    var channelsBuilder = new SchemaBuilder();
+                    var channelsLink = Links.Signalr("https://localhost:5010/hubs/graphql");
+                    channelsBuilder.ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult();
 
-                    // build schema by introspecting the chat schema
-                    var link = Links.Signalr("https://localhost:5010/hubs/graphql");
-                    builder.ImportIntrospectedSchema(link).GetAwaiter().GetResult();
+                    var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                        channelsBuilder,
+                        channelsLink);
 
-                    return RemoteSchemaTools.MakeRemoteExecutable(
-                        builder,
-                        link);
+                    // create messagesSchema by introspecting messages service
+                    var messagesLink = Links.Signalr("https://localhost:5011/hubs/graphql");
+                    var messagesBuilder = new SchemaBuilder(); 
+                    messagesBuilder.ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult();
+
+                    var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                        messagesBuilder,
+                        messagesLink);
+
+                    // combine schemas into one
+                    var schema = new SchemaBuilder()
+                        .Merge(channelsSchema, messagesSchema)
+                        .Build();
+
+                    // introspect and merge with schema
+                    var introspection = Introspect.Schema(schema);
+                    return new SchemaBuilder()
+                        .Merge(schema, introspection)
+                        .Build();
                 });
 
             // add signalr

@@ -11,17 +11,6 @@ namespace tanka.graphql.samples.channels.host.logic
             {
                 {"channels", resolver.Channels},
                 {"channel", resolver.Channel},
-                {"messages", resolver.ChannelMessages}
-            };
-
-            this["Mutation"] = new FieldResolverMap()
-            {
-                {"postMessage", resolver.PostMessage}
-            };
-
-            this["Subscription"] = new FieldResolverMap()
-            {
-                {"messageAdded", resolver.SubscribeToChannel, resolver.Message}
             };
 
             // domain
@@ -29,12 +18,6 @@ namespace tanka.graphql.samples.channels.host.logic
             {
                 {"id", Resolve.PropertyOf<Channel>(c => c.Id)},
                 {"name", Resolve.PropertyOf<Channel>(c => c.Name)}
-            };
-
-            this["Message"] = new FieldResolverMap
-            {
-                {"id", Resolve.PropertyOf<Message>(m => m.Id)},
-                {"content", Resolve.PropertyOf<Message>(m => m.Content)}
             };
         }
     }

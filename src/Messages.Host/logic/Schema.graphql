@@ -1,0 +1,26 @@
+﻿type Message {
+	id: ID!
+	content: String!
+}
+
+input InputMessage {
+    content: String!
+}
+
+type Query {
+	messages(channelId: Int!): [Message!]!
+}
+
+type Mutation {
+    postMessage(channelId: Int!,message: InputMessage!): Message!
+}
+
+type Subscription {
+	messageAdded(channelId: Int!): Message!
+}
+
+schema {
+    query: Query
+	mutation: Mutation
+	subscription: Subscription
+}
