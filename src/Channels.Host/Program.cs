@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace tanka.graphql.samples.Chat.Host
+namespace tanka.graphql.samples.channels.host
 {
     public class Program
     {

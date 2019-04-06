@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 
-namespace tanka.graphql.samples.Chat.Host.Domain
+namespace tanka.graphql.samples.channels.host.logic
 {
-    public class Chat
+    public class Channels
     {
         private readonly List<Channel> _channels = new List<Channel>();
         private readonly PoliteEventChannel<Message> _messageAdded;
@@ -16,7 +16,7 @@ namespace tanka.graphql.samples.Chat.Host.Domain
 
         private int _nextMessageId = 1;
 
-        public Chat()
+        public Channels()
         {
             _messageAdded = new PoliteEventChannel<Message>(new Message
             {

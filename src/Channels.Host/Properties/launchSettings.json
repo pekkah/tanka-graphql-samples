@@ -1,12 +1,4 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:55396",
-      "sslPort": 44326
-    }
-  },
   "profiles": {
     "Chat.Host": {
       "commandName": "Project",

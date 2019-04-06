@@ -3,16 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <AssemblyName>tanka.graphql.samples.Chat.Host</AssemblyName>
-    <RootNamespace>tanka.graphql.samples.Chat.Host</RootNamespace>
+    <AssemblyName>tanka.graphql.samples.channels.host</AssemblyName>
+    <RootNamespace>tanka.graphql.samples.channels.host</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Schemas\Chat.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Schemas\Chat.graphql" />
+    <EmbeddedResource Include="logic\Schema.graphql" />
   </ItemGroup>
 
   <ItemGroup>
