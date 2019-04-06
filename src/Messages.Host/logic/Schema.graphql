@@ -7,19 +7,7 @@ input InputMessage {
     content: String!
 }
 
-type Member {
-	id: ID!
-	name: String!
-}
-
-type Channel {
-    id: ID!
-	name: String!
-}
-
 type Query {
-	channels: [Channel!]!
-	channel(channelId: Int!): Channel
 	messages(channelId: Int!): [Message!]!
 }
 
@@ -33,6 +21,6 @@ type Subscription {
 
 schema {
     query: Query
-    mutation: Mutation
+	mutation: Mutation
 	subscription: Subscription
 }

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Messages.Host": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5011"
+    }
+  }
+}

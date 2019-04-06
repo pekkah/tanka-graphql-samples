@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using tanka.graphql.samples.Host.Logic.Domain;
-using tanka.graphql.samples.Host.Logic.Schemas;
+using tanka.graphql.introspection;
 using tanka.graphql.server;
 using tanka.graphql.tools;
+using tanka.graphql.type;
 
 namespace tanka.graphql.samples.Host
 {
@@ -29,24 +29,39 @@ namespace tanka.graphql.samples.Host
             services.AddSingleton(
                 provider =>
                 {
-                    var schemaBuilder = SchemaLoader.Load();
+                    // create channelsSchema by introspecting channels service
+                    var channelsBuilder = new SchemaBuilder();
+                    var channelsLink = Links.SignalR("https://localhost:5010/hubs/graphql");
+                    channelsBuilder.ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult();
 
-                    var chat = new Chat();
-                    var service = new ChatResolverService(chat);
-                    var resolvers = new ChatResolvers(service);
+                    var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                        channelsBuilder,
+                        channelsLink);
 
-                    var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                        schemaBuilder,
-                        resolvers,
-                        resolvers);
+                    // create messagesSchema by introspecting messages service
+                    var messagesLink = Links.SignalR("https://localhost:5011/hubs/graphql");
+                    var messagesBuilder = new SchemaBuilder();
+                    messagesBuilder.ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult();
 
-                    return schema;
+                    var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                        messagesBuilder,
+                        messagesLink);
+
+                    // combine schemas into one
+                    var schema = new SchemaBuilder()
+                        .Merge(channelsSchema, messagesSchema)
+                        .Build();
+
+                    // introspect and merge with schema
+                    var introspection = Introspect.Schema(schema);
+                    return new SchemaBuilder()
+                        .Merge(schema, introspection)
+                        .Build();
                 });
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
-
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -70,7 +85,7 @@ namespace tanka.graphql.samples.Host
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            // use fugu signalr server hub
+            // use signalr server hub
             app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
 
             // use mvc

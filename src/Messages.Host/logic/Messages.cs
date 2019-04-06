@@ -1,42 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using tanka.graphql.channels;
 using tanka.graphql.resolvers;
 
-namespace tanka.graphql.samples.Host.Logic.Domain
+namespace tanka.graphql.samples.messages.host.logic
 {
-    public class Chat
+    public class Messages
     {
-        private readonly List<Channel> _channels = new List<Channel>();
         private readonly PoliteEventChannel<Message> _messageAdded;
         private readonly List<Message> _messages = new List<Message>();
 
         private int _nextMessageId = 1;
 
-        public Chat()
+        public Messages()
         {
             _messageAdded = new PoliteEventChannel<Message>(new Message
             {
                 Id = -1,
                 Content = "Welcome!"
             });
-
-            _channels.Add(new Channel
-            {
-                Id = 1,
-                Name = "General"
-            });
         }
 
         public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
         {
-            var channel = await GetChannelAsync(channelId);
-
-            if (channel == null) throw new InvalidOperationException($"Channel '{channelId}' not found");
-
             var message = new Message
             {
                 Id = NextId(),
@@ -51,30 +39,6 @@ namespace tanka.graphql.samples.Host.Logic.Domain
         public Task<IEnumerable<Message>> GetMessagesAsync(int channelId, int latest = 100)
         {
             return Task.FromResult(_messages.AsEnumerable());
-        }
-
-        public Task<Channel> CreateChannelAsync(InputChannel inputChannel)
-        {
-            var channel = new Channel
-            {
-                Id = _channels.Count + 1,
-                Name = inputChannel.Name
-            };
-
-            _channels.Add(channel);
-
-            return Task.FromResult(channel);
-        }
-
-        public Task<Channel> GetChannelAsync(int channelId)
-        {
-            var channel = _channels.SingleOrDefault(c => c.Id == channelId);
-            return Task.FromResult(channel);
-        }
-
-        public Task<IEnumerable<Channel>> GetChannelsAsync()
-        {
-            return Task.FromResult(_channels.AsEnumerable());
         }
 
         public ISubscribeResult Join(int channelId, CancellationToken unsubscribe)
@@ -92,26 +56,6 @@ namespace tanka.graphql.samples.Host.Logic.Domain
     {
         public string Content { get; set; }
     }
-
-    public class InputChannel
-    {
-        public string Name { get; set; }
-    }
-
-    public class Channel
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-    }
-
-    public class Member
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-    }
-
 
     public class Message
     {

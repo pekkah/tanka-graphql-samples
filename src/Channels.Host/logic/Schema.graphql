@@ -1,0 +1,13 @@
+﻿type Channel {
+    id: ID!
+	name: String!
+}
+
+type Query {
+	channels: [Channel!]!
+	channel(channelId: Int!): Channel
+}
+
+schema {
+    query: Query
+}
