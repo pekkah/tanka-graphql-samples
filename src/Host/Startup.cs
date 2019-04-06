@@ -31,7 +31,7 @@ namespace tanka.graphql.samples.Host
                 {
                     // create channelsSchema by introspecting channels service
                     var channelsBuilder = new SchemaBuilder();
-                    var channelsLink = Links.Signalr("https://localhost:5010/hubs/graphql");
+                    var channelsLink = Links.SignalR("https://localhost:5010/hubs/graphql");
                     channelsBuilder.ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult();
 
                     var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
@@ -39,8 +39,8 @@ namespace tanka.graphql.samples.Host
                         channelsLink);
 
                     // create messagesSchema by introspecting messages service
-                    var messagesLink = Links.Signalr("https://localhost:5011/hubs/graphql");
-                    var messagesBuilder = new SchemaBuilder(); 
+                    var messagesLink = Links.SignalR("https://localhost:5011/hubs/graphql");
+                    var messagesBuilder = new SchemaBuilder();
                     messagesBuilder.ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult();
 
                     var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
