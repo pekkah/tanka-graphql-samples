@@ -22,7 +22,7 @@ steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
 - script: dotnet publish --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
-  displayName: 'dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)'
+  displayName: 'dotnet publish --no-build -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)'
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
