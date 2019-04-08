@@ -19,7 +19,7 @@ steps:
     packageType: sdk
     version: '2.2.202'
 
-- script: dotnet build --configuration $(buildConfiguration)
+- script: dotnet build --configuration $(buildConfiguration) --runtime win-x86
   displayName: 'dotnet build $(buildConfiguration)'
 - script: dotnet publish src/Host --no-build --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host
   displayName: Publish host
