@@ -19,13 +19,13 @@ steps:
     packageType: sdk
     version: '2.2.202'
 
-- script: dotnet build --configuration $(buildConfiguration)
+- script: dotnet build --configuration $(buildConfiguration) -r win-x86
   displayName: 'dotnet build $(buildConfiguration)'
-- script: dotnet publish src/Host --no-build --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host
+- script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host -r win-x86
   displayName: Publish host
-- script: dotnet publish src/Channels.Host --no-build --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels
+- script: dotnet publish src/Channels.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels -r win-x86
   displayName: Publish channels
-- script: dotnet publish src/Messages.Host --no-build --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages
+- script: dotnet publish src/Messages.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages -r win-x86
   displayName: Publish messages
 - task: PublishBuildArtifacts@1
   inputs:
