@@ -10,14 +10,17 @@
     <AssemblyName>tanka.graphql.samples.Host</AssemblyName>
     <RootNamespace>tanka.graphql.samples.Host</RootNamespace>
     <LangVersion>7.3</LangVersion>
+    <UserSecretsId>0e7d86ae-ff0c-41fe-b196-29a8e3a1c968</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Azure.SignalR" Version="1.0.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
     <PackageReference Include="tanka.graphql" Version="0.6.0" />
     <PackageReference Include="tanka.graphql.server" Version="0.6.0" />
