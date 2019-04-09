@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using tanka.graphql.links;
@@ -19,11 +20,18 @@ namespace tanka.graphql.samples.Host
 
                 Task OnClosed(Exception e)
                 {
+                    // reconnect
                     return connection.StartAsync(cancellationToken);
                 }
 
                 connection.Closed += OnClosed;
-                cancellationToken.Register(() => connection.Closed -= OnClosed);
+                cancellationToken.Register(() =>
+                {
+                    // close connection
+                    connection.Closed -= OnClosed;
+                    var _ = connection.StopAsync(CancellationToken.None);
+                });
+
                 return connection;
             });
         }
