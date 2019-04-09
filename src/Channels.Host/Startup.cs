@@ -10,12 +10,12 @@ namespace tanka.graphql.samples.channels.host
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -38,34 +38,17 @@ namespace tanka.graphql.samples.channels.host
                 });
 
             // add signalr
-            var signalR = services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
-
-            var connectionString = Configuration["Azure:SignalR:ConnectionString"];
-            if (connectionString != null)
-            {
-                signalR.AddAzureSignalR();
-            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             // use signalr server hub
-            var connectionString = Configuration["Azure:SignalR:ConnectionString"];
-            if (connectionString != null)
-            {
-                app.UseAzureSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
-            }
-            else
-            {
-                app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
-            }
+            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
         }
     }
 }

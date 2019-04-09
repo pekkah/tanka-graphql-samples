@@ -60,14 +60,8 @@ namespace tanka.graphql.samples.Host
                 });
 
             // add signalr
-            var signalR = services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddQueryStreamHubWithTracing();
-
-            var connectionString = Configuration["Azure:SignalR:ConnectionString"];
-            if (connectionString != null)
-            {
-                signalR.AddAzureSignalR();
-            }
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -92,15 +86,7 @@ namespace tanka.graphql.samples.Host
             app.UseSpaStaticFiles();
 
             // use signalr server hub
-            var connectionString = Configuration["Azure:SignalR:ConnectionString"];
-            if (connectionString != null)
-            {
-                app.UseAzureSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
-            }
-            else
-            {
-                app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
-            }
+            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
 
             // use mvc
             app.UseMvc(routes =>
