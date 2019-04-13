@@ -6,7 +6,7 @@ namespace tanka.graphql.samples.Host
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = CreateWebHostBuilder(args).Build();
             host.Run();
