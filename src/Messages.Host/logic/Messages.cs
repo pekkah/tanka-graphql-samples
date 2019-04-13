@@ -9,18 +9,14 @@ namespace tanka.graphql.samples.messages.host.logic
 {
     public class Messages
     {
-        private readonly PoliteEventChannel<Message> _messageAdded;
+        private readonly EventChannel<Message> _messageAdded;
         private readonly List<Message> _messages = new List<Message>();
 
         private int _nextMessageId = 1;
 
         public Messages()
         {
-            _messageAdded = new PoliteEventChannel<Message>(new Message
-            {
-                Id = -1,
-                Content = "Welcome!"
-            });
+            _messageAdded = new EventChannel<Message>();
         }
 
         public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
@@ -43,7 +39,8 @@ namespace tanka.graphql.samples.messages.host.logic
 
         public ISubscribeResult Join(int channelId, CancellationToken unsubscribe)
         {
-            return _messageAdded.Subscribe(unsubscribe);
+            var result = _messageAdded.Subscribe(unsubscribe);
+            return result;
         }
 
         private int NextId()
