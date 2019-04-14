@@ -1,13 +1,8 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { Query, Mutation, Subscription } from "react-apollo";
+import { Query } from "react-apollo";
 import { withStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardHeader from "@material-ui/core/CardHeader";
-import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
-import Chip from "@material-ui/core/Chip";
 import List from "@material-ui/core/List"
 import ListItem from "@material-ui/core/ListItem"
 import ListItemText from '@material-ui/core/ListItemText';
@@ -42,7 +37,7 @@ class ChannelMessages extends Component {
   }
 
   render() {
-    const { classes, id } = this.props;
+    const { id } = this.props;
     return (
       <Query query={GET_MESSAGES} variables={{ channelId: id }}>
         {({ subscribeToMore, ...result }) => (
@@ -96,7 +91,6 @@ const MessageList = withStyles(channelMessagesStyles)(
 
     render() {
       const {
-        classes,
         loading,
         data: { messages }
       } = this.props;
@@ -104,7 +98,6 @@ const MessageList = withStyles(channelMessagesStyles)(
       if (loading)
         return (<span>Loading..</span>);
 
-      const getText = message => ` - ${message.content}`;
       return (
         <div>
           <List>
