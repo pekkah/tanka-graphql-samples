@@ -6,6 +6,12 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import Typography from "@material-ui/core/Typography";
+import Avatar from "@material-ui/core/Avatar";
+import Chip from "@material-ui/core/Chip";
+import List from "@material-ui/core/List"
+import ListItem from "@material-ui/core/ListItem"
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 
 const GET_MESSAGES = gql`
   query Messages($channelId: Int!) {
@@ -98,19 +104,20 @@ const MessageList = withStyles(channelMessagesStyles)(
       if (loading)
         return (<span>Loading..</span>);
 
+      const getText = message => ` - ${message.content}`;
       return (
         <div>
-          {messages &&
-            messages.map(message => (
-              <Card className={classes.card} key={message.id}>
-                <CardHeader
-                  subheader={message.timestamp}
-                />
-                <CardContent>
-                  <Typography component="p">{message.content}</Typography>
-                </CardContent>
-              </Card>
-            ))}
+          <List>
+            {messages &&
+              messages.map(message => (
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar>XX</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText secondary={message.timestamp} primary={message.content}/>
+                </ListItem>
+              ))}
+          </List>
         </div>
       );
     }
