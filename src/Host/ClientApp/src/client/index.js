@@ -4,7 +4,13 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 import { TankaLink, TankaClient } from '@tanka/tanka-graphql-server-link';
 
-const serverClient = new TankaClient("/hubs/graphql");
+var options = {
+  reconnectAttempts: Infinity,
+  reconnectInitialWaitMs: 5000,
+  reconnectAdditionalWaitMs: 2000
+};
+
+const serverClient = new TankaClient("/hubs/graphql", options);
 const serverLink = new TankaLink(serverClient);
 
 const client = new ApolloClient({
