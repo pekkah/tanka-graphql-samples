@@ -54,7 +54,7 @@ class ChannelMessages extends Component {
                   const newMessage = subscriptionData.data.messageAdded;
 
                   let messages = [];
-                  if (prev.messages != undefined)
+                  if (prev.messages !== undefined)
                     messages = prev.messages;
 
                   return Object.assign({}, prev, {
@@ -81,10 +81,6 @@ const channelMessagesStyles = {
 
 const MessageList = withStyles(channelMessagesStyles)(
   class extends Component {
-    constructor(props) {
-      super(props);
-    }
-
     componentDidMount() {
       this.props.subscribeToNewMessages();
     }
@@ -103,7 +99,7 @@ const MessageList = withStyles(channelMessagesStyles)(
           <List>
             {messages &&
               messages.map(message => (
-                <ListItem>
+                <ListItem key={message.id}>
                   <ListItemAvatar>
                     <Avatar>XX</Avatar>
                   </ListItemAvatar>

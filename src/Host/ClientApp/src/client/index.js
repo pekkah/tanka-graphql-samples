@@ -2,6 +2,7 @@ import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
+import { RetryLink } from "apollo-link-retry";
 import { TankaLink, TankaClient } from '@tanka/tanka-graphql-server-link';
 
 var options = {
@@ -25,6 +26,7 @@ const client = new ApolloClient({
         );
       if (networkError) console.log(`[Network error]: ${networkError}`);
     }),
+    new RetryLink(),
     serverLink
   ]),
   cache: new InMemoryCache()

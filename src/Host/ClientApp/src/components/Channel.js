@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
-import { Query, Mutation, Subscription } from "react-apollo";
+import { Query, Mutation } from "react-apollo";
 import TextField from "@material-ui/core/TextField";
 
 import { ChannelMessages } from "./ChannelMessages";
