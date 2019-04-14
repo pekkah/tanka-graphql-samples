@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace tanka.graphql.samples.messages.host.logic
             var message = new Message
             {
                 Id = NextId(),
-                Content = inputMessage.Content
+                Content = inputMessage.Content,
+                ChannelId = channelId
             };
             _messages.Add(message);
 
@@ -56,8 +58,17 @@ namespace tanka.graphql.samples.messages.host.logic
 
     public class Message
     {
-        public int Id { get; set; }
+        public Message()
+        {
+            Timestamp = DateTimeOffset.UtcNow;
+        }
 
+        public DateTimeOffset? Timestamp { get; set; }
+
+        public int Id { get; set; }
+        
         public string Content { get; set; }
+
+        public int ChannelId { get; set; }
     }
 }

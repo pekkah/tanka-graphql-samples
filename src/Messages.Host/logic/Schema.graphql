@@ -1,6 +1,8 @@
 ﻿type Message {
 	id: ID!
+	channelId: ID!
 	content: String!
+	timestamp: String!
 }
 
 input InputMessage {

@@ -4,13 +4,16 @@ import { Query, Mutation, Subscription } from "react-apollo";
 import { withStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import Typography from "@material-ui/core/Typography";
 
 const GET_MESSAGES = gql`
   query Messages($channelId: Int!) {
     messages(channelId: $channelId) {
       id
+      channelId
       content
+      timestamp
     }
   }
 `;
@@ -19,7 +22,9 @@ const MESSAGES_SUBSCRIPTION = gql`
   subscription MessageAdded($channelId: Int!) {
     messageAdded(channelId: $channelId) {
       id
+      channelId
       content
+      timestamp
     }
   }
 `;
@@ -42,18 +47,18 @@ class ChannelMessages extends Component {
                 document: MESSAGES_SUBSCRIPTION,
                 variables: { channelId: id },
                 updateQuery: (prev, { subscriptionData }) => {
-                    if (!subscriptionData.data) return prev;
-                    if (!subscriptionData.data.messageAdded) return prev;    
+                  if (!subscriptionData.data) return prev;
+                  if (!subscriptionData.data.messageAdded) return prev;
 
-                    const newMessage = subscriptionData.data.messageAdded;
+                  const newMessage = subscriptionData.data.messageAdded;
 
-                    let messages = [];
-                    if (prev.messages != undefined) 
-                        messages = prev.messages;
+                  let messages = [];
+                  if (prev.messages != undefined)
+                    messages = prev.messages;
 
-                    return Object.assign({}, prev, {
-                        messages: [...messages, newMessage]
-                    });
+                  return Object.assign({}, prev, {
+                    messages: [...messages, newMessage]
+                  });
                 }
               })
             }
@@ -98,6 +103,9 @@ const MessageList = withStyles(channelMessagesStyles)(
           {messages &&
             messages.map(message => (
               <Card className={classes.card} key={message.id}>
+                <CardHeader
+                  subheader={message.timestamp}
+                />
                 <CardContent>
                   <Typography component="p">{message.content}</Typography>
                 </CardContent>

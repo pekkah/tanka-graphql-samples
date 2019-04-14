@@ -25,7 +25,9 @@ namespace tanka.graphql.samples.messages.host.logic
             this["Message"] = new FieldResolverMap
             {
                 {"id", Resolve.PropertyOf<Message>(m => m.Id)},
-                {"content", Resolve.PropertyOf<Message>(m => m.Content)}
+                {"channelId", Resolve.PropertyOf<Message>(m => m.Id)},
+                {"content", Resolve.PropertyOf<Message>(m => m.Content)},
+                {"timestamp", Resolve.PropertyOf<Message>(m => m.Timestamp?.ToString("O"))}
             };
         }
     }
