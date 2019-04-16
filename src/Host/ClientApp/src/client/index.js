@@ -4,11 +4,19 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 import { RetryLink } from "apollo-link-retry";
 import { TankaLink, TankaClient } from '@tanka/tanka-graphql-server-link';
+import auth from '../auth';
 
 var options = {
   reconnectAttempts: Infinity,
   reconnectInitialWaitMs: 5000,
-  reconnectAdditionalWaitMs: 2000
+  reconnectAdditionalWaitMs: 2000,
+  connection: {
+    accessTokenFactory: ()=> {
+      var token = auth.getAccessToken();
+      console.log(`AT: ${token}`);
+      return token;
+    }
+  }
 };
 
 const serverClient = new TankaClient("/hubs/graphql", options);

@@ -30,21 +30,17 @@ namespace tanka.graphql.samples.Host
                 provider =>
                 {
                     // create channelsSchema by introspecting channels service
-                    var channelsBuilder = new SchemaBuilder();
                     var channelsLink = Links.SignalR(Configuration["Remotes:Channels"]);
-                    channelsBuilder.ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult();
-
                     var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                        channelsBuilder,
+                        new SchemaBuilder()
+                            .ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult(),
                         channelsLink);
 
                     // create messagesSchema by introspecting messages service
                     var messagesLink = Links.SignalR(Configuration["Remotes:Messages"]);
-                    var messagesBuilder = new SchemaBuilder();
-                    messagesBuilder.ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult();
-
                     var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                        messagesBuilder,
+                        new SchemaBuilder()
+                            .ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult(),
                         messagesLink);
 
                     // combine schemas into one
