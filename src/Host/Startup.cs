@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +28,37 @@ namespace tanka.graphql.samples.Host
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // signalr authentication
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = Configuration["JWT:Authority"];
+                options.Audience = Configuration["JWT:Audience"];
+                options.SaveToken = true;
+
+                // We have to hook the OnMessageReceived event in order to
+                // allow the JWT authentication handler to read the access
+                // token from the query string when a WebSocket or 
+                // Server-Sent Events request comes in.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // Read the token out of the query string
+                        context.Token = accessToken;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            services.AddAuthorization(options =>
+                options.AddPolicy("authorize", policy => policy.RequireAuthenticatedUser()));
 
             // add schema
             services.AddSingleton(
@@ -81,8 +116,14 @@ namespace tanka.graphql.samples.Host
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            // use authenication
+            app.UseAuthentication();
+
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql"));
+            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql", options =>
+            {
+                options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
+            }));
 
             // use mvc
             app.UseMvc(routes =>

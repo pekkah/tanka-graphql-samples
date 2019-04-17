@@ -8,6 +8,7 @@ class Auth {
   tokenRenewalTimeout;
   auth0 = new auth0.WebAuth({
     domain: process.env.REACT_APP_DOMAIN,
+    audience: process.env.REACT_APP_AUDIENCE,
     clientID: process.env.REACT_APP_CLIENT_ID,
     redirectUri: process.env.REACT_APP_REDIRECT_URI,
     responseType: process.env.REACT_APP_RESPONSE_TYPE,
