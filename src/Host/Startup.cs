@@ -1,13 +1,16 @@
-using System.Collections.Generic;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using tanka.graphql.introspection;
 using tanka.graphql.server;
 using tanka.graphql.tools;
@@ -29,6 +32,9 @@ namespace tanka.graphql.samples.Host
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
             // signalr authentication
             services.AddAuthentication(options =>
             {
@@ -36,6 +42,12 @@ namespace tanka.graphql.samples.Host
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    NameClaimType = "sub",
+                    RoleClaimType = "role"
+                };
+               
                 options.Authority = Configuration["JWT:Authority"];
                 options.Audience = Configuration["JWT:Audience"];
                 options.SaveToken = true;
@@ -60,34 +72,49 @@ namespace tanka.graphql.samples.Host
             services.AddAuthorization(options =>
                 options.AddPolicy("authorize", policy => policy.RequireAuthenticatedUser()));
 
+            services.AddHttpContextAccessor();
+
             // add schema
             services.AddSingleton(
                 provider =>
                 {
-                    // create channelsSchema by introspecting channels service
-                    var channelsLink = Links.SignalR(Configuration["Remotes:Channels"]);
-                    var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                        new SchemaBuilder()
-                            .ImportIntrospectedSchema(channelsLink).GetAwaiter().GetResult(),
-                        channelsLink);
+                    try
+                    {
+                        // create channelsSchema by introspecting channels service
+                        var accessor = provider.GetRequiredService<IHttpContextAccessor>();
+                        var channelsLink = Links.SignalR(Configuration["Remotes:Channels"], accessor);
+                        var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                            new SchemaBuilder()
+                                .ImportIntrospectedSchema(channelsLink)
+                                .ConfigureAwait(false)
+                                .GetAwaiter().GetResult(),
+                            channelsLink);
 
-                    // create messagesSchema by introspecting messages service
-                    var messagesLink = Links.SignalR(Configuration["Remotes:Messages"]);
-                    var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                        new SchemaBuilder()
-                            .ImportIntrospectedSchema(messagesLink).GetAwaiter().GetResult(),
-                        messagesLink);
+                        // create messagesSchema by introspecting messages service
+                        var messagesLink = Links.SignalR(Configuration["Remotes:Messages"], accessor);
+                        var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
+                            new SchemaBuilder()
+                                .ImportIntrospectedSchema(messagesLink)
+                                .ConfigureAwait(false)
+                                .GetAwaiter().GetResult(),
+                            messagesLink);
 
-                    // combine schemas into one
-                    var schema = new SchemaBuilder()
-                        .Merge(channelsSchema, messagesSchema)
-                        .Build();
+                        // combine schemas into one
+                        var schema = new SchemaBuilder()
+                            .Merge(channelsSchema, messagesSchema)
+                            .Build();
 
-                    // introspect and merge with schema
-                    var introspection = Introspect.Schema(schema);
-                    return new SchemaBuilder()
-                        .Merge(schema, introspection)
-                        .Build();
+                        // introspect and merge with schema
+                        var introspection = Introspect.Schema(schema);
+                        return new SchemaBuilder()
+                            .Merge(schema, introspection)
+                            .Build();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
                 });
 
             // add signalr
@@ -120,10 +147,8 @@ namespace tanka.graphql.samples.Host
             app.UseAuthentication();
 
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql", options =>
-            {
-                options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
-            }));
+            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql",
+                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
 
             // use mvc
             app.UseMvc(routes =>

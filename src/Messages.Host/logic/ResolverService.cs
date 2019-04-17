@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using tanka.graphql.resolvers;
 
 namespace tanka.graphql.samples.messages.host.logic
@@ -7,10 +8,12 @@ namespace tanka.graphql.samples.messages.host.logic
     public class ResolverService
     {
         private readonly Messages _channels;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public ResolverService(Messages channels)
+        public ResolverService(Messages channels, IHttpContextAccessor contextAccessor)
         {
             _channels = channels;
+            _contextAccessor = contextAccessor;
         }
 
         public async ValueTask<IResolveResult> ChannelMessages(ResolverContext context)
@@ -26,6 +29,7 @@ namespace tanka.graphql.samples.messages.host.logic
             var channelId = (int) (long) context.Arguments["channelId"];
             var inputMessage = context.GetArgument<InputMessage>("message");
 
+            inputMessage.Content = $"{_contextAccessor.HttpContext.User.Identity.Name} - {inputMessage.Content}";
             var message = await _channels.PostMessageAsync(channelId, inputMessage);
 
             return Resolve.As(message);
