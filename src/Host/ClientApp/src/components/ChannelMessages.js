@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { withStyles } from "@material-ui/core/styles";
-import Avatar from "@material-ui/core/Avatar";
-import List from "@material-ui/core/List"
-import ListItem from "@material-ui/core/ListItem"
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Chip from "@material-ui/core/Chip";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 
 const GET_MESSAGES = gql`
   query Messages($channelId: Int!) {
@@ -15,6 +15,7 @@ const GET_MESSAGES = gql`
       channelId
       content
       timestamp
+      from
     }
   }
 `;
@@ -26,6 +27,7 @@ const MESSAGES_SUBSCRIPTION = gql`
       channelId
       content
       timestamp
+      from
     }
   }
 `;
@@ -54,8 +56,7 @@ class ChannelMessages extends Component {
                   const newMessage = subscriptionData.data.messageAdded;
 
                   let messages = [];
-                  if (prev.messages !== undefined)
-                    messages = prev.messages;
+                  if (prev.messages !== undefined) messages = prev.messages;
 
                   return Object.assign({}, prev, {
                     messages: [...messages, newMessage]
@@ -72,12 +73,13 @@ class ChannelMessages extends Component {
 
 export { ChannelMessages };
 
-const channelMessagesStyles = {
-  card: {
-    minHeight: 75,
-    marginBottom: 16
+var channelMessagesStyles = theme => ({
+  root: {
+    ...theme.mixins.gutters(),
+    paddingTop: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   }
-};
+});
 
 const MessageList = withStyles(channelMessagesStyles)(
   class extends Component {
@@ -88,11 +90,11 @@ const MessageList = withStyles(channelMessagesStyles)(
     render() {
       const {
         loading,
-        data: { messages }
+        data: { messages },
+        classes
       } = this.props;
 
-      if (loading)
-        return (<span>Loading..</span>);
+      if (loading) return <span>Loading..</span>;
 
       return (
         <div>
@@ -100,10 +102,12 @@ const MessageList = withStyles(channelMessagesStyles)(
             {messages &&
               messages.map(message => (
                 <ListItem key={message.id}>
-                  <ListItemAvatar>
-                    <Avatar>XX</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText secondary={message.timestamp} primary={message.content}/>
+                  <Paper className={classes.root} elevation={1}>
+                    <Typography variant="caption" component="h6">
+                      @{message.from} - {message.timestamp}
+                    </Typography>
+                    <Typography component="p">{message.content}</Typography>
+                  </Paper>
                 </ListItem>
               ))}
           </List>

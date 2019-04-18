@@ -27,7 +27,8 @@ namespace tanka.graphql.samples.messages.host.logic
                 {"id", Resolve.PropertyOf<Message>(m => m.Id)},
                 {"channelId", Resolve.PropertyOf<Message>(m => m.Id)},
                 {"content", Resolve.PropertyOf<Message>(m => m.Content)},
-                {"timestamp", Resolve.PropertyOf<Message>(m => m.Timestamp?.ToString("O"))}
+                {"timestamp", Resolve.PropertyOf<Message>(m => m.Timestamp?.ToString("O"))},
+                {"from", Resolve.PropertyOf<Message>(m => m.From)},
             };
         }
     }

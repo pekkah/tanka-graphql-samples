@@ -1,6 +1,6 @@
-﻿using System.Threading;
+﻿using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using tanka.graphql.resolvers;
 
 namespace tanka.graphql.samples.messages.host.logic
@@ -8,19 +8,17 @@ namespace tanka.graphql.samples.messages.host.logic
     public class ResolverService
     {
         private readonly Messages _channels;
-        private readonly IHttpContextAccessor _contextAccessor;
 
-        public ResolverService(Messages channels, IHttpContextAccessor contextAccessor)
+        public ResolverService(Messages channels)
         {
             _channels = channels;
-            _contextAccessor = contextAccessor;
         }
 
         public async ValueTask<IResolveResult> ChannelMessages(ResolverContext context)
         {
             var channelId = (int) (long) context.Arguments["channelId"];
 
-            var messages = await _channels.GetMessagesAsync(channelId, 100);
+            var messages = await _channels.GetMessagesAsync(channelId);
             return Resolve.As(messages);
         }
 
@@ -29,12 +27,16 @@ namespace tanka.graphql.samples.messages.host.logic
             var channelId = (int) (long) context.Arguments["channelId"];
             var inputMessage = context.GetArgument<InputMessage>("message");
 
-            inputMessage.Content = $"{_contextAccessor.HttpContext.User.Identity.Name} - {inputMessage.Content}";
-            var message = await _channels.PostMessageAsync(channelId, inputMessage);
+            // current user is being injected by the resolver middleware
+            var user = context.GetArgument<ClaimsPrincipal>("user");
 
+            // use email claim if present otherwise use default name claim (sub)
+            var from = user.FindFirstValue("email") ?? user.Identity.Name;
+
+            var message = await _channels.PostMessageAsync(channelId, from, inputMessage);
             return Resolve.As(message);
         }
-        
+
         public ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
         {
             var channelId = (int) (long) context.Arguments["channelId"];

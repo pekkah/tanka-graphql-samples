@@ -80,8 +80,10 @@ namespace tanka.graphql.samples.Host
                 {
                     try
                     {
-                        // create channelsSchema by introspecting channels service
+                        // used to get the access token
                         var accessor = provider.GetRequiredService<IHttpContextAccessor>();
+
+                        // create channelsSchema by introspecting channels service
                         var channelsLink = Links.SignalR(Configuration["Remotes:Channels"], accessor);
                         var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
                             new SchemaBuilder()

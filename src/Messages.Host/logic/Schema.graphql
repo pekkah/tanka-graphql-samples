@@ -3,6 +3,7 @@
 	channelId: ID!
 	content: String!
 	timestamp: String!
+	from: String!
 }
 
 input InputMessage {

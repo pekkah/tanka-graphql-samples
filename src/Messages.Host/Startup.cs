@@ -1,16 +1,25 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
+using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.resolvers;
 using tanka.graphql.samples.messages.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;
+using tanka.graphql.type;
 
 namespace tanka.graphql.samples.messages.host
 {
@@ -27,6 +36,7 @@ namespace tanka.graphql.samples.messages.host
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+            services.AddMemoryCache();
 
             // signalr authentication
             services.AddAuthentication(options =>
@@ -34,8 +44,8 @@ namespace tanka.graphql.samples.messages.host
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "sub",
                     RoleClaimType = "role"
@@ -57,6 +67,45 @@ namespace tanka.graphql.samples.messages.host
                         // Read the token out of the query string
                         context.Token = accessToken;
                         return Task.CompletedTask;
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        if (context.SecurityToken is JwtSecurityToken jwt)
+                        {
+                            /*
+                                PERFORMANCE/SECURITY
+                             
+                                For performance reasons we're caching the results of the userInfo request.
+
+                                This is NOT production quality and you should carefully think when using 
+                                it in your application
+                            */
+                            var cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+                            var key = jwt.Claims.Single(c => c.Type == "sub").Value;
+                            var userInfoClaimsIdentity = await cache
+                                .GetOrCreateAsync<ClaimsIdentity>(key, async entry =>
+                                {
+                                    entry.SetAbsoluteExpiration(jwt.ValidTo -TimeSpan.FromSeconds(5));
+
+                                    var configuration = await context.Options.ConfigurationManager
+                                        .GetConfigurationAsync(CancellationToken.None);
+
+                                    var userInfoEndpoint = configuration.UserInfoEndpoint;
+                                    var client = new HttpClient();
+                                    var userInfo = await client.GetUserInfoAsync(new UserInfoRequest
+                                    {
+                                        Address = userInfoEndpoint,
+                                        Token = jwt.RawData
+                                    });
+
+                                    if (userInfo.IsError)
+                                        return new ClaimsIdentity();
+
+                                    return new ClaimsIdentity(userInfo.Claims);
+                                });
+                            
+                            context.Principal.AddIdentity(userInfoClaimsIdentity);
+                        }
                     }
                 };
             });
@@ -69,13 +118,32 @@ namespace tanka.graphql.samples.messages.host
             // add schema
             services.AddSingleton<Messages>();
             services.AddSingleton<ResolverService>();
+            services.AddSingleton<Resolvers>();
             services.AddSingleton(
                 provider =>
                 {
+                    // load typeDefs
                     var schemaBuilder = SchemaLoader.Load();
-                    var service = provider.GetRequiredService<ResolverService>();
-                    var resolvers = new Resolvers(service);
 
+                    // add current user to arguments of resolvers of mutation fields
+                    var accessor = provider.GetRequiredService<IHttpContextAccessor>();
+                    schemaBuilder.TryGetType<ObjectType>("Mutation", out var mutation);
+                    schemaBuilder.Connections(connect =>
+                    {
+                        foreach (var field in connect.VisitFields(mutation))
+                        {
+                            var resolver = connect.GetOrAddResolver(mutation, field.Key);
+                            resolver.Use((context, next) =>
+                            {
+                                var user = accessor.HttpContext?.User;
+                                context.Arguments.Add("user", user);
+                                return next(context);
+                            });
+                        }
+                    });
+
+                    // bind the actual field value resolvers and create schema
+                    var resolvers = provider.GetRequiredService<Resolvers>();
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                         schemaBuilder,
                         resolvers,
