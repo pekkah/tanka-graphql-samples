@@ -32,6 +32,8 @@ namespace tanka.graphql.samples.messages.host.logic
 
             // use email claim if present otherwise use default name claim (sub)
             var from = user.FindFirstValue("email") ?? user.Identity.Name;
+            if (from.Contains("@"))
+                from = from.Substring(0, from.IndexOf("@"));
 
             var message = await _channels.PostMessageAsync(channelId, from, inputMessage);
             return Resolve.As(message);
