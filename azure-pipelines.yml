@@ -24,9 +24,9 @@ steps:
   displayName: Install SDK
   inputs:
     packageType: sdk
-    version: '2.2.202'
+    version: '2.2.203'
 
-- powershell: Set-Content -Path 'src/Host/ClientApp/.env' -Value $(env)
+- powershell: Set-Content -Path 'src/Host/ClientApp/.env' -Value '$(env)'
   displayName: modify .env
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
