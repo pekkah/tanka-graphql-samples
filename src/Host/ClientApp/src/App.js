@@ -11,7 +11,7 @@ export default class App extends Component {
     return (
       <Layout>
         <Route exact path='/' component={Home} />
-        <Route path='/channels/:id' component={Channel} />
+        <Route path='/channels/:id' component={Channel} />        
       </Layout>
     );
   }

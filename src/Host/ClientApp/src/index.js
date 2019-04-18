@@ -2,21 +2,37 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
-import client from './client'
 
 import App from "./App";
-//import registerServiceWorker from "./registerServiceWorker";
+import auth from "./auth";
+import client from "./client";
 
 const baseUrl = document.getElementsByTagName("base")[0].getAttribute("href");
 const rootElement = document.getElementById("root");
 
-ReactDOM.render(
-  <ApolloProvider client={client}>
-    <BrowserRouter basename={baseUrl}>
-      <App />
-    </BrowserRouter>
-  </ApolloProvider>,
-  rootElement
-);
+const handleAuthentication = location => {
+  if (/access_token|id_token|error/.test(location.hash)) {
+    return auth.handleAuthentication();
+  }
+  return Promise.reject();
+};
 
-//registerServiceWorker();
+if (window.location.pathname === "/callback") {
+  handleAuthentication(window.location).then(
+    () => window.location.href = "/",
+    reason => console.log("Callback error", reason)
+  );
+} else if (auth.isLoggedIn()) {
+  auth.renewSession().then(() => {
+    ReactDOM.render(
+      <ApolloProvider client={client}>
+        <BrowserRouter basename={baseUrl}>
+          <App />
+        </BrowserRouter>
+      </ApolloProvider>,
+      rootElement
+    );
+  });
+} else {
+  auth.login();
+}

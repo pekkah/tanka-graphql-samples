@@ -20,13 +20,14 @@ namespace tanka.graphql.samples.messages.host.logic
             _messageAdded = new EventChannel<Message>();
         }
 
-        public async Task<Message> PostMessageAsync(int channelId, InputMessage inputMessage)
+        public async Task<Message> PostMessageAsync(int channelId, string from, InputMessage inputMessage)
         {
             var message = new Message
             {
                 Id = NextId(),
                 Content = inputMessage.Content,
-                ChannelId = channelId
+                ChannelId = channelId,
+                From = from
             };
             _messages.Add(message);
 
@@ -66,9 +67,11 @@ namespace tanka.graphql.samples.messages.host.logic
         public DateTimeOffset? Timestamp { get; set; }
 
         public int Id { get; set; }
-        
+
         public string Content { get; set; }
 
         public int ChannelId { get; set; }
+
+        public string From { get; set; }
     }
 }
