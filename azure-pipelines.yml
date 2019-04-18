@@ -11,6 +11,13 @@ pool:
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  env: |
+    REACT_APP_CLIENT_ID='W4MlLkgw5lJCH2ejTrJ7uFBdNfQb6w-5'
+    REACT_APP_DOMAIN='tanka.eu.auth0.com'
+    REACT_APP_REDIRECT_URI='https://tanka-chat.azurewebsites.net/callback'
+    REACT_APP_RESPONSE_TYPE='token id_token'
+    REACT_APP_SCOPE='openid email'
+    REACT_APP_AUDIENCE='https://tanka-chat.azurewebsites.net/api'
 
 steps:
 - task: DotNetCoreInstaller@0
@@ -19,6 +26,8 @@ steps:
     packageType: sdk
     version: '2.2.202'
 
+- powershell: Set-Content -Path 'src/Host/ClientApp/.env' -Value $(env)
+  displayName: modify .env
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
 - script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host
