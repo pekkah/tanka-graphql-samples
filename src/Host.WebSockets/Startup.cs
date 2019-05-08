@@ -119,12 +119,14 @@ namespace tanka.graphql.samples.Host
                     }
                 });
 
+            // add signalr
+            /*services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+                .AddQueryStreamHubWithTracing();*/
+
             services.AddTankaExecutionOptions()
                 .Configure<ISchema>((options, schema) => options.Schema = schema);
 
-            // add signalr
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddTankaServerHubWithTracing();
+            services.AddTankaWebSocketServerWithTracing();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -152,8 +154,11 @@ namespace tanka.graphql.samples.Host
             app.UseAuthentication();
 
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
-                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
+            app.UseWebSockets();
+            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            {
+                Path = "/api/graphql"
+            });
 
             // use mvc
             app.UseMvc(routes =>

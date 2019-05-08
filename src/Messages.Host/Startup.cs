@@ -152,9 +152,12 @@ namespace tanka.graphql.samples.messages.host
                     return schema;
                 });
 
+            services.AddTankaExecutionOptions()
+                .Configure<ISchema>((options, schema) => options.Schema = schema);
+
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddQueryStreamHubWithTracing();
+                .AddTankaServerHubWithTracing();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -165,7 +168,7 @@ namespace tanka.graphql.samples.messages.host
             app.UseAuthentication();
 
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql",
+            app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
                 options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
         }
     }
