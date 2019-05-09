@@ -1,6 +1,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using tanka.graphql.introspection;
 using tanka.graphql.server;
+using tanka.graphql.server.webSockets;
+using tanka.graphql.server.webSockets.dtos;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 
@@ -60,7 +63,11 @@ namespace tanka.graphql.samples.Host
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
+                        var messageContext = context.HttpContext
+                            .RequestServices.GetRequiredService<IMessageContextAccessor>();
+
+                        var accessToken = messageContext.Context.Message.Payload.SelectToken("authorization")
+                            .ToString();
 
                         // Read the token out of the query string
                         context.Token = accessToken;
@@ -124,9 +131,47 @@ namespace tanka.graphql.samples.Host
                 .AddQueryStreamHubWithTracing();*/
 
             services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.Schema = schema);
+                .Configure<IHttpContextAccessor>((options, accessor) => options.GetSchema 
+                    = query => new ValueTask<ISchema>(accessor.HttpContext.RequestServices.GetRequiredService<ISchema>()));
 
-            services.AddTankaWebSocketServerWithTracing();
+            services.AddTankaWebSocketServerWithTracing()
+                .Configure<IHttpContextAccessor>(
+                        (options, 
+                        accessor
+                        ) => options.AcceptAsync = async context =>
+                {
+                    var authentication = accessor.HttpContext
+                        .RequestServices
+                        .GetRequiredService<IAuthenticationService>();
+
+                    var user = await authentication.AuthenticateAsync(
+                        accessor.HttpContext,
+                        JwtBearerDefaults.AuthenticationScheme);
+
+                    // true when accepted; otherwise false
+                    var isValid = true; //await authentication.IsValidAsync(token);
+
+                    if (!isValid)
+                    {
+                        // you must decide what kind of message to send back to the client
+                        // in case the connection is not accepted.
+                        await context.Output.WriteAsync(new OperationMessage
+                        {
+                            Type = MessageType.GQL_CONNECTION_ERROR,
+                            Id = context.Message.Id
+                        });
+
+                        // complete the output forcing the server to disconnect
+                        context.Output.Complete();
+                    }
+                    else
+                    {
+                        await context.Output.WriteAsync(new OperationMessage
+                        {
+                            Type = MessageType.GQL_CONNECTION_ACK
+                        });
+                    }
+                });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -150,8 +195,8 @@ namespace tanka.graphql.samples.Host
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            // use authenication
-            app.UseAuthentication();
+            
+            //app.UseAuthentication();
 
             // use signalr server hub
             app.UseWebSockets();

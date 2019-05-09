@@ -120,7 +120,8 @@ namespace tanka.graphql.samples.Host
                 });
 
             services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.Schema = schema);
+                .Configure<ISchema>((options, schema) => options.GetSchema 
+                    = query =>  new ValueTask<ISchema>(schema));
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })

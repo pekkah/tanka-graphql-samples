@@ -8,7 +8,10 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 import auth from '../auth';
 
 const wsClient = new SubscriptionClient("wss://localhost:5002/api/graphql", {
-  reconnect: true
+  reconnect: true,
+  connectionParams: () => ({
+    authorization: auth.getAccessToken()
+  }),
 });
 
 const wsLink = new WebSocketLink(wsClient);
