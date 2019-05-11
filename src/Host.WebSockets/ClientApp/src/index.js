@@ -5,7 +5,7 @@ import { ApolloProvider } from "react-apollo";
 
 import App from "./App";
 import auth from "./auth";
-import client from "./client";
+import clientFactory from "./client";
 
 const baseUrl = document.getElementsByTagName("base")[0].getAttribute("href");
 const rootElement = document.getElementById("root");
@@ -23,6 +23,7 @@ if (window.location.pathname === "/callback") {
     reason => console.log("Callback error", reason)
   );
 } else if (auth.isLoggedIn()) {
+  const client = clientFactory();
   auth.renewSession().then(() => {
     ReactDOM.render(
       <ApolloProvider client={client}>

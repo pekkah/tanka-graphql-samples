@@ -1,5 +1,5 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using tanka.graphql.links;
@@ -17,7 +17,9 @@ namespace tanka.graphql.samples.Host
                     {
                         configure.AccessTokenProvider = async () =>
                         {
-                            var token = await accessor.HttpContext.GetTokenAsync("access_token");
+                            var token = accessor.HttpContext.User
+                                .FindFirstValue("access_token");
+
                             return token;
                         };
                     })
