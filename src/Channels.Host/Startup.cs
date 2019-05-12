@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using tanka.graphql.samples.channels.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;
+using tanka.graphql.type;
 
 namespace tanka.graphql.samples.channels.host
 {
@@ -83,9 +84,13 @@ namespace tanka.graphql.samples.channels.host
                     return schema;
                 });
 
+            services.AddTankaExecutionOptions()
+                .Configure<ISchema>((options, schema) => options.GetSchema 
+                    = query =>  new ValueTask<ISchema>(schema));
+
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddQueryStreamHubWithTracing();
+                .AddTankaServerHubWithTracing();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,7 +101,7 @@ namespace tanka.graphql.samples.channels.host
             app.UseAuthentication();
 
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapHub<QueryStreamHub>("/hubs/graphql",
+            app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
                 options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
         }
     }
