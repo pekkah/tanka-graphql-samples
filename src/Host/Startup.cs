@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using tanka.graphql.introspection;
 using tanka.graphql.server;
+using tanka.graphql.server.webSockets;
+using tanka.graphql.server.webSockets.dtos;
 using tanka.graphql.tools;
 using tanka.graphql.type;
 
@@ -36,11 +41,8 @@ namespace tanka.graphql.samples.Host
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
             // signalr authentication
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
+            services.AddAuthentication()
+                .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
@@ -50,8 +52,8 @@ namespace tanka.graphql.samples.Host
                
                 options.Authority = Configuration["JWT:Authority"];
                 options.Audience = Configuration["JWT:Audience"];
-                options.SaveToken = true;
-
+                options.SaveToken = false;
+                
                 // We have to hook the OnMessageReceived event in order to
                 // allow the JWT authentication handler to read the access
                 // token from the query string when a WebSocket or 
@@ -60,17 +62,51 @@ namespace tanka.graphql.samples.Host
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
+                        var accessToken = context.Request.Query["access_token"].ToString();
+
+                        if (string.IsNullOrEmpty(accessToken))
+                        {
+                            var messageContext = context.HttpContext
+                                .RequestServices.GetRequiredService<IMessageContextAccessor>();
+
+                            var message = messageContext.Context?.Message;
+
+                            if (message?.Type == MessageType.GQL_CONNECTION_INIT)
+                            {
+                                accessToken = messageContext.Context?.Message
+                                    .Payload
+                                    .SelectToken("authorization")
+                                    .ToString();
+                            }
+                        }
 
                         // Read the token out of the query string
                         context.Token = accessToken;
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        if (context.SecurityToken is JwtSecurityToken jwt)
+                        {
+                            var tokenIdentity = new ClaimsIdentity(
+                                new[]
+                                {
+                                    new Claim("access_token", jwt.RawData)
+                                });
+
+                            context.Principal.AddIdentity(tokenIdentity);
+                        }
+
                         return Task.CompletedTask;
                     }
                 };
             });
 
             services.AddAuthorization(options =>
-                options.AddPolicy("authorize", policy => policy.RequireAuthenticatedUser()));
+                options.AddPolicy("authorize", 
+                    policy => policy
+                        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()));
 
             services.AddHttpContextAccessor();
 
@@ -119,13 +155,54 @@ namespace tanka.graphql.samples.Host
                     }
                 });
 
+            // add execution options
             services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.GetSchema 
-                    = query =>  new ValueTask<ISchema>(schema));
+                .Configure<IHttpContextAccessor>((options, accessor) => options.GetSchema 
+                    = query => new ValueTask<ISchema>(accessor
+                        .HttpContext
+                        .RequestServices
+                        .GetRequiredService<ISchema>()));
+
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddTankaServerHubWithTracing();
+
+
+            services.AddTankaWebSocketServerWithTracing()
+                .Configure<IHttpContextAccessor>(
+                    (options, 
+                        accessor
+                    ) => options.AcceptAsync = async context =>
+                    {
+                        var succeeded = await AuthorizeHelper.AuthorizeAsync(
+                            accessor.HttpContext,
+                            new List<IAuthorizeData>()
+                            {
+                                new AuthorizeAttribute("authorize")
+                            });
+
+                        if (succeeded)
+                        {
+                            await context.Output.WriteAsync(new OperationMessage
+                            {
+                                Type = MessageType.GQL_CONNECTION_ACK
+                            });
+                        }
+                        else
+                        {
+                            // you must decide what kind of message to send back to the client
+                            // in case the connection is not accepted.
+                            await context.Output.WriteAsync(new OperationMessage
+                            {
+                                Type = MessageType.GQL_CONNECTION_ERROR,
+                                Id = context.Message.Id
+                            });
+
+                            // complete the output forcing the server to disconnect
+                            context.Output.Complete();
+                        }
+                    });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -154,7 +231,17 @@ namespace tanka.graphql.samples.Host
 
             // use signalr server hub
             app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
-                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
+                options =>
+                {
+                    options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
+                }));
+
+            // use websockets server
+            app.UseWebSockets();
+            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            {
+                Path = "/api/graphql"
+            });
 
             // use mvc
             app.UseMvc(routes =>

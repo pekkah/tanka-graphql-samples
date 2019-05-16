@@ -1,5 +1,5 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using tanka.graphql.links;
@@ -15,10 +15,13 @@ namespace tanka.graphql.samples.Host
                 var connection = new HubConnectionBuilder()
                     .WithUrl(url, configure =>
                     {
-                        configure.AccessTokenProvider = async () =>
+                        configure.AccessTokenProvider = () =>
                         {
-                            var token = await accessor.HttpContext.GetTokenAsync("access_token");
-                            return token;
+                            var token = accessor.HttpContext
+                                ?.User
+                                .FindFirstValue("access_token");
+
+                            return Task.FromResult(token);
                         };
                     })
                     .Build();

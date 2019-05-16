@@ -8,7 +8,7 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 import auth from "../auth";
 
 export default function clientFactory() {
-  const wsClient = new SubscriptionClient("wss://localhost:5002/api/graphql", {
+  const wsClient = new SubscriptionClient("wss://localhost:5001/api/graphql", {
     reconnect: true,
     connectionParams: () => ({
       authorization: auth.getAccessToken()
