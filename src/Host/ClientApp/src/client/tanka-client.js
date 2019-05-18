@@ -3,19 +3,25 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
 import { RetryLink } from "apollo-link-retry";
-import { WebSocketLink } from "apollo-link-ws";
-import { SubscriptionClient } from "subscriptions-transport-ws";
+import { TankaLink, TankaClient } from "@tanka/tanka-graphql-server-link";
 import auth from "../auth";
 
-export default function clientFactory() {
-  const wsClient = new SubscriptionClient("wss://localhost:5002/api/graphql", {
-    reconnect: true,
-    connectionParams: () => ({
-      authorization: auth.getAccessToken()
-    })
-  });
+var options = {
+  reconnectAttempts: Infinity,
+  reconnectInitialWaitMs: 5000,
+  reconnectAdditionalWaitMs: 2000,
+  connection: {
+    accessTokenFactory: () => {
+      var token = auth.getAccessToken();
+      console.log(`AT: ${token}`);
+      return token;
+    }
+  }
+};
 
-  const wsLink = new WebSocketLink(wsClient);
+export default function clientFactory() {
+  const serverClient = new TankaClient("/hubs/graphql", options);
+  const serverLink = new TankaLink(serverClient);
 
   const client = new ApolloClient({
     connectToDevTools: true,
@@ -30,7 +36,7 @@ export default function clientFactory() {
         if (networkError) console.log(`[Network error]: ${networkError}`);
       }),
       new RetryLink(),
-      wsLink
+      serverLink
     ]),
     cache: new InMemoryCache()
   });
