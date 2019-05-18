@@ -18,8 +18,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
-    <PackageReference Include="tanka.graphql" Version="0.8.0" />
-    <PackageReference Include="tanka.graphql.server" Version="0.8.0" />
+    <PackageReference Include="tanka.graphql" Version="0.8.1-beta.7" />
+    <PackageReference Include="tanka.graphql.server" Version="0.8.1-beta.7" />
   </ItemGroup>
 
 </Project>

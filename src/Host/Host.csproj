@@ -20,8 +20,8 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
-    <PackageReference Include="tanka.graphql" Version="0.8.0" />
-    <PackageReference Include="tanka.graphql.server" Version="0.8.0" />
+    <PackageReference Include="tanka.graphql" Version="0.8.1-beta.7" />
+    <PackageReference Include="tanka.graphql.server" Version="0.8.1-beta.7" />
   </ItemGroup>
 
   <ItemGroup>
