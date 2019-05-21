@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -28,6 +29,8 @@ namespace tanka.graphql.samples.channels.host
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+
             // signalr authentication
             services.AddAuthentication(options =>
             {
@@ -35,7 +38,7 @@ namespace tanka.graphql.samples.channels.host
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "sub",
                     RoleClaimType = "role"
@@ -52,7 +55,15 @@ namespace tanka.graphql.samples.channels.host
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
+                        var accessToken = context.Request.Query["access_token"]
+                            .ToString();
+
+                        if (string.IsNullOrEmpty(accessToken))
+                            accessToken = context.Request
+                                .Headers["Authorization"]
+                                .ToString()
+                                .Replace("Bearer ", string.Empty);
+
 
                         // Read the token out of the query string
                         context.Token = accessToken;
@@ -85,8 +96,8 @@ namespace tanka.graphql.samples.channels.host
                 });
 
             services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.GetSchema 
-                    = query =>  new ValueTask<ISchema>(schema));
+                .Configure<ISchema>((options, schema) => options.GetSchema
+                    = query => new ValueTask<ISchema>(schema));
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
@@ -103,6 +114,8 @@ namespace tanka.graphql.samples.channels.host
             // use signalr server hub
             app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
                 options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
+
+            app.UseMvc();
         }
     }
 }

@@ -9,8 +9,8 @@ Live at: https://tanka-chat.azurewebsites.net
 
 * Host - this acts as an gateway to Channels and Messages services
 * Host/ClientApp - SPA frontend using React and Apollo
-* Channels.Host - provides channels graphql service
-* Messages.Host - provides messages graphql service
+* Channels.Host - provides channels graphql service (signalr, http)
+* Messages.Host - provides messages graphql service (signalr)
 
 Host project uses introspection to build remote executable schemas 
 from Channels and Messages services.
@@ -55,8 +55,7 @@ Url: https://localhost:5001
 React frontend application hosted by the Host project using ASP.NET Core SPA services. This could
 be separate application but hosting it inside the ASP.NET Core simplifies the startup and deployment.
 
-Picks the Tanka server endpoint and protocol randomly from either tanka-graphql-server-link or apollo-link-ws.
-Current method is displayed on the frontend.
+Uses randomly either tanka-graphql-server-link or apollo-link-ws to communicate with server.
 
 
 ### Backend
@@ -82,6 +81,8 @@ endpoints provided by Messages.Host and Channels.Host. This allows splitting the
 into multiple smaller services while still providing single access point for the clients. Provides
 SignalR based GraphQL server for clients using tanka-graphql-server-link and WebSockets based
 GraphQL server for client using apollo-link-ws.
+
+Host uses SignalR link or Http link to talk to the Channels service based on the operation type.
 
 
 #### Messages.Host

@@ -120,7 +120,11 @@ namespace tanka.graphql.samples.Host
                         var accessor = provider.GetRequiredService<IHttpContextAccessor>();
 
                         // create channelsSchema by introspecting channels service
-                        var channelsLink = Links.SignalR(Configuration["Remotes:Channels"], accessor);
+                        var channelsLink = Links.SignalROrHttp(
+                            Configuration["Remotes:Channels"], 
+                            Configuration["Remotes:ChannelsHttp"],
+                            accessor);
+
                         var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
                             new SchemaBuilder()
                                 .ImportIntrospectedSchema(channelsLink)
