@@ -12,7 +12,7 @@
     "apollo-link-error": "^1.1.10",
     "apollo-link-retry": "^2.2.13",
     "apollo-link-ws": "^1.0.17",
-    "auth0-js": "^9.10.2",
+    "auth0-js": "^9.10.4",
     "graphql": "^14.3.0",
     "graphql-tag": "^2.10.1",
     "react": "^16.8.6",
