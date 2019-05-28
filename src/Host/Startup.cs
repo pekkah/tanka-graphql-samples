@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -13,13 +14,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using tanka.graphql.analysis;
 using tanka.graphql.introspection;
+using tanka.graphql.language;
 using tanka.graphql.server;
 using tanka.graphql.server.webSockets;
 using tanka.graphql.server.webSockets.dtos;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.validation;
 
 namespace tanka.graphql.samples.Host
 {
@@ -160,12 +165,35 @@ namespace tanka.graphql.samples.Host
                 });
 
             // add execution options
-            services.AddTankaExecutionOptions()
-                .Configure<IHttpContextAccessor>((options, accessor) => options.GetSchema 
-                    = query => new ValueTask<ISchema>(accessor
-                        .HttpContext
-                        .RequestServices
-                        .GetRequiredService<ISchema>()));
+            services.AddTankaSchemaOptions()
+                .Configure<IHttpContextAccessor>((options, accessor) =>
+                {
+                    var logger = accessor
+                                     .HttpContext
+                                     .RequestServices
+                                     .GetRequiredService<ILogger<SchemaOptions>>();
+
+                    options.ValidationRules = ExecutionRules.All
+                        .Concat(new[]
+                        {
+                            CostAnalyzer.MaxCost(
+                                maxCost: 100,
+                                defaultFieldComplexity: 1,
+                                onCalculated: operation =>
+                                {
+                                    logger.LogInformation(
+                                        $"Operation '{operation.Operation.ToGraphQL()}' costs " +
+                                        $"'{operation.Cost}' (max: '{operation.MaxCost}')");
+                                } 
+                            )
+                        }).ToArray();
+
+                    options.GetSchema
+                        = query => new ValueTask<ISchema>(accessor
+                            .HttpContext
+                            .RequestServices
+                            .GetRequiredService<ISchema>());
+                });
 
 
             // add signalr
