@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using tanka.graphql.requests;
+using tanka.graphql.server;
 
 namespace tanka.graphql.samples.channels.host.api
 {
@@ -13,33 +11,24 @@ namespace tanka.graphql.samples.channels.host.api
     [ApiController]
     public class QueryController : Controller
     {
-        private readonly IEnumerable<IExtension> _extensions;
+        private readonly IQueryStreamService _queryStreamService;
 
-        //todo: fix duplicate class name
-        private readonly IOptionsMonitor<server.ExecutionOptions> _optionsMonitor;
-
-        public QueryController(IOptionsMonitor<server.ExecutionOptions> optionsMonitor,
-            IEnumerable<IExtension> extensions)
+        public QueryController(IQueryStreamService queryStreamService)
         {
-            _optionsMonitor = optionsMonitor;
-            _extensions = extensions;
+            _queryStreamService = queryStreamService;
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] QueryRequest request)
         {
-            var options = _optionsMonitor.CurrentValue;
-
-            var document = Parser.ParseDocument(request.Query);
-            var schema = await options.GetSchema(null);
-            var result = await Executor.ExecuteAsync(new ExecutionOptions
+            var stream = await _queryStreamService.QueryAsync(new Query
             {
-                Document = document,
-                Schema = schema,
-                OperationName = request.OperationName,
-                VariableValues = request.Variables,
-                Extensions = _extensions.ToArray()
-            });
+                Document = Parser.ParseDocument(request.Query),
+                Variables = request.Variables,
+                OperationName = request.OperationName
+            }, Request.HttpContext.RequestAborted);
+
+            var result = await stream.Reader.ReadAsync();
 
             return Ok(result);
         }

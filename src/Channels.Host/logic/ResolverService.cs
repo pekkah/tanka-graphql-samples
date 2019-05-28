@@ -20,7 +20,7 @@ namespace tanka.graphql.samples.channels.host.logic
 
         public async ValueTask<IResolveResult> Channel(ResolverContext context)
         {
-            var channelId = (int) (long) context.Arguments["channelId"];
+            var channelId = (int) context.Arguments["channelId"];
             var channel = await _channels.GetChannelAsync(channelId);
 
             return Resolve.As(channel);

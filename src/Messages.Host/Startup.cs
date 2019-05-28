@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -16,10 +17,12 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using tanka.graphql.analysis;
 using tanka.graphql.samples.messages.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.validation;
 
 namespace tanka.graphql.samples.messages.host
 {
@@ -135,8 +138,7 @@ namespace tanka.graphql.samples.messages.host
                             var resolver = connect.GetOrAddResolver(mutation, field.Key);
                             resolver.Use((context, next) =>
                             {
-                                var user = accessor.HttpContext?.User;
-                                context.Arguments.Add("user", user);
+                                context.Items["user"] = accessor.HttpContext?.User;
                                 return next(context);
                             });
                         }
@@ -152,9 +154,24 @@ namespace tanka.graphql.samples.messages.host
                     return schema;
                 });
 
-            services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.GetSchema 
-                    = query =>  new ValueTask<ISchema>(schema));
+            services.AddTankaSchemaOptions()
+                .Configure<IHttpContextAccessor>((options, accessor) =>
+                {
+                    options.ValidationRules = ExecutionRules.All
+                        .Concat(new[]
+                        {
+                            CostAnalyzer.MaxCost(
+                                maxCost: 100,
+                                defaultFieldComplexity: 1
+                            )
+                        }).ToArray();
+
+                    options.GetSchema
+                        = query => new ValueTask<ISchema>(accessor
+                            .HttpContext
+                            .RequestServices
+                            .GetRequiredService<ISchema>());
+                });
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
