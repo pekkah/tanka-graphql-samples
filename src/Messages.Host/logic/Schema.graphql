@@ -4,6 +4,7 @@
 	content: String!
 	timestamp: String!
 	from: String!
+	profileUrl: String
 }
 
 input InputMessage {

@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { withStyles } from "@material-ui/core/styles";
-import Chip from "@material-ui/core/Chip";
 import List from "@material-ui/core/List";
+import Avatar from '@material-ui/core/Avatar';
+import Grid from '@material-ui/core/Grid';
 import ListItem from "@material-ui/core/ListItem";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
@@ -16,6 +17,7 @@ const GET_MESSAGES = gql`
       content
       timestamp
       from
+      profileUrl
     }
   }
 `;
@@ -28,6 +30,7 @@ const MESSAGES_SUBSCRIPTION = gql`
       content
       timestamp
       from
+      profileUrl
     }
   }
 `;
@@ -78,7 +81,12 @@ var channelMessagesStyles = theme => ({
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2
-  }
+    },
+  avatar: {
+    width: 48,
+    height: 48,
+    margin:10
+    },
 });
 
 const MessageList = withStyles(channelMessagesStyles)(
@@ -101,14 +109,17 @@ const MessageList = withStyles(channelMessagesStyles)(
           <List>
             {messages &&
               messages.map(message => (
-                <ListItem key={message.id}>
-                  <Paper className={classes.root} elevation={1}>
-                    <Typography variant="caption" component="h6">
-                      @{message.from} - {message.timestamp}
-                    </Typography>
-                    <Typography component="p">{message.content}</Typography>
-                  </Paper>
-                </ListItem>
+                  <ListItem key={message.id}>
+                      <Grid container spacing={2}>
+                          <Avatar className={classes.avatar} src={message.profileUrl} />
+                          <Paper className={classes.root} elevation={1}>
+                            <Typography variant="caption" component="h6">
+                              {message.from} - {message.timestamp}
+                            </Typography>
+                            <Typography component="p">{message.content}</Typography>
+                          </Paper>
+                      </Grid>
+                  </ListItem>
               ))}
           </List>
         </div>
