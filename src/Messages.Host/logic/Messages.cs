@@ -20,14 +20,15 @@ namespace tanka.graphql.samples.messages.host.logic
             _messageAdded = new EventChannel<Message>();
         }
 
-        public async Task<Message> PostMessageAsync(int channelId, string from, InputMessage inputMessage)
+        public async Task<Message> PostMessageAsync(int channelId, string from, string profileUrl, InputMessage inputMessage)
         {
             var message = new Message
             {
                 Id = NextId(),
                 Content = inputMessage.Content,
                 ChannelId = channelId,
-                From = from
+                From = from,
+                ProfileUrl = profileUrl
             };
             _messages.Add(message);
 
@@ -73,5 +74,7 @@ namespace tanka.graphql.samples.messages.host.logic
         public int ChannelId { get; set; }
 
         public string From { get; set; }
+
+        public string ProfileUrl { get; set; }
     }
 }

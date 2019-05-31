@@ -30,12 +30,13 @@ namespace tanka.graphql.samples.messages.host.logic
             // current user is being injected by the resolver middleware
             var user = context.GetArgument<ClaimsPrincipal>("user");
 
-            // use email claim if present otherwise use default name claim (sub)
-            var from = user.FindFirstValue("email") ?? user.Identity.Name;
-            if (from.Contains("@"))
-                from = from.Substring(0, from.IndexOf("@"));
+            // use name claim from the profile if present otherwise use default name claim (sub)
+            var from = user.FindFirstValue("name") ?? user.Identity.Name;
 
-            var message = await _channels.PostMessageAsync(channelId, from, inputMessage);
+            // use profile picture claim from the profile if present otherwise leave empty
+            var picture = user.FindFirstValue("picture") ?? string.Empty;
+
+            var message = await _channels.PostMessageAsync(channelId, from, picture, inputMessage);
             return Resolve.As(message);
         }
 
