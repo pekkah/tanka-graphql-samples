@@ -1,17 +1,21 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using tanka.graphql.analysis;
 using tanka.graphql.samples.channels.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;
 using tanka.graphql.type;
+using tanka.graphql.validation;
 
 namespace tanka.graphql.samples.channels.host
 {
@@ -95,9 +99,24 @@ namespace tanka.graphql.samples.channels.host
                     return schema;
                 });
 
-            services.AddTankaExecutionOptions()
-                .Configure<ISchema>((options, schema) => options.GetSchema
-                    = query => new ValueTask<ISchema>(schema));
+            services.AddTankaSchemaOptions()
+                .Configure<IHttpContextAccessor>((options, accessor) =>
+                {
+                    options.ValidationRules = ExecutionRules.All
+                        .Concat(new[]
+                        {
+                            CostAnalyzer.MaxCost(
+                                maxCost: 100,
+                                defaultFieldComplexity: 1
+                            )
+                        }).ToArray();
+
+                    options.GetSchema
+                        = query => new ValueTask<ISchema>(accessor
+                            .HttpContext
+                            .RequestServices
+                            .GetRequiredService<ISchema>());
+                });
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })

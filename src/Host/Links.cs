@@ -20,7 +20,7 @@ namespace tanka.graphql.samples.Host
     {
         public static ExecutionResultLink SignalR(string url, IHttpContextAccessor accessor)
         {
-            return RemoteLinks.Server(cancellationToken =>
+            return RemoteLinks.SignalR(cancellationToken =>
             {
                 var connection = new HubConnectionBuilder()
                     .WithUrl(url, configure =>
@@ -45,7 +45,7 @@ namespace tanka.graphql.samples.Host
             string httpUrl,
             IHttpContextAccessor accessor)
         {
-            var signalr = RemoteLinks.Server(cancellationToken =>
+            var signalr = RemoteLinks.SignalR(cancellationToken =>
             {
                 var connection = new HubConnectionBuilder()
                     .WithUrl(hubUrl, configure =>
@@ -68,20 +68,10 @@ namespace tanka.graphql.samples.Host
                 httpUrl,
                 transformRequest: operation =>
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, operation.Url);
+                    var request = HttpLink.DefaultTransformRequest(operation);
                     request.Headers.Authorization = new AuthenticationHeaderValue(
                         "Bearer",
                         accessor.HttpContext?.User.FindFirstValue("access_token"));
-
-                    var query = new QueryRequest
-                    {
-                        Query = operation.Document.ToGraphQL(),
-                        Variables = operation.Variables != null
-                            ? new Dictionary<string, object>(operation.Variables)
-                            : null
-                    };
-                    var json = JsonConvert.SerializeObject(query);
-                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                     return request;
                 });
