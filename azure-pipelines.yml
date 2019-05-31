@@ -15,7 +15,7 @@ variables:
   REACT_APP_DOMAIN: 'tanka.eu.auth0.com'
   REACT_APP_REDIRECT_URI: 'https://tanka-chat.azurewebsites.net/callback'
   REACT_APP_RESPONSE_TYPE: 'token id_token'
-  REACT_APP_SCOPE: 'openid email'
+  REACT_APP_SCOPE: 'openid email profile'
   REACT_APP_AUDIENCE: 'https://tanka-chat.azurewebsites.net/api'
   REACT_APP_HOST: 'https://tanka-chat.azurewebsites.net'
 
