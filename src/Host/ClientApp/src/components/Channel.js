@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import gql from "graphql-tag";
 import { Query, Mutation } from "react-apollo";
+import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 
 import { ChannelMessages } from "./ChannelMessages";
@@ -44,53 +45,59 @@ const POST_MESSAGE = gql`
   }
 `;
 
-class PostMessage extends Component {
-  constructor(props) {
-    super(props);
-    this.onMessageChanged = this.onMessageChanged.bind(this);
-    this.state = { message: "" };
+const styles = theme => ({
+  root: {
+    margin: theme.spacing.unit
   }
+});
 
-  onMessageChanged(e) {
-    this.setState({ message: e.target.value });
-  }
+const PostMessage = withStyles(styles)(
+  class extends Component {
+    constructor(props) {
+      super(props);
+        this.onMessageChanged = this.onMessageChanged.bind(this);
+        this.state = { message: "" };
+    }
 
-  render() {
-    const { id } = this.props;
-    return (
-      <Mutation mutation={POST_MESSAGE}>
-        {(postMessage, { data }) => (
-          <div>
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                const options = {
-                  variables: {
-                    channelId: id,
-                    message: { content: this.state.message }
-                  }
-                };
-                postMessage(options);
-                this.setState({
-                  message: ""
-                });
-              }}
-            >
-              <TextField
-                label="Message"
-                rowsMax="4"
-                margin="normal"
-                fullWidth={true}
-                value={this.state.message}
-                onChange={this.onMessageChanged}
-                /*ref={node => {
-                input = node;
-            }}*/
-              />
-            </form>
-          </div>
-        )}
-      </Mutation>
-    );
+    onMessageChanged(e) {
+      this.setState({ message: e.target.value });
+    }
+
+    render() {
+      const { id, classes  } = this.props;
+        return (
+          <Mutation mutation={POST_MESSAGE}>
+            {(postMessage, { data }) => (
+              <div className={classes.root}>
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                      const options = {
+                        variables: {
+                          channelId: id,
+                          message: { content: this.state.message }
+                        }
+                  };
+                  postMessage(options);
+                  this.setState({
+                      message: ""
+                    });
+                  }}
+                >
+
+                <TextField
+                  label="Message"
+                  rowsMax="4"
+                  margin="normal"
+                  fullWidth={true}
+                  value={this.state.message}
+                  onChange={this.onMessageChanged}
+                />
+              </form>
+            </div>
+          )}
+        </Mutation>
+      );
+    }
   }
-}
+);
