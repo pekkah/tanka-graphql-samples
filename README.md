@@ -36,7 +36,8 @@ settings to match.
 ### Frontend
 
 Frontend uses Auth0 for authentication. Create SPA application in Auth0 and modify .env file at the
-root of `src\Host\ClientApp` directory with the settings of your application.
+root of `src\Host\ClientApp` directory with the settings of your application. The app uses userprofile
+to show who is participating in the chat.
 
 Example:
 ```bash
@@ -44,7 +45,7 @@ REACT_APP_CLIENT_ID=<yourid>
 REACT_APP_DOMAIN=<yourdomain>
 REACT_APP_REDIRECT_URI='https://localhost:5001/callback'
 REACT_APP_RESPONSE_TYPE='token id_token'
-REACT_APP_SCOPE='openid'
+REACT_APP_SCOPE='openid profile'
 ```
 
 

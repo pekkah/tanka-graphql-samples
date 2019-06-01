@@ -110,7 +110,7 @@ const MessageList = withStyles(channelMessagesStyles)(
             {messages &&
               messages.map(message => (
                   <ListItem key={message.id}>
-                      <Grid container spacing={2}>
+                      <Grid container>
                           <Avatar className={classes.avatar} src={message.profileUrl} />
                           <Paper className={classes.root} elevation={1}>
                             <Typography variant="caption" component="h6">
