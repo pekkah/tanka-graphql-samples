@@ -59,7 +59,7 @@ steps:
   displayName: Build and Push - channels
   inputs:
     command: buildAndPush
-    repository: pekkah/tanka-chat/channels
+    repository: tankagql/samples-chat-channels
     buildContext: .
     Dockerfile: src/Channels.Host/Dockerfile
     tags: |
@@ -70,7 +70,7 @@ steps:
   displayName: Build and Push - messages
   inputs:
     command: buildAndPush
-    repository: pekkah/tanka-chat/messages
+    repository: tankagql/samples-chat-messages
     buildContext: .
     Dockerfile: src/Messages.Host/Dockerfile
     tags: |
