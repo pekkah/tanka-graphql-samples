@@ -48,7 +48,6 @@ steps:
   displayName: Copy charts
   inputs:
     contents: 'src/**/charts/**'
-    flattenFolders: true
     targetFolder: '$(Build.ArtifactStagingDirectory)/charts'
 
 - task: PublishBuildArtifacts@1
