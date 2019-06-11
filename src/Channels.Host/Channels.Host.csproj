@@ -6,6 +6,7 @@
     <AssemblyName>tanka.graphql.samples.channels.host</AssemblyName>
     <RootNamespace>tanka.graphql.samples.channels.host</RootNamespace>
     <UserSecretsId>7d65196d-14f5-4736-be26-c604bbbe5cf9</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.0.0" />
     <PackageReference Include="tanka.graphql" Version="0.9.0" />
     <PackageReference Include="tanka.graphql.server" Version="0.9.0" />
   </ItemGroup>
