@@ -35,6 +35,7 @@ steps:
 #- script: dotnet publish src/Messages.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages
 #  displayName: Publish messages
 - task: PublishBuildArtifacts@1
+  displayName: Publish build
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
     artifactName: 'build' 
@@ -44,6 +45,7 @@ steps:
     #parallelCount: # Optional
 
 - task: PublishBuildArtifacts@1
+  displayName: Publish helm charts
   inputs:
     pathtoPublish: 'src/**/charts' 
     artifactName: 'charts' 
