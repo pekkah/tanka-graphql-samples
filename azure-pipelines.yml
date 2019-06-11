@@ -24,7 +24,7 @@ steps:
   displayName: Install SDK
   inputs:
     packageType: sdk
-    version: '2.2.203'
+    version: '2.2.300'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
