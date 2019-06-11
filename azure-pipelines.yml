@@ -46,7 +46,7 @@ steps:
 - task: DockerInstaller@0
   displayName: Docker Installer
   inputs:
-    dockerVersion: 18.09.2-ce
+    dockerVersion: 18.06.3-ce
     releaseType: stable
 
 - task: Docker@2
