@@ -7,7 +7,7 @@ name: 'graphql-samples'
 
 pool:
   vmImage: 'ubuntu-16.04'
-
+  
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -42,3 +42,20 @@ steps:
     #targetPath: # Required when publishLocation == FilePath
     #parallel: false # Optional
     #parallelCount: # Optional
+
+- task: DockerInstaller@0
+  displayName: Docker Installer
+  inputs:
+    dockerVersion: 18.09.2-ce
+    releaseType: stable
+
+- task: DockerCompose@0
+  displayName: Build images
+  inputs:
+    containerregistrytype: Container Registry
+    azureSubscriptionEndpoint: DockerHub
+    dockerComposeFile:  "**/docker-compose.yaml"
+    projectName: tanka-chat
+    action: Build services
+    additionalImageTags: $(Build.BuildId)
+    includeLatestTag: true
