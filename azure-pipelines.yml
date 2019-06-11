@@ -3,7 +3,7 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
 
-name: $(Rev:.r)
+name: 0.9.0$(Rev:.r)
 
 pool:
   vmImage: 'ubuntu-16.04'
