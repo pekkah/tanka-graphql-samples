@@ -28,7 +28,7 @@ steps:
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
-- script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host
+- script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/build/host
   displayName: Publish host
 #- script: dotnet publish src/Channels.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels
 #  displayName: Publish channels
@@ -37,17 +37,23 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: Publish build
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/build' 
     artifactName: 'build' 
     #publishLocation: 'Container' # Options: container, filePath
     #targetPath: # Required when publishLocation == FilePath
     #parallel: false # Optional
     #parallelCount: # Optional
 
+- task: CopyFiles@2
+  displayName: Copy charts
+  inputs:
+    contents: 'src/**/charts/**'
+    targetFolder: '$(Build.ArtifactStagingDirectory)/charts'
+
 - task: PublishBuildArtifacts@1
   displayName: Publish helm charts
   inputs:
-    pathtoPublish: 'src/**/charts' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/charts' 
     artifactName: 'charts' 
 
 - task: DockerInstaller@0
