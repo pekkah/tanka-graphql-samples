@@ -3,7 +3,7 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
 
-name: graphql-samples-1.0$(Rev:.r)
+name: tanka-graphql-samples-1.0$(Rev:.r)
 
 pool:
   vmImage: 'ubuntu-16.04'
@@ -49,13 +49,18 @@ steps:
     dockerVersion: 18.09.2-ce
     releaseType: stable
 
-- task: DockerCompose@0
-  displayName: Build images
+- task: Docker@2
+  displayName: Login to Docker Hub
   inputs:
-    containerregistrytype: Container Registry
-    azureSubscriptionEndpoint: DockerHub
-    dockerComposeFile:  "**/docker-compose.yaml"
-    projectName: tanka-chat
-    action: Build services
-    additionalImageTags: $(Build.BuildId)
-    includeLatestTag: true
+    command: login
+    containerRegistry: DockerHub
+
+- task: Docker@2
+  displayName: Build and Push
+  inputs:
+    command: buildAndPush
+    repository: pekkah/tanka-chat-channels
+    Dockerfile: src/Channels.Host/Dockerfile
+    tags: |
+      $(Build.BuildNumber)
+      latest
