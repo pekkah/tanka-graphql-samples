@@ -1,11 +1,11 @@
 # Default values for channelshost.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-fullnameOverride: channelshost
+fullnameOverride: tanka-chat-channels
 replicaCount: 1
 image:
-  repository: channelshost
-  tag: stable
+  repository: tankagql/samples-chat-channels
+  tag: latest
   pullPolicy: IfNotPresent
 imagePullSecrets: []
   # Optionally specify an array of imagePullSecrets.

@@ -43,6 +43,11 @@ steps:
     #parallel: false # Optional
     #parallelCount: # Optional
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: 'src/**/charts' 
+    artifactName: 'charts' 
+
 - task: DockerInstaller@0
   displayName: Docker Installer
   inputs:

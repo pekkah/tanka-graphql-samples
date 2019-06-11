@@ -1,11 +1,11 @@
 # Default values for messageshost.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-fullnameOverride: messageshost
+fullnameOverride: tanka-chat-messages
 replicaCount: 1
 image:
-  repository: messageshost
-  tag: stable
+  repository: tankagql/samples-chat-messages
+  tag: latest
   pullPolicy: IfNotPresent
 imagePullSecrets: []
   # Optionally specify an array of imagePullSecrets.
