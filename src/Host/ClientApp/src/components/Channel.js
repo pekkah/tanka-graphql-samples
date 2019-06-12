@@ -37,7 +37,7 @@ export const Channel = ({ match }) => {
 };
 
 const POST_MESSAGE = gql`
-  mutation PostMessage($channelId: Int!, $message: InputMessage) {
+  mutation PostMessage($channelId: Int!, $message: InputMessage!) {
     postMessage(channelId: $channelId, message: $message) {
       id
       content
