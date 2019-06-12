@@ -21,7 +21,9 @@ spec:
         draft: {{ default "draft-app" .Values.draft }}
         release: {{ .Release.Name }}
       annotations:
+        {{- if .Values.buildID }}
         buildID: {{ .Values.buildID }}
+        {{- end }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
