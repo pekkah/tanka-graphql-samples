@@ -3,11 +3,11 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
 
-name: 'graphql-samples'
+name: 0.9.0$(Rev:.r)
 
 pool:
-  vmImage: 'windows-2019'
-
+  vmImage: 'ubuntu-16.04'
+  
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -24,21 +24,68 @@ steps:
   displayName: Install SDK
   inputs:
     packageType: sdk
-    version: '2.2.203'
+    version: '2.2.300'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
-- script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/host
+- script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/build/host
   displayName: Publish host
-- script: dotnet publish src/Channels.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels
-  displayName: Publish channels
-- script: dotnet publish src/Messages.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages
-  displayName: Publish messages
+#- script: dotnet publish src/Channels.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels
+#  displayName: Publish channels
+#- script: dotnet publish src/Messages.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages
+#  displayName: Publish messages
 - task: PublishBuildArtifacts@1
+  displayName: Publish build
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/build' 
     artifactName: 'build' 
     #publishLocation: 'Container' # Options: container, filePath
     #targetPath: # Required when publishLocation == FilePath
     #parallel: false # Optional
     #parallelCount: # Optional
+
+- task: CopyFiles@2
+  displayName: Copy charts
+  inputs:
+    contents: 'src/**/charts/**'
+    targetFolder: '$(Build.ArtifactStagingDirectory)/charts'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish helm charts
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)/charts' 
+    artifactName: 'charts' 
+
+- task: DockerInstaller@0
+  displayName: Docker Installer
+  inputs:
+    dockerVersion: 18.06.3-ce
+    releaseType: stable
+
+- task: Docker@2
+  displayName: Login to Docker Hub
+  inputs:
+    command: login
+    containerRegistry: DockerHub
+
+- task: Docker@2
+  displayName: Build and Push - channels
+  inputs:
+    command: buildAndPush
+    repository: tankagql/samples-chat-channels
+    buildContext: .
+    Dockerfile: src/Channels.Host/Dockerfile
+    tags: |
+      $(Build.BuildNumber)
+      latest
+
+- task: Docker@2
+  displayName: Build and Push - messages
+  inputs:
+    command: buildAndPush
+    repository: tankagql/samples-chat-messages
+    buildContext: .
+    Dockerfile: src/Messages.Host/Dockerfile
+    tags: |
+      $(Build.BuildNumber)
+      latest

@@ -1,0 +1,22 @@
+version: '3'
+services:
+  channels:
+    build:
+      context: .
+      dockerfile: src/Channels.Host/Dockerfile
+    ports:
+      - "5010:80"
+    environment: 
+      ASPNETCORE_ENVIRONMENT: "Production"
+      JWT__Authority: "https://tanka.eu.auth0.com/"
+      JWT__Audience: "https://tanka-chat.azurewebsites.net/api"
+  messages:
+    build:
+      context: .
+      dockerfile: src/Messages.Host/Dockerfile
+    ports:
+      - "5011:80"
+    environment: 
+      ASPNETCORE_ENVIRONMENT: "Production"
+      JWT__Authority: "https://tanka.eu.auth0.com/"
+      JWT__Audience: "https://tanka-chat.azurewebsites.net/api"
