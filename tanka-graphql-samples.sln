@@ -13,10 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Channels", "Channels", "{1057C309-99C8-4808-B001-5F87B99CA9C8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Messages", "Messages", "{D9F182BF-8904-4981-911C-CB0F496306AF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Channels.Host", "src\Channels.Host\Channels.Host.csproj", "{3B447312-ACD3-413C-BDAA-E72F9E3A71B5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Messages.Host", "src\Messages.Host\Messages.Host.csproj", "{EC2F24AA-DDDE-4C38-92D1-86D67BD0EDDE}"
@@ -70,10 +66,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3B447312-ACD3-413C-BDAA-E72F9E3A71B5} = {1057C309-99C8-4808-B001-5F87B99CA9C8}
-		{EC2F24AA-DDDE-4C38-92D1-86D67BD0EDDE} = {D9F182BF-8904-4981-911C-CB0F496306AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F52C8A4F-4582-4EC3-AF35-F0F5EC273573}
