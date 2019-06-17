@@ -11,7 +11,7 @@
     "apollo-link": "^1.2.11",
     "apollo-link-error": "^1.1.10",
     "apollo-link-retry": "^2.2.13",
-    "apollo-link-ws": "^1.0.17",
+    "apollo-link-ws": "^1.0.18",
     "auth0-js": "^9.10.4",
     "graphql": "^14.3.1",
     "graphql-tag": "^2.10.1",
