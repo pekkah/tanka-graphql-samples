@@ -44,9 +44,14 @@ secrets: {}
   # ref: https://kubernetes.io/docs/concepts/configuration/secret/
   #
   # This creates a secret "mysecret" and injects "mypassword"
-  # as the environment variable mysecret_mypassword=password.
+  # as the environment variable mysecret__mypassword=password.
   # mysecret:
   #   mypassword: password
+  Remotes:
+    Channels: "http://tanka-chat-channels/hubs/graphql",
+    ChannelsHttp: "http://tanka-chat-channels/api/graphql",
+    Messages: "http://tanka-chat-messages/hubs/graphql"
+  
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

@@ -47,7 +47,7 @@ spec:
             {{- $root := . }}
             {{- range $ref, $values := .Values.secrets }}
             {{- range $key, $value := $values }}
-            - name: {{ $ref }}_{{ $key }}
+            - name: {{ $ref }}__{{ $key }}
               valueFrom:
                 secretKeyRef:
                   name: {{ template "host.fullname" $root }}-{{ $ref | lower }}
