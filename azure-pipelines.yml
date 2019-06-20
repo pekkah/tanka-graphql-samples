@@ -100,7 +100,7 @@ steps:
     command: buildAndPush
     repository: tankagql/samples-chat
     buildContext: src/ClientApp
-    Dockerfile: Dockerfile
+    Dockerfile: src/ClientApp/Dockerfile
     tags: |
       $(Build.BuildNumber)
       latest
