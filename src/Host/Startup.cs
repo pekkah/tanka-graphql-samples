@@ -235,9 +235,6 @@ namespace tanka.graphql.samples.Host
                             context.Output.Complete();
                         }
                     });
-
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -256,7 +253,6 @@ namespace tanka.graphql.samples.Host
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             // use authenication
             app.UseAuthentication();
@@ -273,21 +269,6 @@ namespace tanka.graphql.samples.Host
             app.UseTankaWebSocketServer(new WebSocketServerOptions()
             {
                 Path = "/api/graphql"
-            });
-
-            // use mvc
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    "default",
-                    "{controller}/{action=Index}/{id?}");
-            });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment()) spa.UseReactDevelopmentServer("start");
             });
         }
     }

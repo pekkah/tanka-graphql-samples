@@ -8,7 +8,7 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 import auth from "../auth";
 
 export default function clientFactory() {
-  const host = process.env.REACT_APP_HOST.replace("https", "wss");
+  const host = window.CONFIG.gw.replace("https", "wss").replace("http", "ws");
   const wsClient = new SubscriptionClient(`${host}/api/graphql`, {
     reconnect: true,
     connectionParams: () => ({

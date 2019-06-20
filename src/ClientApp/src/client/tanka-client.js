@@ -20,7 +20,7 @@ var options = {
 };
 
 export default function clientFactory() {
-  const serverClient = new TankaClient("/hubs/graphql", options);
+  const serverClient = new TankaClient(`${window.CONFIG.gw}/hubs/graphql`, options);
   const serverLink = new TankaLink(serverClient);
 
   const client = new ApolloClient({

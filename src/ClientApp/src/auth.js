@@ -1,5 +1,8 @@
 import auth0 from "auth0-js";
 
+const config = window.CONFIG;
+console.debug("CONFIG", config);
+
 class Auth {
   accessToken = null;
   idToken = null;
@@ -7,12 +10,12 @@ class Auth {
   userProfile;
   tokenRenewalTimeout;
   auth0 = new auth0.WebAuth({
-    domain: process.env.REACT_APP_DOMAIN,
-    audience: process.env.REACT_APP_AUDIENCE,
-    clientID: process.env.REACT_APP_CLIENT_ID,
-    redirectUri: process.env.REACT_APP_REDIRECT_URI,
-    responseType: process.env.REACT_APP_RESPONSE_TYPE,
-    scope: process.env.REACT_APP_SCOPE
+    domain: config.domain || process.env.REACT_APP_DOMAIN,
+    audience: config.audience ||process.env.REACT_APP_AUDIENCE,
+    clientID: config.clientID ||process.env.REACT_APP_CLIENT_ID,
+    redirectUri: config.redirectUri ||process.env.REACT_APP_REDIRECT_URI,
+    responseType: config.responseType || process.env.REACT_APP_RESPONSE_TYPE,
+    scope: config.scope || process.env.REACT_APP_SCOPE
   });
 
   constructor() {
