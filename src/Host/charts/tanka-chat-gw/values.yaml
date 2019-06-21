@@ -35,7 +35,7 @@ ingress:
       hosts:
       - chat.tanka-samples.heikura.me
 
-secrets: {}
+secrets:
   # Optionally specify a set of secret objects whose values
   # will be injected as environment variables by default.
   # You should add this section to a file like secrets.yaml
@@ -48,8 +48,8 @@ secrets: {}
   # mysecret:
   #   mypassword: password
   Remotes:
-    Channels: "http://tanka-chat-channels/hubs/graphql",
-    ChannelsHttp: "http://tanka-chat-channels/api/graphql",
+    Channels: "http://tanka-chat-channels/hubs/graphql"
+    ChannelsHttp: "http://tanka-chat-channels/api/graphql"
     Messages: "http://tanka-chat-messages/hubs/graphql"
   
 resources: {}
