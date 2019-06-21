@@ -7,7 +7,7 @@ require('dotenv').config()
 
 const PORT = process.env.SERVER_PORT || 3000;
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "static")));
 
 app.get('/config.js', function(req, res) {
     var configJS = `
@@ -25,7 +25,8 @@ app.get('/config.js', function(req, res) {
     res.send(configJS);
 });
 
-app.get('/*', function(req, res) {
+
+app.get('*', function(req, res) {
     res.sendFile(path.join(__dirname, 'index.html'));
   });
 
