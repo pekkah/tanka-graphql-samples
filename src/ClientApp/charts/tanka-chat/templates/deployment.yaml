@@ -47,7 +47,7 @@ spec:
             {{- $root := . }}
             {{- range $ref, $values := .Values.secrets }}
             {{- range $key, $value := $values }}
-            - name: {{ $ref }}__{{ $key }}
+            - name: {{ $ref }}_{{ $key }}
               valueFrom:
                 secretKeyRef:
                   name: {{ template "client.fullname" $root }}-{{ $ref | lower }}
