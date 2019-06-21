@@ -47,6 +47,8 @@ secrets:
   # as the environment variable mysecret__mypassword=password.
   # mysecret:
   #   mypassword: password
+  SERVER:
+    PORT: 80
   NODE:
     ENV: "Production"
   REACT:
