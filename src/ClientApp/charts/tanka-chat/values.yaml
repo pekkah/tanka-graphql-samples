@@ -48,7 +48,7 @@ secrets:
   # mysecret:
   #   mypassword: password
   SERVER:
-    PORT: 80
+    PORT: "80"
   NODE:
     ENV: "Production"
   REACT:
