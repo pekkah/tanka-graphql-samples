@@ -7,11 +7,10 @@ require('dotenv').config()
 
 const PORT = process.env.SERVER_PORT || 3000;
 
-app.use(express.static(path.join(__dirname, "static")));
+app.use(express.static(path.join(__dirname)));
 
 app.get('/config.js', function(req, res) {
-    var configJS = `
-    window.CONFIG = {
+    var configJS = `window.CONFIG = {
         domain: "${process.env.REACT_APP_DOMAIN}",
         audience: "${process.env.REACT_APP_AUDIENCE}",
         clientID: "${process.env.REACT_APP_CLIENT_ID}",
@@ -26,7 +25,8 @@ app.get('/config.js', function(req, res) {
 });
 
 
-app.get('/*', function(req, res) {
+app.get('*', function(req, res) {
+    console.log("req", req);
     res.sendFile(path.join(__dirname, 'index.html'));
   });
 
