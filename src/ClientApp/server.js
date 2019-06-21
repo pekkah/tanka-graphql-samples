@@ -7,7 +7,12 @@ require('dotenv').config()
 
 const PORT = process.env.SERVER_PORT || 3000;
 
-app.use(express.static(path.join(__dirname)));
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+  })
+
+app.use('/static', express.static(path.join(__dirname, 'static')))
 
 app.get('/config.js', function(req, res) {
     var configJS = `window.CONFIG = {
@@ -25,8 +30,8 @@ app.get('/config.js', function(req, res) {
 });
 
 
-app.get('*', function(req, res) {
-    console.log("req", req);
+app.get('/*', function(req, res) {
+    console.log("req", req.url);
     res.sendFile(path.join(__dirname, 'index.html'));
   });
 
