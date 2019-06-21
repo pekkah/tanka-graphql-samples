@@ -7,12 +7,10 @@ require('dotenv').config()
 
 const PORT = process.env.SERVER_PORT || 3000;
 
-app.use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-  })
-
-app.use('/static', express.static(path.join(__dirname, 'static')))
+app.use("*", function(req, res, next) {
+  console.log("req.originalUrl", req.originalUrl);
+  next();
+});
 
 app.get('/config.js', function(req, res) {
     var configJS = `window.CONFIG = {
@@ -29,11 +27,16 @@ app.get('/config.js', function(req, res) {
     res.send(configJS);
 });
 
+app.use('/static', express.static(path.join(__dirname, 'static')))
 
-app.get('/*', function(req, res) {
-    console.log("req", req.url);
+app.get('*', function(req, res) {
     res.sendFile(path.join(__dirname, 'index.html'));
   });
+
+app.use(function (err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+});
 
 console.log(`Listening on ${PORT}`)
 app.listen(PORT);
