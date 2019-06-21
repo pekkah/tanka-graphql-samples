@@ -2,7 +2,7 @@
 
 Example of using tanka-graphql with Apollo
 
-Live at: https://tanka-chat.azurewebsites.net
+Live at: https://chat.tanka-samples.heikura.me
 
 
 ## Projects
