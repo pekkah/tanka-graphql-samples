@@ -2,6 +2,7 @@
   "name": "host",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://chat.tanka-samples.heikura.me/client",
   "dependencies": {
     "@material-ui/core": "^4.1.1",
     "@material-ui/icons": "^4.1.0",
@@ -23,7 +24,6 @@
     "react-router-bootstrap": "^0.25.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.0.1",
-    "rimraf": "^2.6.3",
     "subscriptions-transport-ws": "^0.9.16"
   },
   "scripts": {
@@ -40,6 +40,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "rimraf": "^2.6.3",
     "copyfiles": "^2.1.0"
   }
 }
