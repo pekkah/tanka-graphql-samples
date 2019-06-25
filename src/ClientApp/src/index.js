@@ -25,7 +25,7 @@ const handleAuthentication = location => {
 
 if (/callback/.test(window.location.pathname)) {
   handleAuthentication(window.location).then(
-    () => (window.location.href = "/client"),
+    () => (window.location.href = baseUrl),
     reason => console.log("Callback error", reason)
   );
 } else if (auth.isLoggedIn()) {
