@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +36,8 @@ namespace tanka.graphql.samples.channels.host
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+
+            AddForwardedHeaders(services);
 
             // signalr authentication
             services.AddAuthentication(options =>
@@ -106,8 +110,7 @@ namespace tanka.graphql.samples.channels.host
                         .Concat(new[]
                         {
                             CostAnalyzer.MaxCost(
-                                maxCost: 100,
-                                defaultFieldComplexity: 1
+                                100
                             )
                         }).ToArray();
 
@@ -126,6 +129,8 @@ namespace tanka.graphql.samples.channels.host
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders();
+
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseAuthentication();
@@ -135,6 +140,23 @@ namespace tanka.graphql.samples.channels.host
                 options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
 
             app.UseMvc();
+        }
+
+        private void AddForwardedHeaders(IServiceCollection services)
+        {
+            if (string.Equals(
+                Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"),
+                "true", StringComparison.OrdinalIgnoreCase))
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                               ForwardedHeaders.XForwardedProto;
+                    // Only loopback proxies are allowed by default.
+                    // Clear that restriction because forwarders are enabled by explicit 
+                    // configuration.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
         }
     }
 }
