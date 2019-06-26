@@ -33,8 +33,8 @@ app.get('*', function(req, res) {
   fs.readFile("index.html", "utf8", function(err, data) {
     // dirty play to get the app running on subpath when homepage is not hardcoded 
     const modified = data
-                    .replace("%BASE%", process.env.REACT_APP_BASE);
-                    //.replace("static/", `${process.env.REACT_APP_BASE}/static/`);
+                    .replace("%BASE%", process.env.REACT_APP_BASE)
+                    .replace("/static/", `${process.env.REACT_APP_BASE}static/`);
 
     res.header("Content-Type", "text/html");
     res.send(modified);
