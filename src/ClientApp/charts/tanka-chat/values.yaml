@@ -26,8 +26,8 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-  path: /client(/|$)(.*)
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+  path: /
   hosts:
   - chat.tanka-samples.heikura.me
   tls:
@@ -54,12 +54,12 @@ secrets:
   REACT:
     APP_CLIENT_ID: "W4MlLkgw5lJCH2ejTrJ7uFBdNfQb6w-5"
     APP_DOMAIN: "tanka.eu.auth0.com"
-    APP_REDIRECT_URI: "https://chat.tanka-samples.heikura.me/client/callback"
+    APP_REDIRECT_URI: "https://chat.tanka-samples.heikura.me/callback"
     APP_RESPONSE_TYPE: "token id_token"
     APP_SCOPE: "openid email profile"
     APP_AUDIENCE: "https://tanka-chat.azurewebsites.net/api"
     APP_HOST: "https://chat.tanka-samples.heikura.me/api"
-    APP_BASE: "/client/"
+    APP_BASE: "/"
   
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
