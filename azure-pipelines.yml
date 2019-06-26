@@ -11,13 +11,6 @@ pool:
 variables:
   buildConfiguration: 'Release'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  REACT_APP_CLIENT_ID: 'W4MlLkgw5lJCH2ejTrJ7uFBdNfQb6w-5'
-  REACT_APP_DOMAIN: 'tanka.eu.auth0.com'
-  REACT_APP_REDIRECT_URI: 'https://tanka-chat.azurewebsites.net/callback'
-  REACT_APP_RESPONSE_TYPE: 'token id_token'
-  REACT_APP_SCOPE: 'openid email profile'
-  REACT_APP_AUDIENCE: 'https://tanka-chat.azurewebsites.net/api'
-  REACT_APP_HOST: 'https://tanka-chat.azurewebsites.net'
 
 steps:
 - task: DotNetCoreInstaller@0
@@ -44,16 +37,10 @@ steps:
     #parallel: false # Optional
     #parallelCount: # Optional
 
-- task: CopyFiles@2
-  displayName: Copy charts
-  inputs:
-    contents: 'src/**/charts/**'
-    targetFolder: '$(Build.ArtifactStagingDirectory)/charts'
-
 - task: PublishBuildArtifacts@1
   displayName: Publish helm charts
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)/charts' 
+    pathtoPublish: 'charts' 
     artifactName: 'charts' 
 
 - task: DockerInstaller@0
@@ -86,6 +73,28 @@ steps:
     repository: tankagql/samples-chat-messages
     buildContext: .
     Dockerfile: src/Messages.Host/Dockerfile
+    tags: |
+      $(Build.BuildNumber)
+      latest
+
+- task: Docker@2
+  displayName: Build and Push - gw
+  inputs:
+    command: buildAndPush
+    repository: tankagql/samples-chat-gw
+    buildContext: .
+    Dockerfile: src/Host/Dockerfile
+    tags: |
+      $(Build.BuildNumber)
+      latest
+
+- task: Docker@2
+  displayName: Build and Push - frontend
+  inputs:
+    command: buildAndPush
+    repository: tankagql/samples-chat
+    buildContext: src/ClientApp
+    Dockerfile: src/ClientApp/Dockerfile
     tags: |
       $(Build.BuildNumber)
       latest

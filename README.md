@@ -2,20 +2,18 @@
 
 Example of using tanka-graphql with Apollo
 
-Live at: https://tanka-chat.azurewebsites.net
+Live at: https://chat.tanka-samples.heikura.me/client
 
 
 ## Projects
 
 * Host - this acts as an gateway to Channels and Messages services
-* Host/ClientApp - SPA frontend using React and Apollo
+* ClientApp - SPA frontend using React and Apollo
 * Channels.Host - provides channels graphql service (signalr, http)
 * Messages.Host - provides messages graphql service (signalr)
 
 Host project uses introspection to build remote executable schemas 
 from Channels and Messages services.
-
-Host project also hosts the frontend SPA application.
 
 
 ## Requirements
@@ -36,7 +34,7 @@ settings to match.
 ### Frontend
 
 Frontend uses Auth0 for authentication. Create SPA application in Auth0 and modify .env file at the
-root of `src\Host\ClientApp` directory with the settings of your application. The app uses userprofile
+root of `src\ClientApp` directory with the settings of your application. The app uses userprofile
 to show who is participating in the chat.
 
 Example:
@@ -49,12 +47,11 @@ REACT_APP_SCOPE='openid profile'
 ```
 
 
-#### Host/ClientApp
+#### ClientApp
 
 Url: https://localhost:5001
 
-React frontend application hosted by the Host project using ASP.NET Core SPA services. This could
-be separate application but hosting it inside the ASP.NET Core simplifies the startup and deployment.
+React frontend application with small NodeJS server.
 
 Uses randomly either tanka-graphql-server-link or apollo-link-ws to communicate with server.
 

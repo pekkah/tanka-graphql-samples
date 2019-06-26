@@ -4,14 +4,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,7 +39,8 @@ namespace tanka.graphql.samples.Host
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+            AddForwardedHeaders(services);
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
@@ -48,67 +48,65 @@ namespace tanka.graphql.samples.Host
             // signalr authentication
             services.AddAuthentication()
                 .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    NameClaimType = "sub",
-                    RoleClaimType = "role"
-                };
-               
-                options.Authority = Configuration["JWT:Authority"];
-                options.Audience = Configuration["JWT:Audience"];
-                options.SaveToken = false;
-                
-                // We have to hook the OnMessageReceived event in order to
-                // allow the JWT authentication handler to read the access
-                // token from the query string when a WebSocket or 
-                // Server-Sent Events request comes in.
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        var accessToken = context.Request.Query["access_token"].ToString();
+                        NameClaimType = "sub",
+                        RoleClaimType = "role"
+                    };
 
-                        if (string.IsNullOrEmpty(accessToken))
+                    options.Authority = Configuration["JWT:Authority"];
+                    options.Audience = Configuration["JWT:Audience"];
+                    options.SaveToken = false;
+
+                    // We have to hook the OnMessageReceived event in order to
+                    // allow the JWT authentication handler to read the access
+                    // token from the query string when a WebSocket or 
+                    // Server-Sent Events request comes in.
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
                         {
-                            var messageContext = context.HttpContext
-                                .RequestServices.GetRequiredService<IMessageContextAccessor>();
+                            var accessToken = context.Request.Query["access_token"].ToString();
 
-                            var message = messageContext.Context?.Message;
-
-                            if (message?.Type == MessageType.GQL_CONNECTION_INIT)
+                            if (string.IsNullOrEmpty(accessToken))
                             {
-                                accessToken = messageContext.Context?.Message
-                                    .Payload
-                                    .SelectToken("authorization")
-                                    .ToString();
+                                var messageContext = context.HttpContext
+                                    .RequestServices.GetRequiredService<IMessageContextAccessor>();
+
+                                var message = messageContext.Context?.Message;
+
+                                if (message?.Type == MessageType.GQL_CONNECTION_INIT)
+                                    accessToken = messageContext.Context?.Message
+                                        .Payload
+                                        .SelectToken("authorization")
+                                        .ToString();
                             }
-                        }
 
-                        // Read the token out of the query string
-                        context.Token = accessToken;
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = context =>
-                    {
-                        if (context.SecurityToken is JwtSecurityToken jwt)
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = context =>
                         {
-                            var tokenIdentity = new ClaimsIdentity(
-                                new[]
-                                {
-                                    new Claim("access_token", jwt.RawData)
-                                });
+                            if (context.SecurityToken is JwtSecurityToken jwt)
+                            {
+                                var tokenIdentity = new ClaimsIdentity(
+                                    new[]
+                                    {
+                                        new Claim("access_token", jwt.RawData)
+                                    });
 
-                            context.Principal.AddIdentity(tokenIdentity);
+                                context.Principal.AddIdentity(tokenIdentity);
+                            }
+
+                            return Task.CompletedTask;
                         }
-
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+                    };
+                });
 
             services.AddAuthorization(options =>
-                options.AddPolicy("authorize", 
+                options.AddPolicy("authorize",
                     policy => policy
                         .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()));
@@ -126,7 +124,7 @@ namespace tanka.graphql.samples.Host
 
                         // create channelsSchema by introspecting channels service
                         var channelsLink = Links.SignalROrHttp(
-                            Configuration["Remotes:Channels"], 
+                            Configuration["Remotes:Channels"],
                             Configuration["Remotes:ChannelsHttp"],
                             accessor);
 
@@ -169,22 +167,22 @@ namespace tanka.graphql.samples.Host
                 .Configure<IHttpContextAccessor>((options, accessor) =>
                 {
                     var logger = accessor
-                                     .HttpContext
-                                     .RequestServices
-                                     .GetRequiredService<ILogger<SchemaOptions>>();
+                        .HttpContext
+                        .RequestServices
+                        .GetRequiredService<ILogger<SchemaOptions>>();
 
                     options.ValidationRules = ExecutionRules.All
                         .Concat(new[]
                         {
                             CostAnalyzer.MaxCost(
-                                maxCost: 100,
-                                defaultFieldComplexity: 1,
+                                100,
+                                1,
                                 onCalculated: operation =>
                                 {
                                     logger.LogInformation(
                                         $"Operation '{operation.Operation.ToGraphQL()}' costs " +
                                         $"'{operation.Cost}' (max: '{operation.MaxCost}')");
-                                } 
+                                }
                             )
                         }).ToArray();
 
@@ -203,13 +201,13 @@ namespace tanka.graphql.samples.Host
 
             services.AddTankaWebSocketServerWithTracing()
                 .Configure<IHttpContextAccessor>(
-                    (options, 
+                    (options,
                         accessor
                     ) => options.AcceptAsync = async context =>
                     {
                         var succeeded = await AuthorizeHelper.AuthorizeAsync(
                             accessor.HttpContext,
-                            new List<IAuthorizeData>()
+                            new List<IAuthorizeData>
                             {
                                 new AuthorizeAttribute("authorize")
                             });
@@ -235,14 +233,13 @@ namespace tanka.graphql.samples.Host
                             context.Output.Complete();
                         }
                     });
-
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -256,39 +253,37 @@ namespace tanka.graphql.samples.Host
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSpaStaticFiles();
 
             // use authenication
             app.UseAuthentication();
 
             // use signalr server hub
             app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
-                options =>
-                {
-                    options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
-                }));
+                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
 
             // use websockets server
             app.UseWebSockets();
-            app.UseTankaWebSocketServer(new WebSocketServerOptions()
+            app.UseTankaWebSocketServer(new WebSocketServerOptions
             {
                 Path = "/api/graphql"
             });
+        }
 
-            // use mvc
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    "default",
-                    "{controller}/{action=Index}/{id?}");
-            });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment()) spa.UseReactDevelopmentServer("start");
-            });
+        private void AddForwardedHeaders(IServiceCollection services)
+        {
+            if (string.Equals(
+                Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"),
+                "true", StringComparison.OrdinalIgnoreCase))
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                               ForwardedHeaders.XForwardedProto;
+                    // Only loopback proxies are allowed by default.
+                    // Clear that restriction because forwarders are enabled by explicit 
+                    // configuration.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
+                });
         }
     }
 }
