@@ -37,16 +37,10 @@ steps:
     #parallel: false # Optional
     #parallelCount: # Optional
 
-- task: CopyFiles@2
-  displayName: Copy charts
-  inputs:
-    contents: 'src/**/charts/**'
-    targetFolder: '$(Build.ArtifactStagingDirectory)/charts'
-
 - task: PublishBuildArtifacts@1
   displayName: Publish helm charts
   inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)/charts' 
+    pathtoPublish: 'charts' 
     artifactName: 'charts' 
 
 - task: DockerInstaller@0
