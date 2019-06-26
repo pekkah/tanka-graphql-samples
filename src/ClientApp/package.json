@@ -2,7 +2,6 @@
   "name": "host",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://chat.tanka-samples.heikura.me/client",
   "dependencies": {
     "@material-ui/core": "^4.1.1",
     "@material-ui/icons": "^4.1.0",

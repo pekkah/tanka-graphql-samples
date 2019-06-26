@@ -51,3 +51,4 @@ services:
       REACT_APP_SCOPE: "openid email profile"
       REACT_APP_AUDIENCE: "https://tanka-chat.azurewebsites.net/api"
       REACT_APP_HOST: "http://localhost:5002"
+      REACT_APP_BASE: ""

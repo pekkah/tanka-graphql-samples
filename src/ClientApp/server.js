@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require("fs");
 const path = require('path');
 const app = express();
 
@@ -8,7 +9,6 @@ require('dotenv').config()
 const PORT = process.env.SERVER_PORT || 3000;
 
 app.use("*", function(req, res, next) {
-  console.log("req.originalUrl", req.originalUrl);
   next();
 });
 
@@ -22,7 +22,6 @@ app.get('/config.js', function(req, res) {
         scope: "${process.env.REACT_APP_SCOPE}",
         gw: "${process.env.REACT_APP_HOST}"
     };`
-    console.debug("config-js", configJS);
     res.header('Content-Type', 'application/javascript');
     res.send(configJS);
 });
@@ -30,13 +29,19 @@ app.get('/config.js', function(req, res) {
 app.use('/static', express.static(path.join(__dirname, 'static')))
 
 app.get('*', function(req, res) {
-    res.sendFile(path.join(__dirname, 'index.html'));
-  });
+  fs.readFile("index.html", "utf8", function(err, data) {
+    const modified = data.replace("%BASE%", process.env.REACT_APP_BASE);
+    res.header("Content-Type", "text/html");
+    res.send(modified);
+    res.end();
+  });    
+});
 
 app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).send('Something broke!')
 });
 
-console.log(`Listening on ${PORT}`)
+console.log(`Base path '${process.env.REACT_APP_BASE}'`);
+console.log(`Listening on ${PORT}`);
 app.listen(PORT);

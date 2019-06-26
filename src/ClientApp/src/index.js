@@ -9,7 +9,8 @@ import clientFactory from "./client";
 
 const protocols = [
   "sr",
-  "ws"];
+  "ws"
+];
 
 const protocol = protocols[random(0, 1)];
 
