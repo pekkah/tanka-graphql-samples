@@ -59,7 +59,7 @@ secrets:
     APP_SCOPE: "openid email profile"
     APP_AUDIENCE: "https://tanka-chat.azurewebsites.net/api"
     APP_HOST: "https://chat.tanka-samples.heikura.me/api"
-    APP_BASE: "/client"
+    APP_BASE: "/client/"
   
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
