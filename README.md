@@ -24,6 +24,15 @@ from Channels and Messages services.
 - Auth0 tenant with SPA and API applications created
 
 
+## Run the sample
+
+```bash
+docker-compose up
+```
+
+Open http://localhost:5001 in web browser.
+
+
 ## Solution
 
 Sample uses Auth0 to provide GitHub login for the application. The default values in the repo
