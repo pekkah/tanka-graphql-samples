@@ -6,7 +6,7 @@ const app = express();
 // load config
 require('dotenv').config()
 
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.SERVER_PORT || 5001;
 
 app.use("*", function(req, res, next) {
   next();
@@ -30,7 +30,14 @@ app.use('/static', express.static(path.join(__dirname, 'static')))
 
 app.get('*', function(req, res) {
   // this could be done on app start instead of every request
-  fs.readFile("index.html", "utf8", function(err, data) {
+  fs.readFile(path.resolve(__dirname, "index.html"), "utf8", function(err, data) {
+
+    if (err)
+      {
+        console.log("error", err);
+        return res.send(err);
+      }
+
     // dirty play to get the app running on subpath when homepage is not hardcoded 
     const modified = data
                     .replace(new RegExp('%BASE%', 'g'), process.env.REACT_APP_BASE)
