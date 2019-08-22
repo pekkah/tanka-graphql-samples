@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using tanka.graphql.schema;
 using tanka.graphql.sdl;
 using tanka.graphql.type;
 
@@ -29,11 +30,10 @@ namespace tanka.graphql.samples.messages.host.logic
             var resourceStream =
                 assembly.GetManifestResourceStream("tanka.graphql.samples.messages.host.logic.Schema.graphql");
 
-            using (var reader =
-                new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader =
+                new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8);
+            
+            return reader.ReadToEnd();
         }
     }
 }

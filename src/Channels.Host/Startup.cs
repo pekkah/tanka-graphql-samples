@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.samples.channels.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;

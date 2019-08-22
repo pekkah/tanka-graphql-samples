@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -13,13 +12,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.samples.messages.host.logic;
 using tanka.graphql.server;
 using tanka.graphql.tools;
@@ -51,7 +48,7 @@ namespace tanka.graphql.samples.messages.host
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
-                {
+            {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "sub",
@@ -90,9 +87,9 @@ namespace tanka.graphql.samples.messages.host
                             var cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
                             var key = jwt.Claims.Single(c => c.Type == "sub").Value;
                             var userInfoClaimsIdentity = await cache
-                                .GetOrCreateAsync<ClaimsIdentity>(key, async entry =>
+                                .GetOrCreateAsync(key, async entry =>
                                 {
-                                    entry.SetAbsoluteExpiration(jwt.ValidTo -TimeSpan.FromSeconds(5));
+                                    entry.SetAbsoluteExpiration(jwt.ValidTo - TimeSpan.FromSeconds(5));
 
                                     var configuration = await context.Options.ConfigurationManager
                                         .GetConfigurationAsync(CancellationToken.None);
@@ -110,7 +107,7 @@ namespace tanka.graphql.samples.messages.host
 
                                     return new ClaimsIdentity(userInfo.Claims);
                                 });
-                            
+
                             context.Principal.AddIdentity(userInfoClaimsIdentity);
                         }
                     }
@@ -137,7 +134,7 @@ namespace tanka.graphql.samples.messages.host
                     schemaBuilder.TryGetType<ObjectType>("Mutation", out var mutation);
                     schemaBuilder.Connections(connect =>
                     {
-                        foreach (var field in connect.VisitFields(mutation))
+                        foreach (var field in connect.GetFields(mutation))
                         {
                             var resolver = connect.GetOrAddResolver(mutation, field.Key);
                             resolver.Use((context, next) =>

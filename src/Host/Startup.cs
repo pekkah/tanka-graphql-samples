@@ -15,9 +15,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.analysis;
+using tanka.graphql.extensions.analysis;
 using tanka.graphql.introspection;
 using tanka.graphql.language;
+using tanka.graphql.schema;
 using tanka.graphql.server;
 using tanka.graphql.server.webSockets;
 using tanka.graphql.server.webSockets.dtos;
@@ -44,6 +45,17 @@ namespace tanka.graphql.samples.Host
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
+            services.AddCors(cors =>
+                {
+                    cors.AddDefaultPolicy(policy =>
+                    {
+                        policy.SetIsOriginAllowed(origin => true);
+                        policy.AllowAnyHeader();
+                        policy.AllowAnyMethod();
+                        policy.AllowCredentials();
+                    });
+                });
 
             // signalr authentication
             services.AddAuthentication()
@@ -113,64 +125,14 @@ namespace tanka.graphql.samples.Host
 
             services.AddHttpContextAccessor();
 
-            // add schema
-            services.AddSingleton(
-                provider =>
-                {
-                    try
-                    {
-                        // used to get the access token
-                        var accessor = provider.GetRequiredService<IHttpContextAccessor>();
-
-                        // create channelsSchema by introspecting channels service
-                        var channelsLink = Links.SignalROrHttp(
-                            Configuration["Remotes:Channels"],
-                            Configuration["Remotes:ChannelsHttp"],
-                            accessor);
-
-                        var channelsSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                            new SchemaBuilder()
-                                .ImportIntrospectedSchema(channelsLink)
-                                .ConfigureAwait(false)
-                                .GetAwaiter().GetResult(),
-                            channelsLink);
-
-                        // create messagesSchema by introspecting messages service
-                        var messagesLink = Links.SignalR(Configuration["Remotes:Messages"], accessor);
-                        var messagesSchema = RemoteSchemaTools.MakeRemoteExecutable(
-                            new SchemaBuilder()
-                                .ImportIntrospectedSchema(messagesLink)
-                                .ConfigureAwait(false)
-                                .GetAwaiter().GetResult(),
-                            messagesLink);
-
-                        // combine schemas into one
-                        var schema = new SchemaBuilder()
-                            .Merge(channelsSchema, messagesSchema)
-                            .Build();
-
-                        // introspect and merge with schema
-                        var introspection = Introspect.Schema(schema);
-                        return new SchemaBuilder()
-                            .Merge(schema, introspection)
-                            .Build();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                });
+            // add schema cache
+            services.AddSingleton<SchemaCache>();
+            services.AddMemoryCache();
 
             // add execution options
             services.AddTankaSchemaOptions()
-                .Configure<IHttpContextAccessor>((options, accessor) =>
+                .Configure<ILogger<Startup>, SchemaCache>((options, logger, cache) =>
                 {
-                    var logger = accessor
-                        .HttpContext
-                        .RequestServices
-                        .GetRequiredService<ILogger<SchemaOptions>>();
-
                     options.ValidationRules = ExecutionRules.All
                         .Concat(new[]
                         {
@@ -187,10 +149,7 @@ namespace tanka.graphql.samples.Host
                         }).ToArray();
 
                     options.GetSchema
-                        = query => new ValueTask<ISchema>(accessor
-                            .HttpContext
-                            .RequestServices
-                            .GetRequiredService<ISchema>());
+                        = async query => await cache.GetOrAdd(query);
                 });
 
 
@@ -239,6 +198,7 @@ namespace tanka.graphql.samples.Host
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseForwardedHeaders();
+            app.UseCors();
 
             if (env.IsDevelopment())
             {
