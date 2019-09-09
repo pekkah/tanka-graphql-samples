@@ -10,7 +10,7 @@
     "apollo-client": "^2.6.4",
     "apollo-link": "^1.2.12",
     "apollo-link-error": "^1.1.11",
-    "apollo-link-retry": "^2.2.14",
+    "apollo-link-retry": "^2.2.15",
     "apollo-link-ws": "^1.0.18",
     "auth0-js": "^9.11.3",
     "dotenv": "^8.1.0",
