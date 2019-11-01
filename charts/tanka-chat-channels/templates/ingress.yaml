@@ -2,38 +2,27 @@
 {{- $fullName := include "channelshost.fullname" . -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: {{ $fullName }}
   labels:
     app: {{ template "channelshost.name" . }}
     chart: {{ template "channelshost.chart" . }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-{{- with .Values.ingress.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 spec:
-{{- if .Values.ingress.tls }}
-  tls:
-  {{- range .Values.ingress.tls }}
-    - hosts:
-      {{- range .hosts }}
-        - {{ . }}
-      {{- end }}
-      secretName: {{ .secretName }}
+  entryPoints:
+  {{- range .Values.ingress.entryPoints }}
+    - {{ . }}
   {{- end }}
-{{- end }}
-  rules:
+  routes:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . }}
-      http:
-        paths:
-          - path: {{ $ingressPath }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: http
+  - match: Host(`{{ . }}`) && PathPrefix(`{{ $ingressPath }}`)
+    kind: Rule
+    services:
+    - name: {{ $fullName }}
+      port: {{ $servicePort }}
   {{- end }}
+  tls:
+    certResolver: default
 {{- end }}
