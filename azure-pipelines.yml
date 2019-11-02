@@ -3,7 +3,7 @@
 # Add steps that run tests, create a NuGet package, deploy, and more:
 # https://docs.microsoft.com/vsts/pipelines/languages/dotnet-core
 
-name: 0.9.0$(Rev:.r)
+name: 0.10.0$(Rev:.r)
 
 pool:
   vmImage: 'ubuntu-16.04'
@@ -13,11 +13,11 @@ variables:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
 steps:
-- task: DotNetCoreInstaller@0
-  displayName: Install SDK
+- task: UseDotNet@2
+  displayName: Use dotnet core SDK
   inputs:
-    packageType: sdk
-    version: '2.2.300'
+    packageType: 'sdk'
+    version: '3.0.x'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
