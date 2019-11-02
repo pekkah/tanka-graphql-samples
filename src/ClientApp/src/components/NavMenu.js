@@ -1,13 +1,13 @@
-﻿import React, { Component } from "react";
+﻿import React from "react";
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
+import { useQuery } from '@apollo/react-hooks';
 
 
 const GET_CHANNELS = gql`
@@ -19,60 +19,44 @@ const GET_CHANNELS = gql`
   }
 `;
 
-export class NavMenu extends Component {
-  displayName = NavMenu.name;
+const NavMenu = () => {
+  const { loading, error, data } = useQuery(GET_CHANNELS);
 
-  constructor(props) {
-    super(props);
+  if (loading)
+    return <p>Loading</p>
 
-    this.toggleNavbar = this.toggleNavbar.bind(this);
-    this.state = {
-      collapsed: true
-    };
-  }
+  if (error)
+    return <p>{error.message}</p>
 
-  toggleNavbar() {
-    this.setState({
-      collapsed: !this.state.collapsed
-    });
-  }
+  const { channels } = data;
 
-  render() {
-    return (
-      <header>
-        <Query query={GET_CHANNELS}>
-          {({ loading, error, data }) => {
-            if (loading) return "Loading...";
-            if (error) return `Error! ${error.message}`;
-
-            return (
-              <>
-                <List>
-                  {data.channels.map(channel => (
-                    <ListItemLink to={`/channels/${channel.id}`} primary={channel.name} icon={<InboxIcon />} key={channel.id}/>
-                  ))}
-                </List>
-              </>
-            );
-          }}
-        </Query>
-      </header>
-    );
-  }
+  return (
+    <header>
+      <List>
+        {channels.map(channel => (
+          <ListItemLink to={`/channels/${channel.id}`} primary={channel.name} icon={<InboxIcon />} key={channel.id} />
+        ))}
+      </List>
+    </header>
+  );
 }
 
-class ListItemLink extends React.Component {
-  renderLink = itemProps => <Link to={this.props.to} {...itemProps} />;
+const ListItemLink = (props) => {
+  const history = useHistory();
+  const { icon, primary, secondary } = props;
 
-  render() {
-    const { icon, primary, secondary } = this.props;
-    return (
-      <li>
-        <ListItem button component={this.renderLink}>
-          {icon && <ListItemIcon>{icon}</ListItemIcon>}
-          <ListItemText inset primary={primary} secondary={secondary} />
-        </ListItem>
-      </li>
-    );
+  const handleListItemClick = (e, to) => {
+    history.push(to);
   }
+
+  return (
+    <li>
+      <ListItem button onClick={event => handleListItemClick(event, props.to)}>
+        {icon && <ListItemIcon>{icon}</ListItemIcon>}
+        <ListItemText inset primary={primary} secondary={secondary} />
+      </ListItem>
+    </li>
+  );
 }
+
+export { NavMenu };

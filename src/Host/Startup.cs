@@ -13,18 +13,15 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.extensions.analysis;
-using tanka.graphql.introspection;
-using tanka.graphql.language;
-using tanka.graphql.schema;
-using tanka.graphql.server;
-using tanka.graphql.server.webSockets;
-using tanka.graphql.server.webSockets.dtos;
-using tanka.graphql.tools;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Extensions.Analysis;
+using Tanka.GraphQL.Language;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.WebSockets;
+using Tanka.GraphQL.Server.WebSockets.DTOs;
+using Tanka.GraphQL.Validation;
 
 namespace tanka.graphql.samples.Host
 {
@@ -40,22 +37,22 @@ namespace tanka.graphql.samples.Host
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddControllers();
             AddForwardedHeaders(services);
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
             services.AddCors(cors =>
+            {
+                cors.AddDefaultPolicy(policy =>
                 {
-                    cors.AddDefaultPolicy(policy =>
-                    {
-                        policy.SetIsOriginAllowed(origin => true);
-                        policy.AllowAnyHeader();
-                        policy.AllowAnyMethod();
-                        policy.AllowCredentials();
-                    });
+                    policy.SetIsOriginAllowed(origin => true);
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                    policy.AllowCredentials();
                 });
+            });
 
             // signalr authentication
             services.AddAuthentication()
@@ -89,10 +86,13 @@ namespace tanka.graphql.samples.Host
                                 var message = messageContext.Context?.Message;
 
                                 if (message?.Type == MessageType.GQL_CONNECTION_INIT)
-                                    accessToken = messageContext.Context?.Message
-                                        .Payload
-                                        .SelectToken("authorization")
-                                        .ToString();
+                                {
+                                    if (messageContext.Context?.Message.Payload is Dictionary<string, object> payload 
+                                        && payload.ContainsKey("authorization"))
+                                    {
+                                        accessToken = payload["authorization"].ToString();
+                                    }
+                                }
                             }
 
                             // Read the token out of the query string
@@ -195,7 +195,7 @@ namespace tanka.graphql.samples.Host
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseForwardedHeaders();
             app.UseCors();
@@ -216,16 +216,23 @@ namespace tanka.graphql.samples.Host
 
             // use authenication
             app.UseAuthentication();
-
-            // use signalr server hub
-            app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
-                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
+            app.UseAuthorization();
+            app.UseRouting();
 
             // use websockets server
             app.UseWebSockets();
             app.UseTankaWebSocketServer(new WebSocketServerOptions
             {
                 Path = "/api/graphql"
+            });
+
+            app.UseEndpoints(routes =>
+            {
+                routes.MapTankaServerHub("/hubs/graphql",
+                    options =>
+                    {
+                        options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
+                    });
             });
         }
 

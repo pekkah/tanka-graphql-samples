@@ -3,11 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using tanka.graphql.introspection;
-using tanka.graphql.requests;
-using tanka.graphql.schema;
-using tanka.graphql.tools;
-using tanka.graphql.type;
+using Tanka.GraphQL.Introspection;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.Links;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
 
 namespace tanka.graphql.samples.Host
 {

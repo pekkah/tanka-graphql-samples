@@ -1,18 +1,15 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQLParser.AST;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
-using Newtonsoft.Json;
-using tanka.graphql.language;
-using tanka.graphql.links;
-using tanka.graphql.requests;
+using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Server.Links;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace tanka.graphql.samples.Host
 {
@@ -23,6 +20,13 @@ namespace tanka.graphql.samples.Host
             return RemoteLinks.SignalR(cancellationToken =>
             {
                 var connection = new HubConnectionBuilder()
+                    .AddJsonProtocol(options =>
+                    {
+                        options
+                            .PayloadSerializerOptions
+                            .Converters
+                            .Add(new ObjectDictionaryConverter());
+                    })
                     .WithUrl(url, configure =>
                     {
                         configure.AccessTokenProvider = () =>
@@ -48,6 +52,13 @@ namespace tanka.graphql.samples.Host
             var signalr = RemoteLinks.SignalR(cancellationToken =>
             {
                 var connection = new HubConnectionBuilder()
+                    .AddJsonProtocol(options =>
+                    {
+                        options
+                            .PayloadSerializerOptions
+                            .Converters
+                            .Add(new ObjectDictionaryConverter());
+                    })
                     .WithUrl(hubUrl, configure =>
                     {
                         configure.AccessTokenProvider = () =>
@@ -60,7 +71,10 @@ namespace tanka.graphql.samples.Host
                         };
                     })
                     .Build();
-
+                connection.Closed += delegate(Exception exception)
+                {
+                    return Task.CompletedTask;
+                };
                 return Task.FromResult(connection);
             });
 
@@ -74,6 +88,10 @@ namespace tanka.graphql.samples.Host
                         accessor.HttpContext?.User.FindFirstValue("access_token"));
 
                     return request;
+                },
+                transformResponse: response =>
+                {
+                    return HttpLink.DefaultTransformResponse(response);
                 });
 
             return async (document, variables, token) =>

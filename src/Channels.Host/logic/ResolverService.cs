@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.channels.host.logic
 {

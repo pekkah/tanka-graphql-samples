@@ -1,28 +1,29 @@
-﻿using tanka.graphql.resolvers;
+﻿using Tanka.GraphQL;
+using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.messages.host.logic
 {
-    public class Resolvers : ResolverMap
+    public class Resolvers : ObjectTypeMap
     {
         public Resolvers(ResolverService resolver)
         {
             // roots
-            this["Query"] = new FieldResolverMap
+            this["Query"] = new FieldResolversMap()
             {
                 {"messages", resolver.ChannelMessages}
             };
 
-            this["Mutation"] = new FieldResolverMap()
+            this["Mutation"] = new FieldResolversMap
             {
                 {"postMessage", resolver.PostMessage}
             };
 
-            this["Subscription"] = new FieldResolverMap()
+            this["Subscription"] = new FieldResolversMap
             {
                 {"messageAdded", resolver.SubscribeToChannel, resolver.Message}
             };
 
-            this["Message"] = new FieldResolverMap
+            this["Message"] = new FieldResolversMap
             {
                 {"id", Resolve.PropertyOf<Message>(m => m.Id)},
                 {"channelId", Resolve.PropertyOf<Message>(m => m.Id)},

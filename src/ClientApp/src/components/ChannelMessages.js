@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
+import { useQuery, useSubscription } from "@apollo/react-hooks";
 import { withStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import Avatar from '@material-ui/core/Avatar';
@@ -35,43 +35,44 @@ const MESSAGES_SUBSCRIPTION = gql`
   }
 `;
 
-class ChannelMessages extends Component {
-  constructor(props) {
-    super(props);
-    this.messages = [];
-  }
+const ChannelMessages = (props) => {
+  const { id } = props;
+  const { loading, error, data, subscribeToMore } = useQuery(GET_MESSAGES, {
+    variables: {
+      channelId: id
+    }
+  });
 
-  render() {
-    const { id } = this.props;
-    return (
-      <Query query={GET_MESSAGES} variables={{ channelId: id }}>
-        {({ subscribeToMore, ...result }) => (
-          <MessageList
-            {...result}
-            subscribeToNewMessages={() =>
-              subscribeToMore({
-                document: MESSAGES_SUBSCRIPTION,
-                variables: { channelId: id },
-                updateQuery: (prev, { subscriptionData }) => {
-                  if (!subscriptionData.data) return prev;
-                  if (!subscriptionData.data.messageAdded) return prev;
+  if (error)
+    return <p>{error}</p>;
 
-                  const newMessage = subscriptionData.data.messageAdded;
+  if (loading)
+    return <p>Loading</p>;
 
-                  let messages = [];
-                  if (prev.messages !== undefined) messages = prev.messages;
+  return (
+    <MessageList
+      {...data}
+      subscribeToNewMessages={() =>
+        subscribeToMore({
+          document: MESSAGES_SUBSCRIPTION,
+          variables: { channelId: id },
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) return prev;
+            if (!subscriptionData.data.messageAdded) return prev;
 
-                  return Object.assign({}, prev, {
-                    messages: [...messages, newMessage]
-                  });
-                }
-              })
-            }
-          />
-        )}
-      </Query>
-    );
-  }
+            const newMessage = subscriptionData.data.messageAdded;
+
+            let messages = [];
+            if (prev.messages !== undefined) messages = prev.messages;
+
+            return Object.assign({}, prev, {
+              messages: [...messages, newMessage]
+            });
+          }
+        })
+      }
+    />
+  )
 }
 
 export { ChannelMessages };
@@ -81,49 +82,44 @@ var channelMessagesStyles = theme => ({
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2
-    },
+  },
   avatar: {
     width: 48,
     height: 48,
-    margin:10
-    },
+    margin: 10
+  },
 });
 
-const MessageList = withStyles(channelMessagesStyles)(
-  class extends Component {
-    componentDidMount() {
-      this.props.subscribeToNewMessages();
-    }
+const MessageList = withStyles(channelMessagesStyles)((props) => {
 
-    render() {
-      const {
-        loading,
-        data: { messages },
-        classes
-      } = this.props;
+  useEffect(()=> {
+    const unsubscribe = props.subscribeToNewMessages();
+    return () => unsubscribe();
+  }, [props.subscribeToNewMessages])
 
-      if (loading) return <span>Loading..</span>;
+  const {
+    messages,
+    classes
+  } = props;
 
-      return (
-        <div>
-          <List>
-            {messages &&
-              messages.map(message => (
-                  <ListItem key={message.id}>
-                      <Grid container>
-                          <Avatar className={classes.avatar} src={message.profileUrl} />
-                          <Paper className={classes.root} elevation={1}>
-                            <Typography variant="caption" component="h6">
-                              {message.from} - {message.timestamp}
-                            </Typography>
-                            <Typography component="p">{message.content}</Typography>
-                          </Paper>
-                      </Grid>
-                  </ListItem>
-              ))}
-          </List>
-        </div>
-      );
-    }
-  }
-);
+  return (
+    <div>
+      <List>
+        {messages &&
+          messages.map(message => (
+            <ListItem key={message.id}>
+              <Grid container>
+                <Avatar className={classes.avatar} src={message.profileUrl} />
+                <Paper className={classes.root} elevation={1}>
+                  <Typography variant="caption" component="h6">
+                    {message.from} - {message.timestamp}
+                  </Typography>
+                  <Typography component="p">{message.content}</Typography>
+                </Paper>
+              </Grid>
+            </ListItem>
+          ))}
+      </List>
+    </div>
+  );
+});

@@ -2,9 +2,8 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
-using tanka.graphql.schema;
-using tanka.graphql.sdl;
-using tanka.graphql.type;
+using Tanka.GraphQL.SchemaBuilding;
+using Tanka.GraphQL.SDL;
 
 namespace tanka.graphql.samples.messages.host.logic
 {
@@ -32,7 +31,7 @@ namespace tanka.graphql.samples.messages.host.logic
 
             using var reader =
                 new StreamReader(resourceStream ?? throw new InvalidOperationException(), Encoding.UTF8);
-            
+
             return reader.ReadToEnd();
         }
     }

@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using tanka.graphql.requests;
-using tanka.graphql.server;
+using Tanka.GraphQL;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.Links.DTOs;
 
 namespace tanka.graphql.samples.channels.host.api
 {

@@ -23,17 +23,11 @@ probes:
 
 ingress:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-  path: /api(/|$)(.*)
+  entryPoints:
+    - websecure
+  path: /api
   hosts:
-  - chat.tanka-samples.heikura.me
-  tls:
-    - secretName: tls-samples-chat
-      hosts:
-      - chat.tanka-samples.heikura.me
+  - tanka-chat.heikura.me
 
 secrets:
   # Optionally specify a set of secret objects whose values
