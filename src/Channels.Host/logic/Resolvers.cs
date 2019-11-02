@@ -1,20 +1,21 @@
-﻿using tanka.graphql.resolvers;
+﻿using Tanka.GraphQL;
+using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.channels.host.logic
 {
-    public class Resolvers : ResolverMap
+    public class Resolvers :ObjectTypeMap
     {
         public Resolvers(ResolverService resolver)
         {
             // roots
-            this["Query"] = new FieldResolverMap
+            this["Query"] = new FieldResolversMap()
             {
                 {"channels", resolver.Channels},
-                {"channel", resolver.Channel},
+                {"channel", resolver.Channel}
             };
 
             // domain
-            this["Channel"] = new FieldResolverMap
+            this["Channel"] = new FieldResolversMap
             {
                 {"id", Resolve.PropertyOf<Channel>(c => c.Id)},
                 {"name", Resolve.PropertyOf<Channel>(c => c.Name)}

@@ -1,6 +1,6 @@
 import auth0 from "auth0-js";
 
-const config = window.CONFIG;
+const config = window.CONFIG || {};
 console.debug("CONFIG", config);
 
 class Auth {

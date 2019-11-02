@@ -7,8 +7,10 @@ import { WebSocketLink } from "apollo-link-ws";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import auth from "../auth";
 
+const gw = (window.CONFIG && window.CONFIG.gw) || process.env.REACT_APP_HOST;
+
 export default function clientFactory() {
-  const host = window.CONFIG.gw.replace("https", "wss").replace("http", "ws");
+  const host = gw.replace("https", "wss").replace("http", "ws");
   const wsClient = new SubscriptionClient(`${host}/api/graphql`, {
     reconnect: true,
     connectionParams: () => ({

@@ -19,8 +19,10 @@ var options = {
   }
 };
 
+const gw = (window.CONFIG && window.CONFIG.gw) || process.env.REACT_APP_HOST;
+
 export default function clientFactory() {
-  const serverClient = new TankaClient(`${window.CONFIG.gw}/hubs/graphql`, options);
+  const serverClient = new TankaClient(`${gw}/hubs/graphql`, options);
   const serverLink = new TankaLink(serverClient);
 
   const client = new ApolloClient({

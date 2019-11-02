@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,16 +7,17 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using tanka.graphql.extensions.analysis;
+using Tanka.GraphQL.Extensions.Analysis;
 using tanka.graphql.samples.channels.host.logic;
-using tanka.graphql.server;
-using tanka.graphql.tools;
-using tanka.graphql.type;
-using tanka.graphql.validation;
+using Tanka.GraphQL.Server;
+using Tanka.GraphQL.Server.Links.DTOs;
+using Tanka.GraphQL.Tools;
+using Tanka.GraphQL.TypeSystem;
+using Tanka.GraphQL.Validation;
 
 namespace tanka.graphql.samples.channels.host
 {
@@ -32,10 +32,13 @@ namespace tanka.graphql.samples.channels.host
 
         public void ConfigureServices(IServiceCollection services)
         {
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
+            services.AddControllers()
+                .AddJsonOptions(options =>
+            {
+                // required to serialize 
+                options.JsonSerializerOptions.Converters
+                    .Add(new ObjectDictionaryConverter());
+            });
 
             AddForwardedHeaders(services);
 
@@ -127,19 +130,28 @@ namespace tanka.graphql.samples.channels.host
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseForwardedHeaders();
 
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseRouting();
 
             // use signalr server hub
-            app.UseSignalR(routes => routes.MapTankaServerHub("/hubs/graphql",
-                options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); }));
+            app.UseEndpoints(routes =>
+            {
+                routes.MapTankaServerHub("/hubs/graphql",
+                    options =>
+                    {
+                        options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
+                    });
 
-            app.UseMvc();
+                routes.MapControllers();
+            });
         }
 
         private void AddForwardedHeaders(IServiceCollection services)

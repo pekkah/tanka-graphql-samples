@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using tanka.graphql.channels;
-using tanka.graphql.resolvers;
+using Tanka.GraphQL;
+using Tanka.GraphQL.Channels;
+using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.messages.host.logic
 {
@@ -20,7 +21,8 @@ namespace tanka.graphql.samples.messages.host.logic
             _messageAdded = new EventChannel<Message>();
         }
 
-        public async Task<Message> PostMessageAsync(int channelId, string from, string profileUrl, InputMessage inputMessage)
+        public async Task<Message> PostMessageAsync(int channelId, string from, string profileUrl,
+            InputMessage inputMessage)
         {
             var message = new Message
             {
@@ -53,9 +55,14 @@ namespace tanka.graphql.samples.messages.host.logic
         }
     }
 
-    public class InputMessage
+    public class InputMessage : IReadFromObjectDictionary
     {
         public string Content { get; set; }
+
+        public void Read(IReadOnlyDictionary<string, object> source)
+        {
+            Content = source.GetValue<string>("content", null);
+        }
     }
 
     public class Message

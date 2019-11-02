@@ -12,10 +12,7 @@ namespace tanka.graphql.samples.Host
     {
         public static async Task<bool> AuthorizeAsync(HttpContext context, IList<IAuthorizeData> policies)
         {
-            if (policies.Count == 0)
-            {
-                return true;
-            }
+            if (policies.Count == 0) return true;
 
             var policyProvider = context.RequestServices.GetRequiredService<IAuthorizationPolicyProvider>();
 
@@ -26,41 +23,30 @@ namespace tanka.graphql.samples.Host
             // This will set context.User if required
             var authenticateResult = await policyEvaluator.AuthenticateAsync(authorizePolicy, context);
 
-            var authorizeResult = await policyEvaluator.AuthorizeAsync(authorizePolicy, authenticateResult, context, resource: null);
-            if (authorizeResult.Succeeded)
-            {
-                return true;
-            }
-            else if (authorizeResult.Challenged)
+            var authorizeResult =
+                await policyEvaluator.AuthorizeAsync(authorizePolicy, authenticateResult, context, null);
+            if (authorizeResult.Succeeded) return true;
+
+            if (authorizeResult.Challenged)
             {
                 if (authorizePolicy.AuthenticationSchemes.Count > 0)
-                {
                     foreach (var scheme in authorizePolicy.AuthenticationSchemes)
-                    {
                         await context.ChallengeAsync(scheme);
-                    }
-                }
                 else
-                {
                     await context.ChallengeAsync();
-                }
                 return false;
             }
-            else if (authorizeResult.Forbidden)
+
+            if (authorizeResult.Forbidden)
             {
                 if (authorizePolicy.AuthenticationSchemes.Count > 0)
-                {
                     foreach (var scheme in authorizePolicy.AuthenticationSchemes)
-                    {
                         await context.ForbidAsync(scheme);
-                    }
-                }
                 else
-                {
                     await context.ForbidAsync();
-                }
                 return false;
             }
+
             return false;
         }
     }
