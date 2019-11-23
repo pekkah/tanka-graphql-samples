@@ -13,13 +13,13 @@ namespace tanka.graphql.samples.channels.host.logic
             _channels = channels;
         }
 
-        public override async ValueTask<IEnumerable<Channel>> Channels(Query objectValue, IResolverContext context)
+        public override async ValueTask<IEnumerable<Channel>> Channels(Query? objectValue, IResolverContext context)
         {
             var channels = await _channels.GetChannelsAsync();
             return channels;
         }
 
-        public override async ValueTask<Channel?> Channel(Query objectValue, string channelId, IResolverContext context)
+        public override async ValueTask<Channel?> Channel(Query? objectValue, int channelId, IResolverContext context)
         {
             var channel = await _channels.GetChannelAsync(channelId);
             return channel;

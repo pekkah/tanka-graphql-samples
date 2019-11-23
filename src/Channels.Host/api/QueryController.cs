@@ -26,7 +26,7 @@ namespace tanka.graphql.samples.channels.host.api
             {
                 Document = Parser.ParseDocument(request.Query),
                 Variables = request.Variables,
-                OperationName = request.OperationName
+                OperationName = request.OperationName,
             }, Request.HttpContext.RequestAborted);
 
             var result = await stream.Reader.ReadAsync();

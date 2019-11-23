@@ -3,13 +3,13 @@
 ) on FIELD_DEFINITION
 
 type Channel {
-    id: ID!
+    id: Int!
 	name: String!
 }
 
 type Query {
-	channels: [Channel!]! @gen(asAbstract: true)
-	channel(channelId: ID!): Channel
+	channels: [Channel!]!
+	channel(channelId: Int!): Channel
 }
 
 schema {

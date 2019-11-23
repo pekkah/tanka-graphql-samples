@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Tanka.GraphQL;
 using Tanka.GraphQL.Extensions.Analysis;
 using tanka.graphql.samples.channels.host.logic;
 using Tanka.GraphQL.Server;
@@ -110,9 +111,9 @@ namespace tanka.graphql.samples.channels.host
             //todo: generator should provide helper for this
             services.AddTransient<IQueryController, QueryController>();
             services.AddTransient<IChannelController, ChannelController>();
-            services.AddTankaServerExecutionContextExtension<IQueryController>();
-            services.AddTankaServerExecutionContextExtension<IChannelController>();
-
+            services.AddSingleton<IExecutorExtension, ContextExtension<IQueryController>>();
+            services.AddSingleton<IExecutorExtension, ContextExtension<IChannelController>>();
+            
             services.AddTankaSchemaOptions()
                 .Configure<IHttpContextAccessor>((options, accessor) =>
                 {

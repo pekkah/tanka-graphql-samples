@@ -12,12 +12,12 @@ namespace tanka.graphql.samples.channels.host.logic
         {
             _channels.Add(new Channel
             {
-                Id = "1",
+                Id = 1,
                 Name = "General"
             });
         }
 
-        public Task<Channel> GetChannelAsync(string channelId)
+        public Task<Channel> GetChannelAsync(int channelId)
         {
             var channel = _channels.SingleOrDefault(c => c.Id == channelId);
             return Task.FromResult(channel);
@@ -26,6 +26,13 @@ namespace tanka.graphql.samples.channels.host.logic
         public Task<IEnumerable<Channel>> GetChannelsAsync()
         {
             return Task.FromResult(_channels.AsEnumerable());
+        }
+    }
+
+    public partial class Channel
+    {
+        public Channel()
+        {
         }
     }
 }
