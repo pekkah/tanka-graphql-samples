@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Tanka.GraphQL.Extensions.Analysis;
@@ -93,10 +94,7 @@ namespace tanka.graphql.samples.channels.host
                 provider =>
                 {
                     var schemaBuilder = SchemaLoader.Load();
-
-                    var chat = new Channels();
-                    var service = new ResolverService(chat);
-                    var resolvers = new Resolvers(service);
+                    var resolvers = new SchemaResolvers();
 
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                         schemaBuilder,
@@ -105,6 +103,15 @@ namespace tanka.graphql.samples.channels.host
 
                     return schema;
                 });
+
+            // Channels are singleton
+            services.AddSingleton<Channels>();
+
+            //todo: generator should provide helper for this
+            services.AddTransient<IQueryController, QueryController>();
+            services.AddTransient<IChannelController, ChannelController>();
+            services.AddTankaServerExecutionContextExtension<IQueryController>();
+            services.AddTankaServerExecutionContextExtension<IChannelController>();
 
             services.AddTankaSchemaOptions()
                 .Configure<IHttpContextAccessor>((options, accessor) =>

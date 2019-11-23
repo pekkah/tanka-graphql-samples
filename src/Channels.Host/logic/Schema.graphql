@@ -1,11 +1,15 @@
-﻿type Channel {
+﻿directive @gen(
+	asAbstract: Boolean!
+) on FIELD_DEFINITION
+
+type Channel {
     id: ID!
 	name: String!
 }
 
 type Query {
-	channels: [Channel!]!
-	channel(channelId: Int!): Channel
+	channels: [Channel!]! @gen(asAbstract: true)
+	channel(channelId: ID!): Channel
 }
 
 schema {
