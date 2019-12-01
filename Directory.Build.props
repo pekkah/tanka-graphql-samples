@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <Project>
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
-    <!--<NullableContextOptions>enable</NullableContextOptions> -->
+    <Authors>Pekka Heikura &lt;pekkah@gmail.com&gt;</Authors>
     <Copyright>Pekka Heikura</Copyright>
-    <Authors>Pekka Heikura</Authors>
+    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Description>Sample usage of Tanka GraphQL</Description>
+    <PackageTags>graphql,tanka,demo,sample</PackageTags>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>
