@@ -12,13 +12,13 @@ namespace tanka.graphql.samples.channels.host.logic
             _channels = channels;
         }
 
-        public async ValueTask<IResolveResult> Channels(ResolverContext context)
+        public async ValueTask<IResolverResult> Channels(IResolverContext context)
         {
             var channels = await _channels.GetChannelsAsync();
             return Resolve.As(channels);
         }
 
-        public async ValueTask<IResolveResult> Channel(ResolverContext context)
+        public async ValueTask<IResolverResult> Channel(IResolverContext context)
         {
             var channelId = (int) context.Arguments["channelId"];
             var channel = await _channels.GetChannelAsync(channelId);
