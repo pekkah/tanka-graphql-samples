@@ -43,7 +43,7 @@ namespace tanka.graphql.samples.messages.host.logic
             return Task.FromResult(_messages.AsEnumerable());
         }
 
-        public ISubscribeResult Join(int channelId, CancellationToken unsubscribe)
+        public ISubscriberResult Join(int channelId, CancellationToken unsubscribe)
         {
             var result = _messageAdded.Subscribe(unsubscribe);
             return result;

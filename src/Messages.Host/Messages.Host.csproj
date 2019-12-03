@@ -20,8 +20,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.0.0" />
-    <PackageReference Include="tanka.graphql" Version="0.11.0" />
-    <PackageReference Include="tanka.graphql.server" Version="0.11.0" />
+    <PackageReference Include="tanka.graphql" Version="0.13.0-beta.16" />
+    <PackageReference Include="tanka.graphql.server" Version="0.13.0-beta.16" />
   </ItemGroup>
 
 </Project>

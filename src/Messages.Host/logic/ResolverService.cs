@@ -14,7 +14,7 @@ namespace tanka.graphql.samples.messages.host.logic
             _channels = channels;
         }
 
-        public async ValueTask<IResolveResult> ChannelMessages(ResolverContext context)
+        public async ValueTask<IResolverResult> ChannelMessages(IResolverContext context)
         {
             var channelId = (int) context.Arguments["channelId"];
 
@@ -22,7 +22,7 @@ namespace tanka.graphql.samples.messages.host.logic
             return Resolve.As(messages);
         }
 
-        public async ValueTask<IResolveResult> PostMessage(ResolverContext context)
+        public async ValueTask<IResolverResult> PostMessage(IResolverContext context)
         {
             var channelId = (int) context.Arguments["channelId"];
             var inputMessage = context.GetObjectArgument<InputMessage>("message");
@@ -40,15 +40,15 @@ namespace tanka.graphql.samples.messages.host.logic
             return Resolve.As(message);
         }
 
-        public ValueTask<ISubscribeResult> SubscribeToChannel(ResolverContext context, CancellationToken unsubscribe)
+        public ValueTask<ISubscriberResult> SubscribeToChannel(IResolverContext context, CancellationToken unsubscribe)
         {
             var channelId = (int) context.Arguments["channelId"];
-            return new ValueTask<ISubscribeResult>(_channels.Join(channelId, unsubscribe));
+            return new ValueTask<ISubscriberResult>(_channels.Join(channelId, unsubscribe));
         }
 
-        public ValueTask<IResolveResult> Message(ResolverContext context)
+        public ValueTask<IResolverResult> Message(IResolverContext context)
         {
-            return new ValueTask<IResolveResult>(Resolve.As(context.ObjectValue));
+            return new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue));
         }
     }
 }
