@@ -106,27 +106,21 @@ namespace tanka.graphql.samples.channels.host
                     return schema;
                 });
 
-            services.AddTankaSchemaOptions()
-                .Configure<IHttpContextAccessor>((options, accessor) =>
+            services.AddTankaGraphQL()
+                .ConfigureSchema<IHttpContextAccessor>((accessor) => new ValueTask<ISchema>(accessor
+                    .HttpContext
+                    .RequestServices
+                    .GetRequiredService<ISchema>()))
+                .ConfigureRules(rules => rules.Concat(new[]
                 {
-                    options.ValidationRules = ExecutionRules.All
-                        .Concat(new[]
-                        {
-                            CostAnalyzer.MaxCost(
-                                100
-                            )
-                        }).ToArray();
-
-                    options.GetSchema
-                        = query => new ValueTask<ISchema>(accessor
-                            .HttpContext
-                            .RequestServices
-                            .GetRequiredService<ISchema>());
-                });
+                    CostAnalyzer.MaxCost(
+                        100
+                    )
+                }).ToArray());
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddTankaServerHubWithTracing();
+                .AddTankaGraphQL();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -136,15 +130,14 @@ namespace tanka.graphql.samples.channels.host
 
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseRouting();
 
             // use signalr server hub
             app.UseEndpoints(routes =>
             {
-                routes.MapTankaServerHub("/hubs/graphql",
+                routes.MapTankaGraphQLSignalR("/hubs/graphql",
                     options =>
                     {
                         options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
