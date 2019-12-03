@@ -130,39 +130,23 @@ namespace tanka.graphql.samples.Host
             services.AddMemoryCache();
 
             // add execution options
-            services.AddTankaSchemaOptions()
-                .Configure<ILogger<Startup>, SchemaCache>((options, logger, cache) =>
+            services.AddTankaGraphQL()
+                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd(null))
+                .ConfigureRules<ILogger<Startup>>((rules, logger) => rules.Concat(new[]
                 {
-                    options.ValidationRules = ExecutionRules.All
-                        .Concat(new[]
+                    CostAnalyzer.MaxCost(
+                        100,
+                        1,
+                        onCalculated: operation =>
                         {
-                            CostAnalyzer.MaxCost(
-                                100,
-                                1,
-                                onCalculated: operation =>
-                                {
-                                    logger.LogInformation(
-                                        $"Operation '{operation.Operation.ToGraphQL()}' costs " +
-                                        $"'{operation.Cost}' (max: '{operation.MaxCost}')");
-                                }
-                            )
-                        }).ToArray();
-
-                    options.GetSchema
-                        = async query => await cache.GetOrAdd(query);
-                });
-
-
-            // add signalr
-            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddTankaServerHubWithTracing();
-
-
-            services.AddTankaWebSocketServerWithTracing()
-                .Configure<IHttpContextAccessor>(
-                    (options,
-                        accessor
-                    ) => options.AcceptAsync = async context =>
+                            logger.LogInformation(
+                                $"Operation '{operation.Operation.ToGraphQL()}' costs " +
+                                $"'{operation.Cost}' (max: '{operation.MaxCost}')");
+                        }
+                    )
+                }).ToArray())
+                .ConfigureWebSockets<IHttpContextAccessor>(
+                    async (context, accessor) =>
                     {
                         var succeeded = await AuthorizeHelper.AuthorizeAsync(
                             accessor.HttpContext,
@@ -192,6 +176,12 @@ namespace tanka.graphql.samples.Host
                             context.Output.Complete();
                         }
                     });
+
+
+            // add signalr
+            services.AddSignalR(options => { options.EnableDetailedErrors = true; })
+                .AddTankaGraphQL();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -214,21 +204,17 @@ namespace tanka.graphql.samples.Host
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            // use authenication
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseRouting();
 
             // use websockets server
             app.UseWebSockets();
-            app.UseTankaWebSocketServer(new WebSocketServerOptions
-            {
-                Path = "/api/graphql"
-            });
+            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             app.UseEndpoints(routes =>
             {
-                routes.MapTankaServerHub("/hubs/graphql",
+                routes.MapTankaGraphQLSignalR("/hubs/graphql",
                     options =>
                     {
                         options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
