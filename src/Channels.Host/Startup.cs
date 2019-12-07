@@ -9,10 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Tanka.GraphQL;
 using Tanka.GraphQL.Extensions.Analysis;
 using tanka.graphql.samples.channels.host.logic;
 using Tanka.GraphQL.Server;
@@ -95,7 +93,10 @@ namespace tanka.graphql.samples.channels.host
                 provider =>
                 {
                     var schemaBuilder = SchemaLoader.Load();
-                    var resolvers = new SchemaResolvers();
+
+                    var chat = new Channels();
+                    var service = new ResolverService(chat);
+                    var resolvers = new Resolvers(service);
 
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                         schemaBuilder,
@@ -105,36 +106,21 @@ namespace tanka.graphql.samples.channels.host
                     return schema;
                 });
 
-            // Channels are singleton
-            services.AddSingleton<Channels>();
-
-            //todo: generator should provide helper for this
-            services.AddTransient<IQueryController, QueryController>();
-            services.AddTransient<IChannelController, ChannelController>();
-            services.AddSingleton<IExecutorExtension, ContextExtension<IQueryController>>();
-            services.AddSingleton<IExecutorExtension, ContextExtension<IChannelController>>();
-            
-            services.AddTankaSchemaOptions()
-                .Configure<IHttpContextAccessor>((options, accessor) =>
+            services.AddTankaGraphQL()
+                .ConfigureSchema<IHttpContextAccessor>((accessor) => new ValueTask<ISchema>(accessor
+                    .HttpContext
+                    .RequestServices
+                    .GetRequiredService<ISchema>()))
+                .ConfigureRules(rules => rules.Concat(new[]
                 {
-                    options.ValidationRules = ExecutionRules.All
-                        .Concat(new[]
-                        {
-                            CostAnalyzer.MaxCost(
-                                100
-                            )
-                        }).ToArray();
-
-                    options.GetSchema
-                        = query => new ValueTask<ISchema>(accessor
-                            .HttpContext
-                            .RequestServices
-                            .GetRequiredService<ISchema>());
-                });
+                    CostAnalyzer.MaxCost(
+                        100
+                    )
+                }).ToArray());
 
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
-                .AddTankaServerHubWithTracing();
+                .AddTankaGraphQL();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -144,15 +130,14 @@ namespace tanka.graphql.samples.channels.host
 
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseRouting();
 
             // use signalr server hub
             app.UseEndpoints(routes =>
             {
-                routes.MapTankaServerHub("/hubs/graphql",
+                routes.MapTankaGraphQLSignalR("/hubs/graphql",
                     options =>
                     {
                         options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
