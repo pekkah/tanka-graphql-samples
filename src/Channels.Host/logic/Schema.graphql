@@ -1,5 +1,11 @@
-﻿type Channel {
-    id: ID!
+﻿directive @gen(
+	asAbstract: Boolean! = false,
+	asProperty: Boolean! = false,
+	clrType: String = null
+) on FIELD_DEFINITION
+
+type Channel {
+    id: Int!
 	name: String!
 }
 

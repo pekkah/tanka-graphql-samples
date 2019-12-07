@@ -3,6 +3,9 @@ WORKDIR /app
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
+COPY [".config", ""]
+RUN dotnet tool restore
+
 WORKDIR /src
 COPY ["src/Channels.Host/Channels.Host.csproj", "src/Channels.Host/"]
 

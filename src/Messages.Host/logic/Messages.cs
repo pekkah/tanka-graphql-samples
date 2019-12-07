@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,35 +52,5 @@ namespace tanka.graphql.samples.messages.host.logic
         {
             return _nextMessageId++;
         }
-    }
-
-    public class InputMessage : IReadFromObjectDictionary
-    {
-        public string Content { get; set; }
-
-        public void Read(IReadOnlyDictionary<string, object> source)
-        {
-            Content = source.GetValue<string>("content", null);
-        }
-    }
-
-    public class Message
-    {
-        public Message()
-        {
-            Timestamp = DateTimeOffset.UtcNow;
-        }
-
-        public DateTimeOffset? Timestamp { get; set; }
-
-        public int Id { get; set; }
-
-        public string Content { get; set; }
-
-        public int ChannelId { get; set; }
-
-        public string From { get; set; }
-
-        public string ProfileUrl { get; set; }
     }
 }

@@ -89,14 +89,14 @@ namespace tanka.graphql.samples.channels.host
             services.AddHttpContextAccessor();
 
             // add schema
+            services.AddScoped<IQueryController, QueryController>();
+            services.AddScoped<IChannelController, ChannelController>();
+            services.AddSingleton<Channels>();
             services.AddSingleton(
                 provider =>
                 {
                     var schemaBuilder = SchemaLoader.Load();
-
-                    var chat = new Channels();
-                    var service = new ResolverService(chat);
-                    var resolvers = new Resolvers(service);
+                    var resolvers = new SchemaResolvers();
 
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                         schemaBuilder,

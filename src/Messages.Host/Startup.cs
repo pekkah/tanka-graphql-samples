@@ -122,8 +122,10 @@ namespace tanka.graphql.samples.messages.host
 
             // add schema
             services.AddSingleton<Messages>();
-            services.AddSingleton<ResolverService>();
-            services.AddSingleton<Resolvers>();
+            services.AddScoped<IQueryController, QueryController>();
+            services.AddScoped<IMutationController, MutationController>();
+            services.AddScoped<SubscriptionController>();
+            services.AddScoped<IMessageController, MessageController>();
             services.AddSingleton(
                 provider =>
                 {
@@ -147,7 +149,7 @@ namespace tanka.graphql.samples.messages.host
                     });
 
                     // bind the actual field value resolvers and create schema
-                    var resolvers = provider.GetRequiredService<Resolvers>();
+                    var resolvers = new SchemaResolvers();
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
                         schemaBuilder,
                         resolvers,

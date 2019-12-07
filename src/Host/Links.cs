@@ -71,10 +71,7 @@ namespace tanka.graphql.samples.Host
                         };
                     })
                     .Build();
-                connection.Closed += delegate(Exception exception)
-                {
-                    return Task.CompletedTask;
-                };
+
                 return Task.FromResult(connection);
             });
 

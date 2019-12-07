@@ -17,19 +17,6 @@ namespace tanka.graphql.samples.channels.host.logic
             });
         }
 
-        public Task<Channel> CreateChannelAsync(InputChannel inputChannel)
-        {
-            var channel = new Channel
-            {
-                Id = _channels.Count + 1,
-                Name = inputChannel.Name
-            };
-
-            _channels.Add(channel);
-
-            return Task.FromResult(channel);
-        }
-
         public Task<Channel> GetChannelAsync(int channelId)
         {
             var channel = _channels.SingleOrDefault(c => c.Id == channelId);
@@ -42,15 +29,10 @@ namespace tanka.graphql.samples.channels.host.logic
         }
     }
 
-    public class InputChannel
+    public partial class Channel
     {
-        public string Name { get; set; }
-    }
-
-    public class Channel
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
+        public Channel()
+        {
+        }
     }
 }
