@@ -1,5 +1,7 @@
 ﻿directive @gen(
-	asAbstract: Boolean!
+	asAbstract: Boolean! = false,
+	asProperty: Boolean! = false,
+	clrType: String = null
 ) on FIELD_DEFINITION
 
 type Channel {
