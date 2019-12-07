@@ -1,8 +1,14 @@
-﻿type Message {
-	id: ID!
-	channelId: ID!
+﻿directive @gen(
+	asAbstract: Boolean! = false,
+	asProperty: Boolean! = false,
+	clrType: String = null
+) on FIELD_DEFINITION
+
+type Message {
+	id: ID! @gen(clrType: "int")
+	channelId: ID! @gen(clrType: "int")
 	content: String!
-	timestamp: String!
+	timestamp: String! @gen(clrType: "DateTimeOffset")
 	from: String!
 	profileUrl: String
 }
@@ -16,7 +22,7 @@ type Query {
 }
 
 type Mutation {
-    postMessage(channelId: Int!,message: InputMessage!): Message!
+    postMessage(channelId: Int!, message: InputMessage!): Message!
 }
 
 type Subscription {
