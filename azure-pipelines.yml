@@ -19,10 +19,15 @@ steps:
     packageType: 'sdk'
     version: '3.0.x'
 
+- script: dotnet tool restore
+  displayName: Restore tools
+
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+  
 - script: dotnet publish src/Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/build/host
   displayName: Publish host
+  
 #- script: dotnet publish src/Channels.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/channels
 #  displayName: Publish channels
 #- script: dotnet publish src/Messages.Host --configuration $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/messages
