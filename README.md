@@ -2,7 +2,7 @@
 
 Example of using tanka-graphql with Apollo
 
-Live at: https://tanka-chat.heikura.me/
+Live at: https://tanka-chat.heikura.me/ (Might be occassionally down for maintenance)
 
 
 ## Projects
@@ -19,9 +19,10 @@ from Channels and Messages services.
 ## Requirements
 
 - nodeJS
-- latest VS 2017 or 2019 (or just use command prompt and VS Code)
-- dotnet SDK 2.2
+- latest VS 2019 (or just use command prompt and VS Code)
+- dotnet SDK 3.0
 - Auth0 tenant with SPA and API applications created
+- tanka.graphql.generator.tool installed (run `dotnet tool restore`)
 
 
 ## Run the sample
