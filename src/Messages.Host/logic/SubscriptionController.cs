@@ -19,16 +19,10 @@ namespace tanka.graphql.samples.messages.host.logic
             return new ValueTask<ISubscriberResult>(_channels.Join(channelId, unsubscribe));
         }
 
-        public override ValueTask<IResolverResult> MessageAdded(IResolverContext context)
+        public override ValueTask<Message> MessageAdded(object objectValue, int channelId, IResolverContext context)
         {
-            var message = context.ObjectValue as Message;
-            return ResolveSync.As(message);
-        }
-
-        public override ValueTask<Message> MessageAdded(Subscription objectValue, int channelId, IResolverContext context)
-        {
-            //todo: bug in generator
-            throw new System.NotImplementedException();
+            var message = (Message)context.ObjectValue;
+            return new ValueTask<Message>(message);
         }
     }
 }
