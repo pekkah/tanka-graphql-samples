@@ -4,7 +4,7 @@ using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.messages.host.logic
 {
-    public class SubscriptionController
+    public class SubscriptionController : SubscriptionControllerBase<Subscription>
     {
         private readonly Messages _channels;
 
@@ -13,15 +13,22 @@ namespace tanka.graphql.samples.messages.host.logic
             _channels = channels;
         }
 
-        public ValueTask<ISubscriberResult> MessageAdded(IResolverContext context, CancellationToken unsubscribe)
+        public override ValueTask<ISubscriberResult> MessageAdded(Subscription objectValue, int channelId, CancellationToken unsubscribe,
+            IResolverContext context)
         {
-            var channelId = (int) context.Arguments["channelId"];
             return new ValueTask<ISubscriberResult>(_channels.Join(channelId, unsubscribe));
         }
 
-        public ValueTask<IResolverResult> Message(IResolverContext context)
+        public override ValueTask<IResolverResult> MessageAdded(IResolverContext context)
         {
-            return new ValueTask<IResolverResult>(Resolve.As(context.ObjectValue));
+            var message = context.ObjectValue as Message;
+            return ResolveSync.As(message);
+        }
+
+        public override ValueTask<Message> MessageAdded(Subscription objectValue, int channelId, IResolverContext context)
+        {
+            //todo: bug in generator
+            throw new System.NotImplementedException();
         }
     }
 }

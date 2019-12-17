@@ -124,7 +124,7 @@ namespace tanka.graphql.samples.messages.host
             services.AddSingleton<Messages>();
             services.AddScoped<IQueryController, QueryController>();
             services.AddScoped<IMutationController, MutationController>();
-            services.AddScoped<SubscriptionController>();
+            services.AddScoped<ISubscriptionController, SubscriptionController>();
             services.AddScoped<IMessageController, MessageController>();
             services.AddSingleton(
                 provider =>
