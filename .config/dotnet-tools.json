@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "tanka.graphql.generator.tool": {
-      "version": "0.5.1-beta.6",
+      "version": "0.7.2-beta.2",
       "commands": [
         "dotnet-tanka-graphql"
       ]

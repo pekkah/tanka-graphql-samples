@@ -90,7 +90,7 @@ namespace tanka.graphql.samples.Host
                                     if (messageContext.Context?.Message.Payload is Dictionary<string, object> payload 
                                         && payload.ContainsKey("authorization"))
                                     {
-                                        accessToken = payload["authorization"].ToString();
+                                        accessToken = payload["authorization"].ToString()!;
                                     }
                                 }
                             }
@@ -131,7 +131,7 @@ namespace tanka.graphql.samples.Host
 
             // add execution options
             services.AddTankaGraphQL()
-                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd(null))
+                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd())
                 .ConfigureRules<ILogger<Startup>>((rules, logger) => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(

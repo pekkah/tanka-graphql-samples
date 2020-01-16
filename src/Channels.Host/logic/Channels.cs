@@ -33,6 +33,7 @@ namespace tanka.graphql.samples.channels.host.logic
     {
         public Channel()
         {
+            Name = string.Empty;
         }
     }
 }

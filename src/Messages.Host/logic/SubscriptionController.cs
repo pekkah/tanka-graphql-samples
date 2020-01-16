@@ -13,7 +13,7 @@ namespace tanka.graphql.samples.messages.host.logic
             _channels = channels;
         }
 
-        public override ValueTask<ISubscriberResult> MessageAdded(Subscription objectValue, int channelId, CancellationToken unsubscribe,
+        public override ValueTask<ISubscriberResult> MessageAdded(Subscription? objectValue, int channelId, CancellationToken unsubscribe,
             IResolverContext context)
         {
             return new ValueTask<ISubscriberResult>(_channels.Join(channelId, unsubscribe));
