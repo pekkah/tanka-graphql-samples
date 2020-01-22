@@ -120,12 +120,16 @@ namespace tanka.graphql.samples.messages.host
 
             services.AddHttpContextAccessor();
 
-            // add schema
+            // add domain
             services.AddSingleton<Messages>();
-            services.AddScoped<IQueryController, QueryController>();
-            services.AddScoped<IMutationController, MutationController>();
-            services.AddScoped<ISubscriptionController, SubscriptionController>();
-            services.AddScoped<IMessageController, MessageController>();
+            
+            // add schema
+            services.AddSchemaControllers()
+                .AddQueryController<QueryController>()
+                .AddMutationController<MutationController>()
+                .AddSubscriptionController<SubscriptionController>()
+                .AddMessageController<MessageController>();
+
             services.AddSingleton(
                 provider =>
                 {
