@@ -88,10 +88,14 @@ namespace tanka.graphql.samples.channels.host
 
             services.AddHttpContextAccessor();
 
-            // add schema
-            services.AddScoped<IQueryController, QueryController>();
-            services.AddScoped<IChannelController, ChannelController>();
+            // add domain
             services.AddSingleton<Channels>();
+
+            // add schema
+            services.AddSchemaControllers()
+                .AddQueryController<QueryController>()
+                .AddChannelController<ChannelController>();
+
             services.AddSingleton(
                 provider =>
                 {

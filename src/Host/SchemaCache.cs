@@ -28,7 +28,7 @@ namespace tanka.graphql.samples.Host
             _accessor = accessor;
         }
 
-        public Task<ISchema> GetOrAdd(Query query)
+        public Task<ISchema> GetOrAdd()
         {
             return _cache.GetOrCreateAsync(
                 "Schema",

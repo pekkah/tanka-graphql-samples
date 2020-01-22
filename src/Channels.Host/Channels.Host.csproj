@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>tanka.graphql.samples.channels.host</AssemblyName>
     <RootNamespace>tanka.graphql.samples.channels.host</RootNamespace>
     <UserSecretsId>7d65196d-14f5-4736-be26-c604bbbe5cf9</UserSecretsId>
@@ -10,18 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="logic\Schema.graphql" />
+    <GraphQL Include="logic\Schema.graphql" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.0.0" />
-    <PackageReference Include="tanka.graphql" Version="0.13.1" />
-    <PackageReference Include="tanka.graphql.server" Version="0.13.1" />
-    <PackageReference Include="tanka.graphql.generator" Version="0.5.0" />
+    <PackageReference Include="tanka.graphql" Version="0.15.0" />
+    <PackageReference Include="tanka.graphql.server" Version="0.15.0" />
+    <PackageReference Include="tanka.graphql.generator" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
