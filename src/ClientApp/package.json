@@ -6,7 +6,7 @@
     "@apollo/react-hooks": "^3.1.3",
     "@material-ui/core": "^4.9.0",
     "@material-ui/icons": "^4.5.1",
-    "@tanka/tanka-graphql-server-link": "^1.0.0-rc",
+    "@tanka/tanka-graphql-server-link": "^1.0.0",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",
