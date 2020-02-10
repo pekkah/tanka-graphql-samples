@@ -40,7 +40,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "rimraf": "^3.0.1",
+    "rimraf": "^3.0.2",
     "copyfiles": "^2.2.0"
   }
 }
