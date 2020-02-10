@@ -10,10 +10,18 @@ namespace tanka.graphql.samples.channels.host.logic
 
         public Channels()
         {
-            _channels.Add(new Channel
+            _channels.AddRange(new[]
             {
-                Id = 1,
-                Name = "General"
+                new Channel
+                {
+                    Id = 1,
+                    Name = "General"
+                },
+                new Channel
+                {
+                    Id = 2,
+                    Name = "Misc"
+                }
             });
         }
 

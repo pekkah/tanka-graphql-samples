@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Tanka.GraphQL.ValueResolution;
 
 namespace tanka.graphql.samples.messages.host.logic
@@ -8,10 +9,12 @@ namespace tanka.graphql.samples.messages.host.logic
     public class MutationController : MutationControllerBase<Mutation>
     {
         private readonly Messages _messages;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public MutationController(Messages messages)
+        public MutationController(Messages messages, IHttpContextAccessor httpContextAccessor)
         {
             _messages = messages;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public override async ValueTask<Message> PostMessage(
@@ -21,7 +24,7 @@ namespace tanka.graphql.samples.messages.host.logic
             IResolverContext context)
         {
             // current user is being injected by the resolver middleware
-            var user = (ClaimsPrincipal) context.Items["user"];
+            var user = _httpContextAccessor.HttpContext.User;
 
             // use name claim from the profile if present otherwise use default name claim (sub)
             var from = user.FindFirstValue("name") ?? user.Identity.Name;

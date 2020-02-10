@@ -136,22 +136,6 @@ namespace tanka.graphql.samples.messages.host
                     // load typeDefs
                     var schemaBuilder = SchemaLoader.Load();
 
-                    // add current user to arguments of resolvers of mutation fields
-                    var accessor = provider.GetRequiredService<IHttpContextAccessor>();
-                    schemaBuilder.TryGetType<ObjectType>("Mutation", out var mutation);
-                    schemaBuilder.Connections(connect =>
-                    {
-                        foreach (var field in connect.GetFields(mutation))
-                        {
-                            var resolver = connect.GetOrAddResolver(mutation, field.Key);
-                            resolver.Use((context, next) =>
-                            {
-                                context.Items["user"] = accessor.HttpContext?.User;
-                                return next(context);
-                            });
-                        }
-                    });
-
                     // bind the actual field value resolvers and create schema
                     var resolvers = new SchemaResolvers();
                     var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
@@ -163,10 +147,7 @@ namespace tanka.graphql.samples.messages.host
                 });
 
             services.AddTankaGraphQL()
-                .ConfigureSchema<IHttpContextAccessor>(accessor => new ValueTask<ISchema>(accessor
-                    .HttpContext
-                    .RequestServices
-                    .GetRequiredService<ISchema>()))
+                .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
                 .ConfigureRules(rules => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(
