@@ -33,13 +33,8 @@ namespace tanka.graphql.samples.messages.host.logic
             };
             _messages.Add(message);
 
-            await PostMessage(message);
+            await MessageAdded(message);
             return message;
-        }
-
-        private async Task PostMessage(Message message)
-        {
-            if (_channels.TryGetValue(message.ChannelId, out var channel)) await channel.WriteAsync(message);
         }
 
         public Task<IEnumerable<Message>> GetMessagesAsync(int channelId, int latest = 100)
@@ -55,6 +50,11 @@ namespace tanka.graphql.samples.messages.host.logic
             var channel = _channels.GetOrAdd(channelId, _ => new EventChannel<Message>());
             var result = channel.Subscribe(unsubscribe);
             return result;
+        }
+
+        private async Task MessageAdded(Message message)
+        {
+            if (_channels.TryGetValue(message.ChannelId, out var channel)) await channel.WriteAsync(message);
         }
 
         private int NextId()
