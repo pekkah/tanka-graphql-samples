@@ -23,7 +23,7 @@ namespace tanka.graphql.samples.messages.host.logic
             InputMessage message,
             IResolverContext context)
         {
-            // current user is being injected by the resolver middleware
+            // current user
             var user = _httpContextAccessor.HttpContext.User;
 
             // use name claim from the profile if present otherwise use default name claim (sub)
