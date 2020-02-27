@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Tanka.GraphQL.SchemaBuilding;
 using Tanka.GraphQL.SDL;
 
@@ -9,12 +10,12 @@ namespace tanka.graphql.samples.channels.host.logic
 {
     public static class SchemaLoader
     {
-        public static SchemaBuilder Load()
+        public static async Task<SchemaBuilder> Load()
         {
             var idl = LoadIdlFromResource();
 
-            var builder = new SchemaBuilder();
-            builder.Sdl(idl);
+            var builder = await new SchemaBuilder()
+                .SdlAsync(idl);
 
             return builder;
         }

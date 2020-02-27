@@ -1,4 +1,6 @@
-﻿directive @gen(
+﻿# @import(path: "tanka://cost-analysis")
+
+directive @gen(
 	asAbstract: Boolean! = false,
 	asProperty: Boolean! = false,
 	clrType: String = null
@@ -18,11 +20,11 @@ input InputMessage {
 }
 
 type Query {
-	messages(channelId: Int!): [Message!]!
+	messages(channelId: Int!): [Message!]! @cost(complexity: 2)
 }
 
 type Mutation {
-    postMessage(channelId: Int!, message: InputMessage!): Message!
+    postMessage(channelId: Int!, message: InputMessage!): Message! @cost(complexity: 3)
 }
 
 type Subscription {
