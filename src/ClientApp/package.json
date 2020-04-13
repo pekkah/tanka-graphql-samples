@@ -11,7 +11,7 @@
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",
     "apollo-link-error": "^1.1.12",
-    "apollo-link-retry": "^2.2.15",
+    "apollo-link-retry": "^2.2.16",
     "apollo-link-ws": "^1.0.20",
     "auth0-js": "^9.12.2",
     "dotenv": "^8.2.0",
