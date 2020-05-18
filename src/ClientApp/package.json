@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
-    "@material-ui/core": "^4.9.13",
+    "@material-ui/core": "^4.9.14",
     "@material-ui/icons": "^4.9.1",
     "@tanka/tanka-graphql-server-link": "^1.0.3",
     "apollo-cache-inmemory": "^1.6.5",
