@@ -1,13 +1,12 @@
-using System;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQLParser.AST;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Tanka.GraphQL.Language.Nodes;
 using Tanka.GraphQL.Server.Links;
 using Tanka.GraphQL.Server.Links.DTOs;
 
@@ -93,7 +92,7 @@ namespace tanka.graphql.samples.Host
 
             return async (document, variables, token) =>
             {
-                var hasQueryOrMutation = document.Definitions.OfType<GraphQLOperationDefinition>()
+                var hasQueryOrMutation = document.OperationDefinitions
                     .Any(op => op.Operation != OperationType.Subscription);
 
                 if (hasQueryOrMutation)

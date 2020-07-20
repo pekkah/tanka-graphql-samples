@@ -14,18 +14,12 @@ namespace tanka.graphql.samples.channels.host
 {
     public class SchemaCache
     {
-        private readonly IHttpContextAccessor _accessor;
         private readonly IMemoryCache _cache;
-        private readonly IConfiguration _configuration;
 
         public SchemaCache(
-            IConfiguration configuration,
-            IMemoryCache cache,
-            IHttpContextAccessor accessor)
+            IMemoryCache cache)
         {
-            _configuration = configuration;
             _cache = cache;
-            _accessor = accessor;
         }
 
         public Task<ISchema> GetOrAdd()
