@@ -22,9 +22,10 @@ namespace tanka.graphql.samples.channels.host.api
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] QueryRequest request)
         {
+            var document = Parser.ParseDocument(request.Query);
             var stream = await _queryStreamService.QueryAsync(new Query
             {
-                Document = Parser.ParseDocument(request.Query),
+                Document = document,
                 Variables = request.Variables,
                 OperationName = request.OperationName,
             }, Request.HttpContext.RequestAborted);

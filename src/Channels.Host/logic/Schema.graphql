@@ -1,4 +1,6 @@
-﻿directive @gen(
+﻿tanka_import from "tanka://cost-analysis"
+
+directive @gen(
 	asAbstract: Boolean! = false,
 	asProperty: Boolean! = false,
 	clrType: String = null
@@ -10,7 +12,7 @@ type Channel {
 }
 
 type Query {
-	channels: [Channel!]!
+	channels: [Channel!]! @cost(complexity: 2)
 	channel(channelId: Int!): Channel
 }
 

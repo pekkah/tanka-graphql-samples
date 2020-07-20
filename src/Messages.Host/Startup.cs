@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -20,9 +19,6 @@ using Microsoft.IdentityModel.Tokens;
 using Tanka.GraphQL.Extensions.Analysis;
 using tanka.graphql.samples.messages.host.logic;
 using Tanka.GraphQL.Server;
-using Tanka.GraphQL.Tools;
-using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.Validation;
 
 namespace tanka.graphql.samples.messages.host
 {
@@ -122,7 +118,7 @@ namespace tanka.graphql.samples.messages.host
 
             // add domain
             services.AddSingleton<Messages>();
-            
+
             // add schema
             services.AddSchemaControllers()
                 .AddQueryController<QueryController>()
@@ -130,24 +126,11 @@ namespace tanka.graphql.samples.messages.host
                 .AddSubscriptionController<SubscriptionController>()
                 .AddMessageController<MessageController>();
 
-            services.AddSingleton(
-                provider =>
-                {
-                    // load typeDefs
-                    var schemaBuilder = SchemaLoader.Load();
-
-                    // bind the actual field value resolvers and create schema
-                    var resolvers = new SchemaResolvers();
-                    var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                        schemaBuilder,
-                        resolvers,
-                        resolvers);
-
-                    return schema;
-                });
+            services.AddMemoryCache();
+            services.AddSingleton<SchemaCache>();
 
             services.AddTankaGraphQL()
-                .ConfigureSchema<ISchema>(schema => new ValueTask<ISchema>(schema))
+                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd())
                 .ConfigureRules(rules => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(
@@ -175,10 +158,7 @@ namespace tanka.graphql.samples.messages.host
             app.UseEndpoints(routes =>
             {
                 routes.MapTankaGraphQLSignalR("/hubs/graphql",
-                    options =>
-                    {
-                        options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
-                    });
+                    options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); });
             });
         }
 

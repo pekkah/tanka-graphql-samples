@@ -96,25 +96,11 @@ namespace tanka.graphql.samples.channels.host
                 .AddQueryController<QueryController>()
                 .AddChannelController<ChannelController>();
 
-            services.AddSingleton(
-                provider =>
-                {
-                    var schemaBuilder = SchemaLoader.Load();
-                    var resolvers = new SchemaResolvers();
-
-                    var schema = SchemaTools.MakeExecutableSchemaWithIntrospection(
-                        schemaBuilder,
-                        resolvers,
-                        resolvers);
-
-                    return schema;
-                });
+            services.AddMemoryCache();
+            services.AddSingleton<SchemaCache>();
 
             services.AddTankaGraphQL()
-                .ConfigureSchema<IHttpContextAccessor>((accessor) => new ValueTask<ISchema>(accessor
-                    .HttpContext
-                    .RequestServices
-                    .GetRequiredService<ISchema>()))
+                .ConfigureSchema<SchemaCache>(async cache => await cache.GetOrAdd())
                 .ConfigureRules(rules => rules.Concat(new[]
                 {
                     CostAnalyzer.MaxCost(
