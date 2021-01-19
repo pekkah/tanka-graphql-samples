@@ -1,4 +1,6 @@
-﻿tanka_import from "tanka://cost-analysis"
+﻿"""
+tanka_import from "tanka://cost-analysis"
+"""
 
 directive @gen(
 	asAbstract: Boolean! = false,
