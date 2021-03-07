@@ -28,7 +28,7 @@ const styles = theme => ({
     marginLeft: drawerWidth
   },
   menuButton: {
-    marginRight: theme.spacing.unit * 2,
+    marginRight: theme.spacing(2),
     [theme.breakpoints.up('sm')]: {
       display: 'none',
     },
@@ -39,7 +39,7 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing.unit
+    padding: theme.spacing()
   },
 });
 
