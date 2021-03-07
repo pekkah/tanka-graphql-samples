@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,7 +20,6 @@ using Tanka.GraphQL.Language;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.Server.WebSockets;
 using Tanka.GraphQL.Server.WebSockets.DTOs;
-using Tanka.GraphQL.Validation;
 
 namespace tanka.graphql.samples.Host
 {
@@ -86,13 +84,9 @@ namespace tanka.graphql.samples.Host
                                 var message = messageContext.Context?.Message;
 
                                 if (message?.Type == MessageType.GQL_CONNECTION_INIT)
-                                {
-                                    if (messageContext.Context?.Message.Payload is Dictionary<string, object> payload 
+                                    if (messageContext.Context?.Message.Payload is Dictionary<string, object> payload
                                         && payload.ContainsKey("authorization"))
-                                    {
                                         accessToken = payload["authorization"].ToString()!;
-                                    }
-                                }
                             }
 
                             // Read the token out of the query string
@@ -109,7 +103,7 @@ namespace tanka.graphql.samples.Host
                                         new Claim("access_token", jwt.RawData)
                                     });
 
-                                context.Principal.AddIdentity(tokenIdentity);
+                                context.Principal?.AddIdentity(tokenIdentity);
                             }
 
                             return Task.CompletedTask;
@@ -181,7 +175,6 @@ namespace tanka.graphql.samples.Host
             // add signalr
             services.AddSignalR(options => { options.EnableDetailedErrors = true; })
                 .AddTankaGraphQL();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -210,15 +203,13 @@ namespace tanka.graphql.samples.Host
 
             // use websockets server
             app.UseWebSockets();
-            app.UseTankaGraphQLWebSockets("/api/graphql");
 
             app.UseEndpoints(routes =>
             {
                 routes.MapTankaGraphQLSignalR("/hubs/graphql",
-                    options =>
-                    {
-                        options.AuthorizationData.Add(new AuthorizeAttribute("authorize"));
-                    });
+                    options => { options.AuthorizationData.Add(new AuthorizeAttribute("authorize")); });
+
+                routes.MapTankaGraphQLWebSockets("/api/graphql");
             });
         }
 
