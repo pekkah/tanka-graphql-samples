@@ -94,7 +94,7 @@ const PostMessage = (props) => {
 
 const styles = theme => ({
   root: {
-    margin: theme.spacing.unit
+    margin: theme.spacing()
   }
 });
 

@@ -80,8 +80,8 @@ export { ChannelMessages };
 var channelMessagesStyles = theme => ({
   root: {
     ...theme.mixins.gutters(),
-    paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   avatar: {
     width: 48,
