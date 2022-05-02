@@ -16,7 +16,7 @@
     "auth0-js": "^9.16.2",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "graphql": "^15.5.0",
+    "graphql": "^16.4.0",
     "graphql-tag": "^2.12.4",
     "react": "^17.0.2",
     "react-apollo": "^3.1.5",
