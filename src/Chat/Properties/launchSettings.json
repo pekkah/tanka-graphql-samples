@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Chat": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:8000/graphql/ui",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:8000",
+      "dotnetRunMessages": true
+    }
+  }
+}

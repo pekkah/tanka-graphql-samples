@@ -249,6 +249,8 @@ paket-files/
 # FAKE - F# Make
 .fake/
 
+/tools/
+
 # JetBrains Rider
 .idea/
 *.sln.iml
@@ -260,9 +262,13 @@ paket-files/
 __pycache__/
 *.pyc
 
-# cake Tools
-tools/
-
 .rpt2_cache/
 dist/
 coverage/
+BenchmarkDotNet.Artifacts/
+gh-pages/
+*.saved.bak
+_build/
+
+*.received.cs
+*.received/
