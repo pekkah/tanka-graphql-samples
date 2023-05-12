@@ -20,8 +20,4 @@
 
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.5" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Chat.BlazorUI\Client\Chat.BlazorUI.Client.csproj" />
-  </ItemGroup>
 </Project>
