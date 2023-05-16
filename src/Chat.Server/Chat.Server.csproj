@@ -18,9 +18,4 @@
 		<PackageReference Include="Yarp.ReverseProxy" Version="2.0.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Chat.Shared\Chat.Shared.csproj" />
-      <ProjectReference Include="..\Chat.Client\Chat.Client.csproj" />
-	</ItemGroup>
-
 </Project>
