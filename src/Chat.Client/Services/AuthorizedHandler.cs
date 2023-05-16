@@ -27,7 +27,7 @@ public class AuthorizedHandler : DelegatingHandler
         if (responseMessage.StatusCode == HttpStatusCode.Unauthorized)
         {
             // if server returned 401 Unauthorized, redirect to login page
-            _authenticationStateProvider.SignIn();
+            //_authenticationStateProvider.SignIn();
         }
 
         return responseMessage;

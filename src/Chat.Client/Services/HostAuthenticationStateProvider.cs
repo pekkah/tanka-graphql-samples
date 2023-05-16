@@ -25,14 +25,6 @@ public class HostAuthenticationStateProvider : AuthenticationStateProvider
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         => new AuthenticationState(await GetUser(useCache: true));
 
-    public void SignIn(string? customReturnUrl = null)
-    {
-        var returnUrl = customReturnUrl != null ? _navigation.ToAbsoluteUri(customReturnUrl).ToString() : null;
-        var encodedReturnUrl = Uri.EscapeDataString(returnUrl ?? _navigation.Uri);
-        var logInUrl = _navigation.ToAbsoluteUri($"{AuthDefaults.LogInPath}?returnUrl={encodedReturnUrl}");
-        _navigation.NavigateTo(logInUrl.ToString(), true);
-    }
-
     private async ValueTask<ClaimsPrincipal> GetUser(bool useCache = false)
     {
         var now = DateTimeOffset.Now;

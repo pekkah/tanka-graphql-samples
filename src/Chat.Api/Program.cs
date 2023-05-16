@@ -45,6 +45,5 @@ app.UseRouting();
 app.UseWebSockets();
 
 app.MapTankaGraphQL("/graphql", "Default");
-app.MapFallbackToFile("index.html");
 app.Run();
 

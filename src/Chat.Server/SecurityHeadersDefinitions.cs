@@ -11,7 +11,6 @@ public static class SecurityHeadersDefinitions
             .AddReferrerPolicyStrictOriginWhenCrossOrigin()
             .AddCrossOriginOpenerPolicy(builder => builder.SameOrigin())
             .AddCrossOriginResourcePolicy(builder => builder.SameOrigin())
-            .AddCrossOriginEmbedderPolicy(builder => builder.RequireCorp()) // remove for dev if using hot reload
             .AddContentSecurityPolicy(builder =>
             {
                 builder.AddObjectSrc().None();
@@ -55,6 +54,8 @@ public static class SecurityHeadersDefinitions
         {
             // maxage = one year in seconds
             policy.AddStrictTransportSecurityMaxAgeIncludeSubDomains();
+
+            policy.AddCrossOriginEmbedderPolicy(builder => builder.RequireCorp()); // remove for dev if using hot reload
         }
 
         policy.ApplyDocumentHeadersToAllResponses();

@@ -272,3 +272,6 @@ _build/
 
 *.received.cs
 *.received/
+
+# db files
+**/*.db-*
