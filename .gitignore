@@ -275,3 +275,4 @@ _build/
 
 # db files
 **/*.db-*
+/src/Chat.Api/Chat.db

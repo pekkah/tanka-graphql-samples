@@ -33,6 +33,13 @@ if (app.Environment.IsDevelopment())
     await db.Database.EnsureDeletedAsync();
     await db.Database.EnsureCreatedAsync();
 
+    await db.Channels.AddRangeAsync(new[]
+    {
+        new Channel() { Name = "General", Description = "" }, new Channel() { Name = "Tanka", Description = "" },
+    });
+    await db.SaveChangesAsync();
+
+
     app.UseWebAssemblyDebugging();
 }
 

@@ -14,6 +14,17 @@ public static class Query
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
         return await db.Channels.ToListAsync();
     }
+
+    public static async Task<Channel?> Channel(
+        [FromArguments]int id,
+        [FromServices] IDbContextFactory<ChatContext> dbFactory
+    )
+    {
+        await using ChatContext db = await dbFactory.CreateDbContextAsync();
+        var channel = await db.Channels.FindAsync(id);
+
+        return channel;
+    }
 }
 
 [ObjectType]
@@ -28,7 +39,6 @@ public static class Mutation
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
         var channel = new Channel
         {
-            Id = Guid.NewGuid().ToString(),
             Name = name,
             Description = description
         };
@@ -39,7 +49,7 @@ public static class Mutation
 
     public static async Task<MutationChannel?> Channel(
         [FromServices] IDbContextFactory<ChatContext> dbFactory,
-        string id
+        int id
     )
     {
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
@@ -56,7 +66,7 @@ public static class Mutation
 [ObjectType]
 public class Channel
 {
-    public required string Id { get; init; }
+    public int Id { get; set; }
 
     public required string Name { get; init; }
 
@@ -67,9 +77,11 @@ public class Channel
         )
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-        return await db.Messages            
+        var messages = await db.Messages            
             .Where(message => message.ChannelId == Id)
             .ToListAsync();
+
+        return messages;
     }
 }
 
@@ -83,7 +95,7 @@ public class MutationChannel
         _channel = channel;
     }
 
-    public string Id => _channel.Id;
+    public int Id => _channel.Id;
 
     public string Name => _channel.Name;
 
@@ -97,9 +109,9 @@ public class MutationChannel
         await using var db = await dbFactory.CreateDbContextAsync();
         var message = new Message
         {
-            Id = Guid.NewGuid().ToString(),
             Text = text,
-            ChannelId = _channel.Id
+            ChannelId = _channel.Id,
+            TimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()
         };
         await db.Messages.AddAsync(message);
         await db.SaveChangesAsync();
@@ -110,11 +122,13 @@ public class MutationChannel
 [ObjectType]
 public class Message 
 {
-    public required string Id { get; init; }
+    public int Id { get; set; }
+
+    public required string TimestampMs { get; set; }
 
     public required string Text { get; init; }
 
-    public required string ChannelId { get; init; }
+    public required int ChannelId { get; init; }
 }
 
 //todo: Use SG for DbContext?
