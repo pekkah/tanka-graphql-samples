@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tanka.GraphQL.Server;
+using Tanka.GraphQL.ValueResolution;
 
 namespace Tanka.GraphQL.Samples.Chat;
 
@@ -8,7 +13,8 @@ namespace Tanka.GraphQL.Samples.Chat;
 public static class Query
 {
     public static async Task<IEnumerable<Channel>> Channels(
-        [FromServices] IDbContextFactory<ChatContext> dbFactory
+        [FromServices] IDbContextFactory<ChatContext> dbFactory,
+        ResolverContext context
     )
     {
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
@@ -103,15 +109,24 @@ public class MutationChannel
 
     public async Task<Message> AddMessage(
         [FromServices] IDbContextFactory<ChatContext> dbFactory,
-        string text
+        string text,
+        ResolverContext context
     )
     {
+        //todo: need to simplify both getting the HttpContext and the User
+        var user = context.QueryContext.Features.GetRequiredFeature<IHttpContextFeature>().HttpContext.User;
         await using var db = await dbFactory.CreateDbContextAsync();
         var message = new Message
         {
             Text = text,
             ChannelId = _channel.Id,
-            TimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString()
+            TimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
+            Sender = new Sender()
+            {
+                Name = user.FindFirstValue(JwtRegisteredClaimNames.Name) ?? "??",
+                Sub = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? "-1",
+                AvatarUrl = user.FindFirstValue("avatar_url") ?? string.Empty
+            }
         };
         await db.Messages.AddAsync(message);
         await db.SaveChangesAsync();
@@ -128,7 +143,20 @@ public class Message
 
     public required string Text { get; init; }
 
+    public Sender Sender { get; set; } = null!;
+
     public required int ChannelId { get; init; }
+}
+
+[ObjectType]
+[Owned]
+public class Sender
+{
+    public string Sub { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public string AvatarUrl { get; set; } = string.Empty;
 }
 
 //todo: Use SG for DbContext?

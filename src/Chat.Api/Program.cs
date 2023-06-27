@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 
 using Tanka.GraphQL.Samples.Chat;
+using Tanka.GraphQL.Samples.Chat.Api;
 using Tanka.GraphQL.Server;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddPooledDbContextFactory<ChatContext>(
         options => options.UseSqlite(
             "Data Source=Chat.db;Cache=Shared"
-            )
-        );
+        )
+    );
 
 builder.AddTankaGraphQL()
     .AddHttp()
@@ -24,33 +24,38 @@ builder.AddTankaGraphQL()
         });
     });
 
+builder.Services
+    .AddAuthentication("github")
+    .AddScheme<GitHubAccessTokenAuthenticationOptions, GitHubAccessTokenAuthenticationHandler>("github", options =>
+    {
+    });
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    var dbFactory = app.Services.GetRequiredService<IDbContextFactory<ChatContext>>();
-    await using var db = await dbFactory.CreateDbContextAsync();
+    IDbContextFactory<ChatContext> dbFactory = app.Services.GetRequiredService<IDbContextFactory<ChatContext>>();
+    await using ChatContext db = await dbFactory.CreateDbContextAsync();
     await db.Database.EnsureDeletedAsync();
-    await db.Database.EnsureCreatedAsync();
-
-    await db.Channels.AddRangeAsync(new[]
+    try
     {
-        new Channel() { Name = "General", Description = "" }, new Channel() { Name = "Tanka", Description = "" },
-    });
-    await db.SaveChangesAsync();
+        await db.Database.EnsureCreatedAsync();
 
-
-    app.UseWebAssemblyDebugging();
+        await db.Channels.AddRangeAsync(new Channel { Name = "General", Description = "" },
+            new Channel { Name = "Tanka", Description = "" });
+        await db.SaveChangesAsync();
+    }
+    catch (Exception x)
+    {
+        app.Services.GetRequiredService<ILogger<Program>>().LogError(x, "Failed to initialize database");
+        throw;
+    }
 }
 
 app.UseHttpsRedirection();
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseWebSockets();
 
 app.MapTankaGraphQL("/graphql", "Default");
 app.Run();
-
