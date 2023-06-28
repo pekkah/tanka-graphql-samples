@@ -1,13 +1,15 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useTask$, useVisibleTask$ } from "@builder.io/qwik";
 import {
   type DocumentHead,
   routeLoader$,
   routeAction$,
   Form,
+  server$,
 } from "@builder.io/qwik-city";
 import { useAuthSession } from "~/routes/plugin@auth";
 import { type Session } from "@auth/core/types";
 import { addMessage, fetchChannelAndMessages } from "~/lib/api";
+import { useChatContext } from "~/components/ChatContext";
 
 export const useInitialMessages = routeLoader$(async (event) => {
   const id = parseInt(event.params.id);
@@ -28,18 +30,45 @@ export const useAddMessage = routeAction$(async (data, event) => {
   return await addMessage(data, session.accessToken, id);
 });
 
+const getChannel = server$(async function () {
+  const session: Session | null = this.sharedMap.get("session");
+
+  if (!session?.accessToken) {
+    throw new Error("Unauthorized");
+  }
+  console.log('params', this.params);
+  return await fetchChannelAndMessages(parseInt(this.params.id), session.accessToken,);
+});
+
 export default component$(() => {
   const addMessage = useAddMessage();
-  const session = useAuthSession();
-  const channel = useInitialMessages();
+  const session = useAuthSession();  
+  const chat = useChatContext();
+
+  useTask$(async () => {
+    const channel = await getChannel();
+    chat.current = channel;
+  });
+
+  useVisibleTask$(({cleanup}) => {
+    const timeout = setInterval(()=> {
+      getChannel()
+      .then((channel) => {
+        console.log("channel", channel.messages);
+        chat.current = channel;
+      });
+    }, 200);
+
+    cleanup(()=> clearInterval(timeout));
+  });
 
   return (
     <div>
       <div class="p-6 h-auto">
-        <p class="text-lg">{channel.value.name}</p>
+        <p class="text-lg">{chat.current?.name}</p>
       </div>
       <div class="p-6 pt-0 overflow-y-auto w-6/12" style={{ height: "85vh" }}>
-        {channel.value.messages.map((message) => (
+        {chat.current?.messages.map((message) => (
           <div
             class={[
               "chat",

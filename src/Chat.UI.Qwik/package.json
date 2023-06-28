@@ -43,6 +43,7 @@
     "vite-tsconfig-paths": "4.2.0"
   },
   "dependencies": {
+    "graphql-ws": "^5.14.0",
     "http-proxy-middleware": "^2.0.6"
   }
 }
