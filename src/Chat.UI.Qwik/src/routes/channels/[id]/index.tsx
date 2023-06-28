@@ -8,10 +8,10 @@ import {
 } from "@builder.io/qwik-city";
 import { useAuthSession } from "~/routes/plugin@auth";
 import { type Session } from "@auth/core/types";
-import { addMessage, fetchChannelAndMessages } from "~/lib/api";
+import { addMessage, fetchChannel, fetchChannelAndMessages } from "~/lib/api";
 import { useChatContext } from "~/components/ChatContext";
 
-export const useInitialMessages = routeLoader$(async (event) => {
+export const useChannel = routeLoader$(async (event) => {
   const id = parseInt(event.params.id);
   const session: Session | null = event.sharedMap.get("session");
 
@@ -19,13 +19,18 @@ export const useInitialMessages = routeLoader$(async (event) => {
     throw event.error(401, "Unauthorized");
   }
 
-  return await fetchChannelAndMessages(id, session.accessToken);
+  return await fetchChannel(id, session.accessToken);
 });
 
 export const useAddMessage = routeAction$(async (data, event) => {
   const session = event.sharedMap.get("session") as {
     accessToken: string;
   };
+
+  if (!session?.accessToken) {
+    throw new Error("Unauthorized");
+  }
+
   const id = parseInt(event.params.id);
   return await addMessage(data, session.accessToken, id);
 });
@@ -36,13 +41,16 @@ const getChannel = server$(async function () {
   if (!session?.accessToken) {
     throw new Error("Unauthorized");
   }
-  console.log('params', this.params);
-  return await fetchChannelAndMessages(parseInt(this.params.id), session.accessToken,);
+
+  return await fetchChannelAndMessages(
+    parseInt(this.params.id),
+    session.accessToken
+  );
 });
 
 export default component$(() => {
   const addMessage = useAddMessage();
-  const session = useAuthSession();  
+  const session = useAuthSession();
   const chat = useChatContext();
 
   useTask$(async () => {
@@ -50,16 +58,14 @@ export default component$(() => {
     chat.current = channel;
   });
 
-  useVisibleTask$(({cleanup}) => {
-    const timeout = setInterval(()=> {
-      getChannel()
-      .then((channel) => {
-        console.log("channel", channel.messages);
+  useVisibleTask$(({ cleanup }) => {
+    const timeout = setInterval(() => {
+      getChannel().then((channel) => {
         chat.current = channel;
       });
     }, 200);
 
-    cleanup(()=> clearInterval(timeout));
+    cleanup(() => clearInterval(timeout));
   });
 
   return (
@@ -131,7 +137,7 @@ export default component$(() => {
 });
 
 export const head: DocumentHead = ({ resolveValue }) => {
-  const channel = resolveValue(useInitialMessages);
+  const channel = resolveValue(useChannel);
   return {
     title: `${channel.name} - Tanka Chat - Qwik`,
     meta: [

@@ -1,7 +1,6 @@
 import { serverAuth$ } from "@builder.io/qwik-auth";
 import GitHub from "@auth/core/providers/GitHub";
 import type { Provider } from "@auth/core/providers";
-import { type RequestHandler } from "@builder.io/qwik-city";
 
 declare module "@auth/core/types" {
   /**
@@ -18,7 +17,7 @@ declare module "@auth/core/types" {
   }
 }
 
-const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
+export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
   serverAuth$(({ env }) => ({
     secret: env.get("AUTH_SECRET"),
     trustHost: true,
@@ -50,10 +49,3 @@ const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } =
       }
     }
   }));
-
- const onRequestFixed: RequestHandler = async (event) => {
-  await onRequest(event);
-  console.log('afterOnAuth', event.url.href, event.sharedMap); 
- }
-
-  export { onRequestFixed as onRequest, useAuthSession, useAuthSignin, useAuthSignout };

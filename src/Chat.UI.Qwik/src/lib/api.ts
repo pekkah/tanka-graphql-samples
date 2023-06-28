@@ -12,12 +12,12 @@ export async function fetchChannels(accessToken: string) {
     },
     body: JSON.stringify({
       query: `query Channels {
-              channels {
-                id
-                name
-                description
-              }
-            }`,
+                channels {
+                  id
+                  name
+                  description
+                }
+              }`,
     }),
   });
 
@@ -32,6 +32,39 @@ export async function fetchChannels(accessToken: string) {
       channels: Channel[];
     }>
   ).data.channels;
+}
+
+export async function fetchChannel(id: number, accessToken: string) {
+  const response = await fetch("https://localhost:8000/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      query: `query Channel($id: Int!) {
+                channel(id: $id) {
+                  id
+                  name
+                  description
+                }
+              }`,
+      variables: { id },
+    }),
+  });
+
+  if (!response.ok) {
+    console.error(response.status, response.statusText);
+    throw new Error(`Failed to fetch channels: ${response.statusText}`);
+  }
+
+  const json = await response.json();
+  return (
+    json as GraphQL<{
+      channel: Channel;
+    }>
+  ).data.channel;
 }
 
 export async function fetchChannelAndMessages(id: number, accessToken: string) {
