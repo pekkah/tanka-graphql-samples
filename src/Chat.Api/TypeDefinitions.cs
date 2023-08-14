@@ -109,6 +109,7 @@ public class MutationChannel
 
     public async Task<Message> AddMessage(
         [FromServices] IDbContextFactory<ChatContext> dbFactory,
+        [FromServices] IChannelEvents events,
         string text,
         ResolverContext context
     )
@@ -130,6 +131,8 @@ public class MutationChannel
         };
         await db.Messages.AddAsync(message);
         await db.SaveChangesAsync();
+
+        await events.Publish(new MessageChannelEvent(_channel.Id, nameof(MessageChannelEvent), message));
         return message;
     }
 }

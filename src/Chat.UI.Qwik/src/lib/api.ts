@@ -113,8 +113,7 @@ export async function fetchChannelAndMessages(id: number, accessToken: string) {
   return json.data.channel;
 }
 
-export async function addMessage(data: JSONObject, accessToken: string, id: number) {
-  const text = data.message;
+export async function addMessage(text: string, accessToken: string, id: number) {
   const response = await fetch("https://localhost:8000/graphql", {
     method: "POST",
     headers: {

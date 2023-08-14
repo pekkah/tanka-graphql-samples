@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "graphql-ws": "^5.14.0",
-    "http-proxy-middleware": "^2.0.6"
+    "http-proxy-middleware": "^2.0.6",
+    "ws": "^8.13.0"
   }
 }

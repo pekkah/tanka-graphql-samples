@@ -1,38 +1,30 @@
-import { component$, useTask$, useVisibleTask$ } from "@builder.io/qwik";
 import {
-  type DocumentHead,
-  routeLoader$,
-  routeAction$,
-  Form,
+  component$,
+  useTask$,
+  useVisibleTask$,
+  $,
+  useSignal,
+} from "@builder.io/qwik";
+import {
   server$,
+  useLocation,
 } from "@builder.io/qwik-city";
 import { useAuthSession } from "~/routes/plugin@auth";
 import { type Session } from "@auth/core/types";
-import { addMessage, fetchChannel, fetchChannelAndMessages } from "~/lib/api";
+import { addMessage, fetchChannelAndMessages } from "~/lib/api";
 import { useChatContext } from "~/components/ChatContext";
+import { createClient } from "~/lib/graphql";
+import { type Client as GraphQLClient } from "graphql-ws";
+import type { MessageChannelEvent } from "~/lib/types";
 
-export const useChannel = routeLoader$(async (event) => {
-  const id = parseInt(event.params.id);
-  const session: Session | null = event.sharedMap.get("session");
-
-  if (!session) {
-    throw event.error(401, "Unauthorized");
-  }
-
-  return await fetchChannel(id, session.accessToken);
-});
-
-export const useAddMessage = routeAction$(async (data, event) => {
-  const session = event.sharedMap.get("session") as {
-    accessToken: string;
-  };
+const addMessageServer = server$(async function (text: string) {
+  const session: Session | null = this.sharedMap.get("session");
 
   if (!session?.accessToken) {
     throw new Error("Unauthorized");
   }
 
-  const id = parseInt(event.params.id);
-  return await addMessage(data, session.accessToken, id);
+  return await addMessage(text, session.accessToken, parseInt(this.params.id));
 });
 
 const getChannel = server$(async function () {
@@ -48,17 +40,107 @@ const getChannel = server$(async function () {
   );
 });
 
+const streamMessages = server$(async function* () {
+  const session: Session | null = this.sharedMap.get("session");
+
+  if (!session?.accessToken) {
+    throw new Error("Unauthorized");
+  }
+
+  const id = parseInt(this.params.id);
+
+  let client: GraphQLClient | null = null;
+
+  try {
+    client = createClient(session.accessToken);
+
+    const iterator = client.iterate<{ channel_events: MessageChannelEvent }>({
+      query: `subscription Events($id: Int!) {
+        channel_events(id: $id) {
+          channelId
+          eventType
+          ... on MessageChannelEvent {
+            message {
+              id
+              timestampMs
+              text
+              sender {
+                sub
+                name
+              }
+            }
+          }
+        }
+      }`,
+      variables: { id },
+    });
+
+    const abort = this.request.signal;
+    abort.addEventListener("abort", () => {
+      console.log('server abort');
+      
+      if (iterator.return)
+        iterator.return();
+
+        client?.dispose();
+    });
+
+    const joined: MessageChannelEvent = {
+      channelId: id,
+      eventType: "MessageChannelEvent",
+      message: {
+        id: 0,
+        timestampMs: Date.now().toString(),
+        text: "Joined",
+        timestamp: new Date(),
+        sender: {
+          name: "System",
+          sub: "system",
+        },
+      },
+    };
+
+    yield { channel_events: joined };
+
+    while(true) {
+      const ir = await iterator.next();
+      
+      if (ir.done || abort.aborted) {
+        console.log('server done');
+        break;
+      }
+
+      const event = ir.value;
+      if (event.data?.channel_events.eventType === "MessageChannelEvent") {
+        event.data.channel_events.message.timestamp = new Date(
+          parseInt(event.data.channel_events.message.timestampMs)
+        );
+      }
+      yield event.data;
+    }
+    console.log("iterator finished");
+  } catch (e) {
+    console.error("graphql error", e);
+    throw e;
+  } finally {
+    client?.dispose();
+    console.log("client disposed");
+  }
+});
+
 export default component$(() => {
-  const addMessage = useAddMessage();
   const session = useAuthSession();
   const chat = useChatContext();
+  const loc = useLocation();
 
-  useTask$(async () => {
+  useTask$(async ({ track }) => {
+    track(() => loc.params.id);
     const channel = await getChannel();
     chat.current = channel;
+    console.log("current", channel.name);
   });
 
-  useVisibleTask$(({ cleanup }) => {
+  /*useVisibleTask$(({ cleanup }) => {
     const timeout = setInterval(() => {
       getChannel().then((channel) => {
         chat.current = channel;
@@ -66,6 +148,43 @@ export default component$(() => {
     }, 200);
 
     cleanup(() => clearInterval(timeout));
+  });*/
+
+  useVisibleTask$(async ({ cleanup, track }) => {
+    track(() => loc.params.id);
+    console.log("using channel", loc.params.id);
+    const abort = new AbortController();
+    const iterator = await streamMessages(abort.signal);
+    cleanup(()=> {
+      console.log('abort');
+      iterator.return();
+      abort.abort();
+    });    
+
+    const update = setInterval(async () => {
+      const ir = await iterator.next();
+
+      if (ir.done) {
+        console.log('done');
+        return;
+      }
+
+      console.log("ir", ir.value);
+      const e = ir.value?.channel_events;
+      if (e?.eventType === "MessageChannelEvent") {
+        console.log("pushing message", e.message);
+        chat.current?.messages.push(e.message);
+        console.log(chat.current?.messages.length);
+      }
+    }, 100);
+
+    cleanup(() => clearInterval(update));
+  });
+
+  const text = useSignal("");
+  const handleAddMessage = $(async () => {
+    await addMessageServer(text.value);
+    text.value = "";
   });
 
   return (
@@ -105,12 +224,7 @@ export default component$(() => {
         ))}
       </div>
       <div class="absolute bottom-0 p-12 h-auto">
-        <Form
-          action={addMessage}
-          onSubmitCompleted$={(_, form) => {
-            form.reset();
-          }}
-        >
+        <div>
           <div class="grid grid-cols-12 h-16 items-end ">
             <div class="form-control col-span-11">
               <label class="label">
@@ -121,30 +235,19 @@ export default component$(() => {
                 type="text"
                 placeholder="Type here"
                 class="input input-bordered input-accent"
+                bind:value={text}
               />
             </div>
             <button
               class="btn btn-outline btn-secondary rounded-sm w-16 h-12 col-span-1"
-              type="submit"
+              onClick$={handleAddMessage}
+              disabled={text.value.length === 0}
             >
               Send
             </button>
           </div>
-        </Form>
+        </div>
       </div>
     </div>
   );
 });
-
-export const head: DocumentHead = ({ resolveValue }) => {
-  const channel = resolveValue(useChannel);
-  return {
-    title: `${channel.name} - Tanka Chat - Qwik`,
-    meta: [
-      {
-        name: "description",
-        content: channel.description,
-      },
-    ],
-  };
-};
