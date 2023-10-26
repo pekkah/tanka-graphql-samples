@@ -1,0 +1,30 @@
+{
+  "name": "chat-ui-solidstart",
+  "scripts": {
+    "dev": "solid-start dev",
+    "build": "solid-start build",
+    "start": "solid-start start"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.6.2",
+    "autoprefixer": "^10.4.15",
+    "postcss": "^8.4.29",
+    "solid-start-node": "^0.3.5",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vite-plugin-mkcert": "^1.16.0"
+  },
+  "dependencies": {
+    "@auth/core": "^0.15.0",
+    "@solidjs/meta": "^0.28.6",
+    "@solidjs/router": "^0.8.3",
+    "solid-js": "^1.7.11",
+    "solid-start": "^0.3.5",
+    "solid-start-oauth": "^1.2.0"
+  },
+  "engines": {
+    "node": "18"
+  }
+}

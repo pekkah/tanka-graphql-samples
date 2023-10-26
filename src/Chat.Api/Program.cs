@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Fields;
@@ -41,9 +40,9 @@ builder.AddTankaGraphQL()
         options.Configure(configure =>
         {
             // Configure subscription types
-            ExecutableSchemaBuilder builder = configure.Builder;
+            ExecutableSchemaBuilder schema = configure.Builder;
 
-            builder.Add("""
+            schema.Add("""
                         interface ChannelEvent {
                             channelId: Int!
                             eventType: String!
@@ -52,7 +51,7 @@ builder.AddTankaGraphQL()
                         type MessageChannelEvent implements ChannelEvent
                         """);
 
-            builder.Add(new ObjectResolversConfiguration(
+            schema.Add(new ObjectResolversConfiguration(
                 "MessageChannelEvent",
                 new FieldsWithResolvers
                 {
@@ -61,7 +60,7 @@ builder.AddTankaGraphQL()
                     { "message: Message!", (MessageChannelEvent objectValue) => objectValue.Message }
                 }));
 
-            builder.Add("Subscription",
+            schema.Add("Subscription",
                 new FieldsWithResolvers
                 {
                     {
