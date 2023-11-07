@@ -3,7 +3,7 @@
     "Chat": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:8000/graphql/ui",
+      "launchUrl": "https://localhost:8000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -1,19 +1,24 @@
 using System.Collections.Concurrent;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Threading.Channels;
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Samples.Chat;
-using Tanka.GraphQL.Samples.Chat.Api;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
+
+using Vite.AspNetCore;
+using Vite.AspNetCore.Extensions;
 
 using Channel = System.Threading.Channels.Channel;
 
@@ -92,12 +97,36 @@ builder.AddTankaGraphQL()
     });
 
 builder.Services
-    .AddAuthentication("github")
-    .AddScheme<GitHubAccessTokenAuthenticationOptions, GitHubAccessTokenAuthenticationHandler>("github", options =>
+    .AddAuthentication(options =>
     {
+        options.DefaultChallengeScheme = "github";
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/signin";
+    })
+    .AddGitHub("github", options =>
+    {
+        options.ClientId = builder.Configuration["GitHub:ClientId"];
+        options.ClientSecret = builder.Configuration["GitHub:ClientSecret"];
+        options.Scope.Add("user:email");
+
+        options.ClaimActions.MapAll();
     });
 
+builder.Services.AddRazorPages();
+builder.Services.AddViteServices(new ViteOptions()
+{
+    PackageDirectory = "UI"
+});
+
+
 WebApplication app = builder.Build();
+app.UseHttpsRedirection();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -122,12 +151,35 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-app.UseHttpsRedirection();
-app.UseRouting();
-
 app.UseWebSockets();
 
+app.MapGet("/signin", async context => await context.ChallengeAsync("github", new OAuthChallengeProperties()
+{
+    RedirectUri = "/"
+}));
+app.MapGet("/signout", async context => await context.SignOutAsync("Cookies"));
+app.MapGet("/session", async context =>
+{
+    await context.Response.WriteAsJsonAsync(new
+    {
+        Name = context.User.FindFirstValue("name"),
+        AvatarUrl = context.User.FindFirstValue("avatar_url"),
+        Login = context.User.FindFirstValue("login"),
+    });
+}).RequireAuthorization();
+
+
 app.MapTankaGraphQL("/graphql", "Default");
+
+
+app.MapRazorPages();
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseViteDevMiddleware();
+}
+
 app.Run();
 
 public interface IChannelEvents

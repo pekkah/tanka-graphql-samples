@@ -20,11 +20,10 @@ public partial class
         IOptionsMonitor<GitHubAccessTokenAuthenticationOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock) : base(options, logger, encoder, clock)
+        TimeProvider clock) : base(options, logger, encoder)
     {
         Backchannel = new HttpClient();
     }
-
 
     public HttpClient Backchannel { get; set; }
 
@@ -37,15 +36,20 @@ public partial class
 
         try
         {
-            var github = new GitHubClient(new ProductHeaderValue("tanka-chat-api"));
-            github.Credentials = new Credentials(accessToken, AuthenticationType.Oauth);
-            User? user = await github.User.Current();
+            var github = new GitHubClient(new ProductHeaderValue("tanka-chat-api"))
+            {
+                Credentials = new Credentials(accessToken, AuthenticationType.Oauth)
+            };
+
+            User user = await github.User.Current();
 
             var identity = new ClaimsIdentity(new Claim[]
             {
-                new(JwtRegisteredClaimNames.Name, user.Name), new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Name, user.Name), 
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new("avatar_url", user.AvatarUrl)
             });
+
             var principal = new ClaimsPrincipal(identity);
 
             var ticket = new AuthenticationTicket(principal!, new AuthenticationProperties(), Scheme.Name);
