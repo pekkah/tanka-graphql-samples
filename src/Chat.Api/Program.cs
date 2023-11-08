@@ -118,7 +118,11 @@ builder.Services
 builder.Services.AddRazorPages();
 builder.Services.AddViteServices(new ViteOptions()
 {
-    PackageDirectory = "UI"
+    PackageDirectory = "UI",
+    Server = new ViteServerOptions()
+    {
+        Https = true
+    }
 });
 
 
@@ -157,16 +161,30 @@ app.MapGet("/signin", async context => await context.ChallengeAsync("github", ne
 {
     RedirectUri = "/"
 }));
-app.MapGet("/signout", async context => await context.SignOutAsync("Cookies"));
+app.MapGet("/signout", async context => await context.SignOutAsync("Cookies", new AuthenticationProperties()
+{
+    RedirectUri = "/"
+}));
 app.MapGet("/session", async context =>
 {
-    await context.Response.WriteAsJsonAsync(new
+    if (context.User.Identity?.IsAuthenticated == false)
     {
-        Name = context.User.FindFirstValue("name"),
-        AvatarUrl = context.User.FindFirstValue("avatar_url"),
-        Login = context.User.FindFirstValue("login"),
-    });
-}).RequireAuthorization();
+        await context.Response.WriteAsJsonAsync(new
+        {
+            IsAuthenticated = false
+        });
+    }
+    else
+    {
+        await context.Response.WriteAsJsonAsync(new
+        {
+            IsAuthenticated = true,
+            Name = context.User.FindFirstValue("name"),
+            AvatarUrl = context.User.FindFirstValue("avatar_url"),
+            Login = context.User.FindFirstValue("login"),
+        });
+    }
+});
 
 
 app.MapTankaGraphQL("/graphql", "Default");
