@@ -1,13 +1,13 @@
 import { createResource } from "solid-js";
 
-export default function Home() {
-  const [data] = createResource(async () => {
-    const response = await fetch("/session", {
-      redirect: "error",
-    });
-    return await response.json();
+const [data] = createResource(async () => {
+  const response = await fetch("/session", {
+    redirect: "error",
   });
+  return await response.json();
+});
 
+export default function Home() {
   return (
     <>
       {data.error && <div>{data.error}</div>}

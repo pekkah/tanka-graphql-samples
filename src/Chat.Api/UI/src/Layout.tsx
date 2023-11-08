@@ -1,4 +1,4 @@
-import { Outlet } from "@solidjs/router";
+import { A, Outlet } from "@solidjs/router";
 
 export default function Layout() {
   return (
@@ -23,10 +23,10 @@ export default function Layout() {
         ></label>
         <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
           <li>
-            <a>General</a>
+            <A href="/channels/1">General</A>
           </li>
           <li>
-            <a>Tanka</a>
+            <A href="/channels/2">Tanka</A>
           </li>
         </ul>
       </div>
