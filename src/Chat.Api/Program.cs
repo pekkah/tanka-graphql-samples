@@ -127,6 +127,7 @@ builder.Services.AddViteServices(new ViteOptions()
 
 
 WebApplication app = builder.Build();
+app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();

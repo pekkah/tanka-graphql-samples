@@ -17,9 +17,9 @@ function App() {
       ) : (
         <div>
           {data().isAuthenticated ? (
-            <div>Hello {data().name} <a href="/signout">Logout</a></div>
+            <div>Hello! {data().name} <a href="/signout">Logout</a></div>
           ) : (
-            <div>Not authenticated. Please <a href="/signin">Login</a></div>
+            <div>Please <a href="/signin">Login</a></div>
           )}
         </div>
       )}
