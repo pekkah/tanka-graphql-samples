@@ -8,7 +8,7 @@ export default function Channel() {
 
   return (
     <>
-     <p>Channel {id()}</p>
+     <h2>Channel {id()}</h2>
     </>
   );
 }

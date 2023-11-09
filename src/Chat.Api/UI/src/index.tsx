@@ -1,3 +1,6 @@
+// add the beginning of your app entry
+import 'vite/modulepreload-polyfill';
+
 /* @refresh reload */
 import { render } from "solid-js/web";
 

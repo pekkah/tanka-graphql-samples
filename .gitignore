@@ -276,3 +276,5 @@ _build/
 # db files
 **/*.db-*
 /src/Chat.Api/Chat.db
+/src/Chat.Api/wwwroot/*
+appsettings.Production.json

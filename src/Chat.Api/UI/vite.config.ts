@@ -4,6 +4,14 @@ import mkcert from'vite-plugin-mkcert';
 
 export default defineConfig({
   plugins: [mkcert(), solid()],
+  build: {
+    manifest: true,
+    emptyOutDir: true,
+    outDir:"../wwwroot",
+    rollupOptions: {
+      input: "src/index.tsx"
+    }
+  },
   server: {
     https: true,
     hmr: {

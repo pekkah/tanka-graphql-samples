@@ -121,7 +121,8 @@ builder.Services.AddViteServices(new ViteOptions()
     PackageDirectory = "UI",
     Server = new ViteServerOptions()
     {
-        Https = true
+        Https = true,
+        UseFullDevUrl = true
     }
 });
 
@@ -129,6 +130,13 @@ builder.Services.AddViteServices(new ViteOptions()
 WebApplication app = builder.Build();
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
+
+// we serve assets by proxying to Vite in development
+if (!app.Environment.IsDevelopment())
+{
+    app.UseStaticFiles();
+}
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -189,8 +197,6 @@ app.MapGet("/session", async context =>
 
 
 app.MapTankaGraphQL("/graphql", "Default");
-
-
 app.MapRazorPages();
 
 
@@ -199,6 +205,7 @@ if (app.Environment.IsDevelopment())
     app.UseViteDevMiddleware();
 }
 
+app.MapFallbackToPage("/Index");
 app.Run();
 
 public interface IChannelEvents
