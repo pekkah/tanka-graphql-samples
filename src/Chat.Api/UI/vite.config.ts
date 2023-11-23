@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import mkcert from'vite-plugin-mkcert';
+import codegen from 'vite-plugin-graphql-codegen';
 
 export default defineConfig({
-  plugins: [mkcert(), solid()],
+  plugins: [mkcert(), codegen(), solid()],
   build: {
     manifest: true,
     emptyOutDir: true,

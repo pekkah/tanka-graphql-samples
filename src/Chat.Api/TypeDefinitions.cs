@@ -1,20 +1,19 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Samples.Chat;
+namespace Tanka.GraphQL.Samples.Chat.Api;
 
 [ObjectType]
 public static class Query
 {
     public static async Task<IEnumerable<Channel>> Channels(
-        [FromServices] IDbContextFactory<ChatContext> dbFactory,
-        ResolverContext context
+        [FromServices] IDbContextFactory<ChatContext> dbFactory
     )
     {
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
@@ -74,8 +73,10 @@ public class Channel
 {
     public int Id { get; set; }
 
+    [MaxLength(1024)]
     public required string Name { get; init; }
 
+    [MaxLength(2048)]
     public required string Description { get; init; }
 
     public async Task<IEnumerable<Message>> Messages(
@@ -114,8 +115,11 @@ public class MutationChannel
         ResolverContext context
     )
     {
-        //todo: need to simplify both getting the HttpContext and the User
-        var user = context.QueryContext.Features.GetRequiredFeature<IHttpContextFeature>().HttpContext.User;
+        var user = context.GetUser();
+
+        if (user.Identity?.IsAuthenticated == false)
+            throw new InvalidOperationException($"Forbidden: user is not authenticated.");
+
         await using var db = await dbFactory.CreateDbContextAsync();
         var message = new Message
         {
@@ -124,15 +128,16 @@ public class MutationChannel
             TimestampMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             Sender = new Sender()
             {
-                Name = user.FindFirstValue(JwtRegisteredClaimNames.Name) ?? "??",
-                Sub = user.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? "-1",
+                Name = user.FindFirstValue("name") ?? "??",
+                Id = user.FindFirstValue("id") ?? "-1",
+                Login = user.FindFirstValue("login") ?? string.Empty,
                 AvatarUrl = user.FindFirstValue("avatar_url") ?? string.Empty
             }
         };
         await db.Messages.AddAsync(message);
         await db.SaveChangesAsync();
 
-        await events.Publish(new MessageChannelEvent(_channel.Id, nameof(MessageChannelEvent), message));
+        await events.Publish(new MessageChannelEvent(_channel.Id, nameof(MessageChannelEvent), message), CancellationToken.None);
         return message;
     }
 }
@@ -142,8 +147,10 @@ public class Message
 {
     public int Id { get; set; }
 
+    [MaxLength(100)]
     public required string TimestampMs { get; set; }
 
+    [MaxLength(4048)]
     public required string Text { get; init; }
 
     public Sender Sender { get; set; } = null!;
@@ -155,10 +162,16 @@ public class Message
 [Owned]
 public class Sender
 {
-    public string Sub { get; set; } = string.Empty;
+    [MaxLength(100)]
+    public string Id { get; set; } = string.Empty;
 
+    [MaxLength(100)]
+    public string Login { get; set; } = string.Empty;
+
+    [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
+    [MaxLength(2048)]
     public string AvatarUrl { get; set; } = string.Empty;
 }
 

@@ -1,18 +1,10 @@
-using System.Collections.Concurrent;
-using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
-using System.Threading.Channels;
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 
 using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
-using Tanka.GraphQL.Samples.Chat;
+using Tanka.GraphQL.Samples.Chat.Api;
+using Tanka.GraphQL.Samples.Chat.Api.Startup;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
@@ -20,10 +12,7 @@ using Tanka.GraphQL.ValueResolution;
 using Vite.AspNetCore;
 using Vite.AspNetCore.Extensions;
 
-using Channel = System.Threading.Channels.Channel;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddPooledDbContextFactory<ChatContext>(
         options => options.UseSqlite(
@@ -32,32 +21,35 @@ builder.Services
     );
 
 builder.Services.AddSingleton<IChannelEvents, ChannelEvents>();
+
+// add Tanka GraphQL and configure schema
 builder.AddTankaGraphQL()
     .AddHttp()
     .AddWebSockets()
     .AddSchemaOptions("Default", options =>
     {
+        // Add source generator generated types for queries and mutations
         options.AddGeneratedTypes(types =>
         {
-            types.AddTankaGraphQLSamplesChatTypes();
+            types.AddTankaGraphQLSamplesChatApiTypes();
         });
 
+        // Manually configure subscription types as the SG does not support it yet
         //TODO: Add subscription support to the code generator
         options.Configure(configure =>
         {
-            // Configure subscription types
-            ExecutableSchemaBuilder builder = configure.Builder;
+            ExecutableSchemaBuilder schema = configure.Builder;
 
-            builder.Add("""
-                        interface ChannelEvent {
-                            channelId: Int!
-                            eventType: String!
-                        }
+            schema.Add("""
+                       interface ChannelEvent {
+                           channelId: Int!
+                           eventType: String!
+                       }
 
-                        type MessageChannelEvent implements ChannelEvent
-                        """);
+                       type MessageChannelEvent implements ChannelEvent
+                       """);
 
-            builder.Add(new ObjectResolversConfiguration(
+            schema.Add(new ObjectResolversConfiguration(
                 "MessageChannelEvent",
                 new FieldsWithResolvers
                 {
@@ -66,7 +58,7 @@ builder.AddTankaGraphQL()
                     { "message: Message!", (MessageChannelEvent objectValue) => objectValue.Message }
                 }));
 
-            builder.Add("Subscription",
+            schema.Add("Subscription",
                 new FieldsWithResolvers
                 {
                     {
@@ -75,7 +67,8 @@ builder.AddTankaGraphQL()
                             context.ResolvedValue = context.ObjectValue;
                             context.ResolveAbstractType = (definition, value) => value switch
                             {
-                                MessageChannelEvent => context.Schema.GetRequiredNamedType<ObjectDefinition>("MessageChannelEvent"),
+                                MessageChannelEvent => context.Schema.GetRequiredNamedType<ObjectDefinition>(
+                                    "MessageChannelEvent"),
                                 _ => throw new InvalidOperationException("Unknown ChannelEvent type")
                             };
                         }
@@ -87,7 +80,7 @@ builder.AddTankaGraphQL()
                         "channel_events(id: Int!): ChannelEvent", b => b.Run((context, unsubscribe) =>
                         {
                             var events = context.GetRequiredService<IChannelEvents>();
-                            var id = context.GetArgument<int>("id");
+                            int id = context.GetArgument<int>("id");
                             context.ResolvedValue = events.Subscribe(id, unsubscribe);
                             return default;
                         })
@@ -96,209 +89,57 @@ builder.AddTankaGraphQL()
         });
     });
 
-builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultChallengeScheme = "github";
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    })
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/signin";
-    })
-    .AddGitHub("github", options =>
-    {
-        options.ClientId = builder.Configuration["GitHub:ClientId"];
-        options.ClientSecret = builder.Configuration["GitHub:ClientSecret"];
-        options.Scope.Add("user:email");
+// Add GitHub authentication with cookies
+builder.AddCookieAndGitHubAuthentication();
 
-        options.ClaimActions.MapAll();
-    });
-
-builder.Services.AddRazorPages();
-builder.Services.AddViteServices(new ViteOptions()
+// These are used for the UI
+builder.Services.AddRazorPages(); // host the SolidJS UI
+builder.Services.AddViteServices(new ViteOptions() // use vite development server
 {
     PackageDirectory = "UI",
-    Server = new ViteServerOptions()
+    Server = new ViteServerOptions
     {
+        AutoRun = false, // enable to autostart vite dev server
         Https = true,
         UseFullDevUrl = true
     }
 });
 
+// Write schema files to disk for graphql-codegen
+if (builder.Environment.IsDevelopment()) 
+    builder.Services.AddSingleton<IHostedService, WriteSchemaFiles>();
 
+/* App */
 WebApplication app = builder.Build();
+
+// Run migrations in development
+if (app.Environment.IsDevelopment()) await app.RunMigrations();
+
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 
-// we serve assets by proxying to Vite in development
-if (!app.Environment.IsDevelopment())
-{
-    app.UseStaticFiles();
-}
+// This is used during production to serve the SolidJS UI resources
+if (!app.Environment.IsDevelopment()) app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
-{
-    IDbContextFactory<ChatContext> dbFactory = app.Services.GetRequiredService<IDbContextFactory<ChatContext>>();
-    await using ChatContext db = await dbFactory.CreateDbContextAsync();
-    await db.Database.EnsureDeletedAsync();
-    try
-    {
-        await db.Database.EnsureCreatedAsync();
-
-        await db.Channels.AddRangeAsync(
-            new Tanka.GraphQL.Samples.Chat.Channel { Name = "General", Description = "" },
-            new Tanka.GraphQL.Samples.Chat.Channel { Name = "Tanka", Description = "" }
-        );
-
-        await db.SaveChangesAsync();
-    }
-    catch (Exception x)
-    {
-        app.Services.GetRequiredService<ILogger<Program>>().LogError(x, "Failed to initialize database");
-        throw;
-    }
-}
-
+// WebSockets are required to use websockets transport with GraphQL
 app.UseWebSockets();
 
-app.MapGet("/signin", async context => await context.ChallengeAsync("github", new OAuthChallengeProperties()
-{
-    RedirectUri = "/"
-}));
-app.MapGet("/signout", async context => await context.SignOutAsync("Cookies", new AuthenticationProperties()
-{
-    RedirectUri = "/"
-}));
-app.MapGet("/session", async context =>
-{
-    if (context.User.Identity?.IsAuthenticated == false)
-    {
-        await context.Response.WriteAsJsonAsync(new
-        {
-            IsAuthenticated = false
-        });
-    }
-    else
-    {
-        await context.Response.WriteAsJsonAsync(new
-        {
-            IsAuthenticated = true,
-            Name = context.User.FindFirstValue("name"),
-            AvatarUrl = context.User.FindFirstValue("avatar_url"),
-            Login = context.User.FindFirstValue("login"),
-        });
-    }
-});
+// Some utility endpoints for the SolidJS UI
+app.UseBffEndpoints();
 
-
+// Map Default schema to endpoint
 app.MapTankaGraphQL("/graphql", "Default");
+
+// SolidJS UI is hosted by Razor page
 app.MapRazorPages();
-
-
 if (app.Environment.IsDevelopment())
-{
+    // Server SolidJS resources in development
     app.UseViteDevMiddleware();
-}
 
+// Allow SolidJS router to handle unknown requests
 app.MapFallbackToPage("/Index");
 app.Run();
-
-public interface IChannelEvents
-{
-    ValueTask Publish<T>(T channelEvent) where T : ChannelEvent;
-
-    IAsyncEnumerable<ChannelEvent> Subscribe(int channelId, CancellationToken cancellationToken);
-}
-
-public class ChannelEvents : IChannelEvents
-{
-    private readonly ConcurrentDictionary<int, SimpleAsyncSubject<ChannelEvent>> _channels = new();
-
-    public ValueTask Publish<T>(T channelEvent) where T : ChannelEvent
-    {
-        int channelId = channelEvent.ChannelId;
-        SimpleAsyncSubject<ChannelEvent> channel =
-            _channels.GetOrAdd(channelId, id => new ConcurrentSimpleAsyncSubject<ChannelEvent>());
-
-        return channel.OnNextAsync(channelEvent);
-    }
-
-    public IAsyncEnumerable<ChannelEvent> Subscribe(int channelId, CancellationToken cancellationToken)
-    {
-        //todo: channel with channelId exists
-        SimpleAsyncSubject<ChannelEvent> channel =
-            _channels.GetOrAdd(channelId, id => new ConcurrentSimpleAsyncSubject<ChannelEvent>());
-
-         return new Subscription(channel).AsAsyncEnumerable(cancellationToken);
-    }
-}
-
-public abstract record ChannelEvent(int ChannelId, string EventType);
-
-public record MessageChannelEvent
-    (int ChannelId, string EventType, Message Message) : ChannelEvent(ChannelId, EventType);
-
-public class Subscription : IAsyncObserver<ChannelEvent>
-{
-    private readonly Channel<ChannelEvent> _channel =
-        Channel.CreateUnbounded<ChannelEvent>(
-            new UnboundedChannelOptions { SingleWriter = true, SingleReader = true });
-
-    private readonly IAsyncObservable<ChannelEvent> _observable;
-
-    public Subscription(IAsyncObservable<ChannelEvent> observable)
-    {
-        _observable = observable;
-    }
-
-    protected ChannelReader<ChannelEvent> Reader => _channel.Reader;
-
-    protected ChannelWriter<ChannelEvent> Writer => _channel.Writer;
-
-    public ValueTask OnNextAsync(ChannelEvent value)
-    {
-        return Writer.WriteAsync(value);
-    }
-
-    public ValueTask OnErrorAsync(Exception error)
-    {
-        Writer.Complete(error);
-        return default(ValueTask);
-    }
-
-    public ValueTask OnCompletedAsync()
-    {
-        Writer.Complete();
-        return default(ValueTask);
-    }
-
-    public async IAsyncEnumerable<ChannelEvent> AsAsyncEnumerable(
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        if (cancellationToken.IsCancellationRequested)
-            yield break;
-
-        IAsyncDisposable? disposable = await _observable.SubscribeAsync(this);
-
-        cancellationToken.Register(() =>
-        {
-            disposable.DisposeAsync();
-        });
-
-        // ReSharper disable once MethodSupportsCancellation
-        await foreach (ChannelEvent item in Reader.ReadAllAsync(cancellationToken))
-        {
-            if (cancellationToken.IsCancellationRequested)
-                yield break;
-
-            yield return item;
-        }
-
-        await disposable.DisposeAsync();
-    }
-}
