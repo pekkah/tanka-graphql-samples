@@ -96,7 +96,7 @@ builder.AddCookieAndGitHubAuthentication();
 builder.Services.AddRazorPages(); // host the SolidJS UI
 builder.Services.AddViteServices(new ViteOptions() // use vite development server
 {
-    PackageDirectory = "UI",
+    PackageDirectory = "UI2",
     Server = new ViteServerOptions
     {
         AutoRun = false, // enable to autostart vite dev server
@@ -119,7 +119,8 @@ app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 
 // This is used during production to serve the SolidJS UI resources
-if (!app.Environment.IsDevelopment()) app.UseStaticFiles();
+if (!app.Environment.IsDevelopment()) 
+    app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
@@ -137,7 +138,7 @@ app.MapTankaGraphQL("/graphql", "Default");
 // SolidJS UI is hosted by Razor page
 app.MapRazorPages();
 if (app.Environment.IsDevelopment())
-    // Server SolidJS resources in development
+    // Serve SolidJS resources in development
     app.UseViteDevMiddleware();
 
 // Allow SolidJS router to handle unknown requests

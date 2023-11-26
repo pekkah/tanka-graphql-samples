@@ -40,7 +40,7 @@ public class WriteSchemaFiles : IHostedService
         _logger.LogInformation("IsDevelopment: {IsDevelopment}", _environment.IsDevelopment());
         foreach ((string name, ISchema schema) in _schemaCollection.Schemas)
         {
-            string outputFileName = Path.GetFullPath($"../UI/graphql/{name}.graphql", _environment.WebRootPath);
+            string outputFileName = Path.GetFullPath($"../UI2/graphql/{name}.graphql", _environment.WebRootPath);
             _logger.LogInformation("Writing schema '{SchemaName}' to file '{OutputFileName}'", name, outputFileName);
             await File.WriteAllTextAsync(
                 outputFileName, 
