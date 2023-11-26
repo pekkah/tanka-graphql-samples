@@ -93,7 +93,7 @@ builder.AddTankaGraphQL()
 builder.AddCookieAndGitHubAuthentication();
 
 // These are used for the UI
-builder.Services.AddRazorPages(); // host the SolidJS UI
+builder.Services.AddRazorPages(); // host the UI
 builder.Services.AddViteServices(new ViteOptions() // use vite development server
 {
     PackageDirectory = "UI2",
@@ -118,7 +118,7 @@ if (app.Environment.IsDevelopment()) await app.RunMigrations();
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 
-// This is used during production to serve the SolidJS UI resources
+// This is used during production to serve the UI resources
 if (!app.Environment.IsDevelopment()) 
     app.UseStaticFiles();
 
@@ -129,18 +129,18 @@ app.UseAuthorization();
 // WebSockets are required to use websockets transport with GraphQL
 app.UseWebSockets();
 
-// Some utility endpoints for the SolidJS UI
+// Some utility endpoints for the UI
 app.UseBffEndpoints();
 
 // Map Default schema to endpoint
 app.MapTankaGraphQL("/graphql", "Default");
 
-// SolidJS UI is hosted by Razor page
+// UI is hosted by Razor page
 app.MapRazorPages();
 if (app.Environment.IsDevelopment())
-    // Serve SolidJS resources in development
+    // Serve UI resources in development
     app.UseViteDevMiddleware();
 
-// Allow SolidJS router to handle unknown requests
+// Allow UI router to handle SPA requests
 app.MapFallbackToPage("/Index");
 app.Run();
