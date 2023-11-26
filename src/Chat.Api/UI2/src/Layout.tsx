@@ -5,7 +5,7 @@ import { PageTitle } from "./model/page";
 
 export default function Layout() {
   return (
-    <div class="drawer lg:drawer-open">
+    <div class="drawer lg:drawer-open h-full">
       <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
         <div class="navbar bg-base-100">
@@ -33,7 +33,7 @@ export default function Layout() {
             <UserInfo />
           </div>
         </div>
-        <div class="px-6 pb-4">
+        <div class="px-6 pb-4 h-full">
           <Outlet />
         </div>
       </div>

@@ -13,7 +13,9 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n": types.AddMessageDocument,
     "\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n": types.ChannelsDocument,
+    "\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n    }\n}\n": types.ChannelByIdDocument,
 };
 
 /**
@@ -33,7 +35,15 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n"): (typeof documents)["\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n    }\n}\n"): (typeof documents)["\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n    }\n}\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

@@ -10,7 +10,29 @@ const ChannelsQuery = graphql(`
   }
 `);
 
+const ChannelByIdQuery = graphql(`
+  query ChannelById($id: Int!) {
+    channel(id: $id) {
+      id
+      name
+      description
+    }
+}
+`);
+
 export function useChannels() {
-  const [result] = useQuery({ query: ChannelsQuery });
+  const [result] = useQuery({ 
+    query: ChannelsQuery 
+  });
+
+  return result;
+}
+
+export function useChannel(id: number) {
+  const [result] = useQuery({
+    query: ChannelByIdQuery,
+    variables: { id }
+  });
+
   return result;
 }
