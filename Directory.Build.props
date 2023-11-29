@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Project>
-  <PropertyGroup>
-    <Authors>Pekka Heikura</Authors>
-    <Copyright>Pekka Heikura</Copyright>
-    <PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Description>Sample usage of Tanka GraphQL</Description>
-    <PackageTags>graphql,tanka,demo,sample</PackageTags>
-    <LangVersion>8.0</LangVersion>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>11</LangVersion>
+		<Copyright>Pekka Heikura</Copyright>
+		<PackageProjectUrl>https://github.com/pekkah/tanka-graphql</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/pekkah/tanka-graphql</RepositoryUrl>
+		<Description>GraphQL Query, Mutation and Subscription library</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>graphql tanka signalr apollo</PackageTags>
+		<Authors>Pekka Heikura</Authors>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AssemblyName Condition="'$(AssemblyName)' == ''">Tanka.GraphQL.Samples.$(MSBuildProjectName)</AssemblyName>
+		<RootNamespace Condition="'$(RootNamespace)' == ''">Tanka.GraphQL.Samples.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PackageOutputPath>$(SolutionDir)artifacts</PackageOutputPath>
+	</PropertyGroup>
 </Project>

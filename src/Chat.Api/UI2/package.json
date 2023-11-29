@@ -1,0 +1,36 @@
+{
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 vite",
+		"build": "vite build",
+		"preview": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 vite preview",
+		"codegen": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts"
+	},
+	"dependencies": {
+		"@preact/signals": "^1.2.2",
+		"@urql/preact": "^4.0.4",
+		"graphql-ws": "^5.14.2",
+		"preact": "^10.19.2",
+		"preact-render-to-string": "^6.3.1",
+		"react-router-dom": "^6.20.0"
+	},
+	"devDependencies": {
+		"@graphql-codegen/cli": "^5.0.0",
+		"@graphql-codegen/client-preset": "^4.1.0",
+		"@preact/preset-vite": "^2.7.0",
+		"@tailwindcss/typography": "^0.5.10",
+		"autoprefixer": "^10.4.16",
+		"cross-env": "^7.0.3",
+		"daisyui": "^4.4.4",
+		"eslint": "^8.54.0",
+		"eslint-config-preact": "^1.3.0",
+		"graphql": "^16.8.1",
+		"postcss": "^8.4.31",
+		"tailwindcss": "^3.3.5",
+		"typescript": "^5.3.2",
+		"vite": "^4.5.0",
+		"vite-plugin-graphql-codegen": "^3.3.3",
+		"vite-plugin-mkcert": "^1.17.1"
+	}
+}
