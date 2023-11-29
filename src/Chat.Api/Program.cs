@@ -13,6 +13,8 @@ using Vite.AspNetCore;
 using Vite.AspNetCore.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true);
+
 builder.Services
     .AddPooledDbContextFactory<ChatContext>(
         options => options.UseSqlite(
@@ -99,7 +101,7 @@ builder.Services.AddViteServices(new ViteOptions() // use vite development serve
     PackageDirectory = "UI2",
     Server = new ViteServerOptions
     {
-        AutoRun = false, // enable to autostart vite dev server
+        AutoRun = builder.Configuration.GetValue<bool>("Vite:AutoRun"), // enable to autostart vite dev server
         Https = true,
         UseFullDevUrl = true
     }

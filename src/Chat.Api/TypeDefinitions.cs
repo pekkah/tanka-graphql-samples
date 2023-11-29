@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -38,9 +39,15 @@ public static class Mutation
     public static async Task<MutationChannel> AddChannel(
         [FromServices] IDbContextFactory<ChatContext> dbFactory,
         string name,
-        string description
+        string description,
+        ResolverContext context
     )
     {
+        var user = context.GetUser();
+
+        if (user.Identity?.IsAuthenticated == false)
+            throw new InvalidOperationException($"Forbidden: user is not authenticated.");
+
         await using ChatContext db = await dbFactory.CreateDbContextAsync();
         var channel = new Channel
         {

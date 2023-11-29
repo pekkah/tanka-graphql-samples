@@ -5,10 +5,10 @@ import { PageTitle } from "./model/page";
 
 export default function Layout() {
   return (
-    <div class="drawer lg:drawer-open h-full">
+    <div class="drawer lg:drawer-open h-screen p-0 m-0 overflow-hidden">
       <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content flex flex-col">
-        <div class="navbar bg-base-100">
+      <div class="drawer-content h-screen flex flex-col">
+        <div class="navbar bg-base-100 flex-none">
           <div class="flex-none">
             <label for="my-drawer-2" class="btn drawer-button lg:hidden">
               <svg
@@ -33,7 +33,7 @@ export default function Layout() {
             <UserInfo />
           </div>
         </div>
-        <div class="px-6 pb-4 h-full">
+        <div class="p-2 flex-none h-[100%]">
           <Outlet />
         </div>
       </div>

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 
 namespace Tanka.GraphQL.Samples.Chat.Api.Startup;
@@ -9,13 +10,14 @@ public static class BffEndpointsExtensions
 {
     public static WebApplication UseBffEndpoints(this WebApplication app)
     {
-        app.MapGet("/signin",
-            async context =>
-                await context.ChallengeAsync("github", new OAuthChallengeProperties { RedirectUri = "/" }));
+        app.MapGet("/signin", context =>
+            context.ChallengeAsync("github", new OAuthChallengeProperties { RedirectUri = "/" }));
 
         app.MapGet("/signout",
             async context =>
-                await context.SignOutAsync("Cookies", new AuthenticationProperties { RedirectUri = "/" }));
+            {
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties { RedirectUri = "/" });
+            });
 
         app.MapGet("/session", async context =>
         {
