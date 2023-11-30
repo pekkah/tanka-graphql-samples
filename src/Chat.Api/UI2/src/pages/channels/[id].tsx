@@ -1,29 +1,36 @@
 import { useParams } from "react-router-dom";
-import { usePageTitle } from "../../model/page";
-import { useChannel, useNewMessages } from "../../data/useChannels";
+import { useChannelWithNewMessages } from "../../data/useChannels";
 import { useAddMessage } from "../../data/useAddMessage";
 import { signal } from "@preact/signals";
 import { Message } from "../../generated/graphql";
-import { AuthenticatedSession, Session, useSession } from "../../model";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { Session, useSession } from "../../model";
+import { useEffect, useRef } from "preact/hooks";
+import { usePageTitle } from "../../model/page";
 
 export default function Channel() {
   const { id } = useParams<{ id: string }>();
-
-  const channelResponse = useChannel(parseInt(id));
   const [addMessageResponse, addMessage] = useAddMessage();
   const newMessage = signal("");
 
   const session = useSession();
-  const messages = useNewMessages(parseInt(id), {
-    fetching: channelResponse.fetching,
-    data: channelResponse.data?.channel?.messages ?? [],
-  });
+  const [
+    {
+      data,
+      error,
+      fetching,
+    },
+  ] = useChannelWithNewMessages(parseInt(id));
 
-  if (channelResponse.fetching) {
+  if (fetching) {
     return <div>Loading...</div>;
   }
 
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  const { channel } = data;
+  const messages = channel.messages || [];
 
   function handleNewMessageChange(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -31,9 +38,11 @@ export default function Channel() {
   }
 
   function addMessageClick() {
-    addMessage({ channelId: channelResponse.data.channel.id, text: newMessage.value });
+    addMessage({ channelId: channel.id, text: newMessage.value });
     newMessage.value = "";
   }
+
+  usePageTitle().value = channel.name;
 
   return (
     <>
@@ -51,7 +60,7 @@ export default function Channel() {
         />
         <button
           class="px-4 py-2 bg-blue-500 text-white rounded-r-md"
-          disabled={addMessageResponse.fetching || channelResponse.fetching}
+          disabled={addMessageResponse.fetching || fetching}
           onClick={addMessageClick}
         >
           Send
@@ -75,11 +84,11 @@ function MessageList({
   }
 
   const messagesDiv = useRef<HTMLDivElement>(null);
-  useEffect(()=> {
+  useEffect(() => {
     if (messagesDiv.current) {
       messagesDiv.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages])
+  }, [messages]);
 
   return (
     <>

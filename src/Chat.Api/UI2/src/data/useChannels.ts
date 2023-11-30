@@ -1,6 +1,12 @@
 import { graphql } from "../generated";
 import { useQuery, useSubscription } from "@urql/preact";
-import { EventsSubscription, Message, MessageChannelEvent } from "../generated/graphql";
+import {
+  Channel,
+  EventsSubscription,
+  Message,
+  MessageChannelEvent,
+} from "../generated/graphql";
+import { useState } from "preact/hooks";
 
 const ChannelsQuery = graphql(`
   query Channels {
@@ -11,7 +17,7 @@ const ChannelsQuery = graphql(`
   }
 `);
 
-const ChannelByIdQuery = graphql(`
+export const ChannelByIdQuery = graphql(`
   query ChannelById($id: Int!) {
     channel(id: $id) {
       id
@@ -73,27 +79,20 @@ const EventsSubscriptionQuery = graphql(`
   }
 `);
 
-export function useNewMessages(
-  id: number,
-  initialQuery: { fetching: boolean, data: Partial<Message>[] | undefined },
-) {
-  const [result] = useSubscription(
-    {
-      pause: initialQuery.fetching,
+export function useChannelWithNewMessages(id: number) {
+  const initialQuery = useQuery({
+    query: ChannelByIdQuery,
+    variables: { id },
+  });
+  
+  useSubscription({
+      pause: initialQuery[0].fetching,
       query: EventsSubscriptionQuery,
       variables: {
         id,
       },
-    },
-    handle
+    }
   );
 
-  function handle(prev: Partial<Message>[] = initialQuery.data, event: EventsSubscription){
-    if (event.channel_events.__typename !== 'MessageChannelEvent') return prev;
-
-    const messageEvent = event.channel_events as MessageChannelEvent;
-    return [...prev, messageEvent.message as Message]
-  }
-
-  return result.data || initialQuery.data;
+  return initialQuery;
 }
