@@ -45,8 +45,8 @@ export default function Channel() {
   usePageTitle().value = channel.name;
 
   return (
-    <>
-      <div class="overflow-y-auto h-[85%] mb-2">
+    <div class="h-full w-full md:w-4/5">
+      <div class="overflow-y-auto mb-2 h-[90%]">
         <MessageList messages={messages} session={session.value} />
       </div>
       <div class="items-center flex bottom-0 h-[50px] m-4">
@@ -66,7 +66,7 @@ export default function Channel() {
           Send
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
