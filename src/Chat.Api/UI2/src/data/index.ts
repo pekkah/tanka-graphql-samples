@@ -4,8 +4,9 @@ import { cacheExchange } from "@urql/exchange-graphcache";
 import { createClient as createWSClient } from "graphql-ws";
 import { ChannelByIdQuery } from "./useChannels";
 
+const host = window.location.host;
 const wsClient = createWSClient({
-  url: "wss://localhost:8000/graphql/ws",
+  url: `wss://${host}/graphql/ws`,
   keepAlive: 10_000,
   retryAttempts: 10,
   lazy: false,

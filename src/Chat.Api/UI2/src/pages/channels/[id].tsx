@@ -56,11 +56,11 @@ export default function Channel() {
           class="w-full px-4 py-2 border border-gray-300 rounded-l-md"
           placeholder="Type your message..."
           onInput={handleNewMessageChange}
-          disabled={addMessageResponse.fetching}
+          disabled={addMessageResponse.fetching || fetching || session.value.isAuthenticated === false}
         />
         <button
           class="px-4 py-2 bg-blue-500 text-white rounded-r-md"
-          disabled={addMessageResponse.fetching || fetching}
+          disabled={addMessageResponse.fetching || fetching || session.value.isAuthenticated === false}
           onClick={addMessageClick}
         >
           Send
