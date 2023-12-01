@@ -114,8 +114,8 @@ if (builder.Environment.IsDevelopment())
 /* App */
 WebApplication app = builder.Build();
 
-// Run migrations in development
-if (app.Environment.IsDevelopment()) await app.RunMigrations();
+// Reset DB on every run
+await app.RunMigrations();
 
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
@@ -139,8 +139,9 @@ app.MapTankaGraphQL("/graphql", "Default");
 
 // UI is hosted by Razor page
 app.MapRazorPages();
+
 if (app.Environment.IsDevelopment())
-    // Serve UI resources in development
+    // Serve UI resources in development using Vite
     app.UseViteDevMiddleware();
 
 // Allow UI router to handle SPA requests
