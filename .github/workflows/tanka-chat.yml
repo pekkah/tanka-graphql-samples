@@ -1,8 +1,8 @@
-name: Build and deploy .NET Core application to Web App tanka-chat
+name: Build and deploy tanka-chat
 on:
   push:
     branches:
-    - feature/deploy3
+    - master
 env:
   AZURE_WEBAPP_NAME: tanka-chat
   AZURE_WEBAPP_PACKAGE_PATH: src/Chat.Api/published

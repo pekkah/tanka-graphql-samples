@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
+		.github\workflows\tanka-chat.yml = .github\workflows\tanka-chat.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Api", "src\Chat.Api\Chat.Api.csproj", "{9E036DE8-B046-4053-85E7-A73D9EDCB0F4}"
