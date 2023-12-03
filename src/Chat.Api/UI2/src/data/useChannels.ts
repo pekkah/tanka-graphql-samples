@@ -85,7 +85,7 @@ export function useChannelWithNewMessages(id: number) {
     variables: { id },
   });
   
-  useSubscription({
+  const [{error: subscriptionError, fetching: subscriptionConnected}] = useSubscription({
       pause: initialQuery[0].fetching,
       query: EventsSubscriptionQuery,
       variables: {
@@ -94,5 +94,9 @@ export function useChannelWithNewMessages(id: number) {
     }
   );
 
-  return initialQuery;
+  return {
+    ...initialQuery[0],
+    subscriptionError,
+    subscriptionConnected
+  };
 }
