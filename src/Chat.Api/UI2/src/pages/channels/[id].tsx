@@ -13,13 +13,8 @@ export default function Channel() {
   const newMessage = signal("");
 
   const session = useSession();
-  const [
-    {
-      data,
-      error,
-      fetching,
-    },
-  ] = useChannelWithNewMessages(parseInt(id));
+  const { data, error, fetching, subscriptionError, subscriptionConnected } =
+    useChannelWithNewMessages(parseInt(id));
 
   if (fetching) {
     return <div>Loading...</div>;
@@ -32,6 +27,20 @@ export default function Channel() {
   const { channel } = data;
   const messages = channel.messages || [];
 
+  usePageTitle().value = channel.name;
+
+  if (subscriptionError) {
+    return <div>Error: {subscriptionError.message}</div>;
+  }
+
+  if (!subscriptionConnected) {
+    return <div>Connecting...</div>;
+  }
+
+  if (!session.value.isAuthenticated) {
+    newMessage.value = "You must be logged in to send messages";
+  }
+
   function handleNewMessageChange(e: Event) {
     const target = e.target as HTMLInputElement;
     newMessage.value = target.value;
@@ -42,25 +51,32 @@ export default function Channel() {
     newMessage.value = "";
   }
 
-  usePageTitle().value = channel.name;
-
   return (
-    <div class="h-full w-full md:w-4/5">
-      <div class="overflow-y-auto mb-2 h-[90%]">
+    <div class="h-full w-full">
+      <div class="overflow-y-auto mb-2 h-[90%] w-full sm:w-[80%]">
         <MessageList messages={messages} session={session.value} />
       </div>
-      <div class="items-center flex bottom-0 h-[50px] m-4">
+      <div class="flex fixed bottom-0 h-auto w-[90%] sm:w-[75%] md:w-[75%] lg:w-[60%] my-4 mx-0 pt-0 mt-0">
         <input
           type="text"
           value={newMessage}
           class="w-full px-4 py-2 border border-gray-300 rounded-l-md"
           placeholder="Type your message..."
           onInput={handleNewMessageChange}
-          disabled={addMessageResponse.fetching || fetching || session.value.isAuthenticated === false}
+          disabled={
+            addMessageResponse.fetching ||
+            fetching ||
+            session.value.isAuthenticated === false
+          }
         />
         <button
           class="px-4 py-2 bg-blue-500 text-white rounded-r-md"
-          disabled={addMessageResponse.fetching || fetching || session.value.isAuthenticated === false}
+          disabled={
+            addMessageResponse.fetching ||
+            fetching ||
+            session.value.isAuthenticated === false ||
+            !subscriptionConnected
+          }
           onClick={addMessageClick}
         >
           Send
