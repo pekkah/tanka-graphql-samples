@@ -14,7 +14,7 @@
 		"graphql-ws": "^5.14.2",
 		"preact": "^10.19.2",
 		"preact-render-to-string": "^6.3.1",
-		"react-router-dom": "^6.20.0"
+		"react-router-dom": "^6.20.1"
 	},
 	"devDependencies": {
 		"@graphql-codegen/cli": "^5.0.0",
