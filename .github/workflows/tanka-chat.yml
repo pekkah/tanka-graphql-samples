@@ -4,12 +4,12 @@ on:
     paths-ignore:
       - 'docs/**'
     branches:
-      - main
+      - master
       - release/**
     tags:
       - "*"
   pull_request:
-    branches: [main]
+    branches: [master]
 
 env:
   AZURE_WEBAPP_NAME: tanka-chat
