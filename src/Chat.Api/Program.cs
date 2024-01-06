@@ -136,6 +136,7 @@ app.UseBffEndpoints();
 
 // Map Default schema to endpoint
 app.MapTankaGraphQL("/graphql", "Default");
+app.MapGraphiQL("/graphql/ui");
 
 // UI is hosted by Razor page
 app.MapRazorPages();
