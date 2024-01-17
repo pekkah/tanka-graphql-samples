@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using Tanka.GraphQL.Executable;
+using Tanka.GraphQL.Extensions.Experimental.OneOf;
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Samples.Chat.Api;
@@ -34,6 +35,25 @@ builder.AddTankaGraphQL()
         options.AddGeneratedTypes(types =>
         {
             types.AddTankaGraphQLSamplesChatApiTypes();
+        });
+        
+        options.PostConfigure(configure =>
+        {
+            // this is experimental feature adding support for @oneOf input types
+            configure.Builder.Schema.AddOneOf();
+            
+            //todo: add support to the code generator
+            configure.Builder.Add("""
+                               extend input ChannelCommand @oneOf
+                               """);
+        });
+
+        options.PostConfigure(configure =>
+        {
+            //todo: add support to code generator
+            configure.Builder.Schema.Add("""
+                                         union CommandResult = AddChannelResult | AddMessageResult
+                                         """);
         });
 
         // Manually configure subscription types as the SG does not support it yet
@@ -91,6 +111,8 @@ builder.AddTankaGraphQL()
         });
     });
 
+builder.Services.AddOneOfValidationRule();
+
 // Add GitHub authentication with cookies
 builder.AddCookieAndGitHubAuthentication();
 
@@ -103,7 +125,6 @@ builder.Services.AddViteServices(new ViteOptions() // use vite development serve
     {
         AutoRun = builder.Configuration.GetValue<bool>("Vite:AutoRun"), // enable to autostart vite dev server
         Https = true,
-        UseFullDevUrl = true
     }
 });
 
@@ -143,7 +164,7 @@ app.MapRazorPages();
 
 if (app.Environment.IsDevelopment())
     // Serve UI resources in development using Vite
-    app.UseViteDevMiddleware();
+    app.UseViteDevelopmentServer();
 
 // Allow UI router to handle SPA requests
 app.MapFallbackToPage("/Index");
