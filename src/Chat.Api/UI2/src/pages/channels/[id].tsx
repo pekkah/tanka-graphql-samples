@@ -47,7 +47,15 @@ export default function Channel() {
   }
 
   function addMessageClick() {
-    addMessage({ channelId: channel.id, text: newMessage.value });
+    addMessage({
+      command: {
+        addMessage: {
+          channelId: parseInt(id),
+          content: newMessage.value,
+        },
+        }
+      }
+    );
     newMessage.value = "";
   }
 

@@ -13,7 +13,7 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n": types.AddMessageDocument,
+    "\n  mutation AddMessage($command: ChannelCommand!) {\n    execute(command: $command) {\n      __typename\n      ... on AddMessageResult {\n        message {\n          id\n          text\n          timestampMs\n          sender {\n            id\n            name\n          }\n        }\n      }\n    }\n  }\n": types.AddMessageDocument,
     "\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n": types.ChannelsDocument,
     "\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n      messages {\n        id\n        text\n        timestampMs\n        sender {\n          id\n          name\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n": types.ChannelByIdDocument,
     "\n  subscription Events($id: Int!) {\n    channel_events(id: $id) {\n      __typename\n      ... on MessageChannelEvent {\n        __typename\n        message {\n          __typename\n          id\n          text\n          timestampMs\n          sender {\n            __typename\n            id\n            name\n            avatarUrl\n            login\n          }\n        }\n      }\n    }\n  }\n": types.EventsDocument,
@@ -36,7 +36,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n"): (typeof documents)["\n  mutation AddMessage($channelId: Int! $text: String!) {\n    channel(id: $channelId) {\n        addMessage(text: $text) {\n            id\n            text\n            timestampMs\n            sender {\n                id\n                name\n            }\n        }\n    }\n  }\n"];
+export function graphql(source: "\n  mutation AddMessage($command: ChannelCommand!) {\n    execute(command: $command) {\n      __typename\n      ... on AddMessageResult {\n        message {\n          id\n          text\n          timestampMs\n          sender {\n            id\n            name\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation AddMessage($command: ChannelCommand!) {\n    execute(command: $command) {\n      __typename\n      ... on AddMessageResult {\n        message {\n          id\n          text\n          timestampMs\n          sender {\n            id\n            name\n          }\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

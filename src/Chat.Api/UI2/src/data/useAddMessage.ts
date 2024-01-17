@@ -2,22 +2,25 @@ import { useMutation } from "@urql/preact";
 import { graphql } from "../generated";
 
 const AddMessageMutation = graphql(`
-  mutation AddMessage($channelId: Int! $text: String!) {
-    channel(id: $channelId) {
-        addMessage(text: $text) {
+  mutation AddMessage($command: ChannelCommand!) {
+    execute(command: $command) {
+      __typename
+      ... on AddMessageResult {
+        message {
+          id
+          text
+          timestampMs
+          sender {
             id
-            text
-            timestampMs
-            sender {
-                id
-                name
-            }
+            name
+          }
         }
+      }
     }
   }
-`)
+`);
 
 export function useAddMessage() {
-    const response = useMutation(AddMessageMutation);
-    return response;
+  const response = useMutation(AddMessageMutation);
+  return response;
 }
