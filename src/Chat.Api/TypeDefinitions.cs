@@ -52,16 +52,16 @@ public static class Mutation
         };
         
         var user = context.GetUser();
+
+        if (user.Identity?.IsAuthenticated == false)
+            throw new InvalidOperationException($"Forbidden: user is not authenticated.");
+
         await using var db = await dbFactory.CreateDbContextAsync();
+        
         if (command.AddMessage is not null)
         {
             var text = command.AddMessage.Content;
             var channelId = command.AddMessage.ChannelId;
-            
-
-            if (user.Identity?.IsAuthenticated == false)
-                throw new InvalidOperationException($"Forbidden: user is not authenticated.");
-
             
             var message = new Message
             {
@@ -84,9 +84,6 @@ public static class Mutation
         }
 
         ArgumentNullException.ThrowIfNull(command.AddChannel);
-        
-        if (user.Identity?.IsAuthenticated == false)
-            throw new InvalidOperationException($"Forbidden: user is not authenticated.");
 
         var name = command.AddChannel.Name;
         var description = command.AddChannel.Description;
