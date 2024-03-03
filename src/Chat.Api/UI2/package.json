@@ -11,7 +11,7 @@
 		"@preact/signals": "^1.2.2",
 		"@urql/exchange-graphcache": "^6.4.0",
 		"@urql/preact": "^4.0.4",
-		"graphql-ws": "^5.14.2",
+		"graphql-ws": "^5.15.0",
 		"preact": "^10.19.3",
 		"preact-render-to-string": "^6.3.1",
 		"react-router-dom": "^6.22.2"
