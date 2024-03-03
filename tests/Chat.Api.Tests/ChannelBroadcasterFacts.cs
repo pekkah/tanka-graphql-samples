@@ -1,3 +1,5 @@
+using Tanka.GraphQL.Samples.Chat.Api.Schema;
+
 namespace Tanka.GraphQL.Samples.Chat.Api.Tests;
 
 public class ChannelBroadcasterFacts
@@ -11,7 +13,7 @@ public class ChannelBroadcasterFacts
         var expected = new MessageChannelEvent(
             1,
             "test",
-            new Message { TimestampMs = "1", Text = "test", ChannelId = 1 }
+            new Schema.Message { TimestampMs = "1", Text = "test", ChannelId = 1 }
             );
 
         /* When */
@@ -33,7 +35,7 @@ public class ChannelBroadcasterFacts
         var expected = new MessageChannelEvent(
             1,
             "test",
-            new Message { TimestampMs = "1", Text = "test", ChannelId = 1 }
+            new Schema.Message { TimestampMs = "1", Text = "test", ChannelId = 1 }
         );
 
         /* When */

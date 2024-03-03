@@ -1,14 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 
-using Tanka.GraphQL.Executable;
 using Tanka.GraphQL.Extensions.Experimental.OneOf;
-using Tanka.GraphQL.Fields;
-using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Samples.Chat.Api;
+using Tanka.GraphQL.Samples.Chat.Api.Schema;
 using Tanka.GraphQL.Samples.Chat.Api.Startup;
 using Tanka.GraphQL.Server;
-using Tanka.GraphQL.TypeSystem;
-using Tanka.GraphQL.ValueResolution;
 
 using Vite.AspNetCore;
 using Vite.AspNetCore.Extensions;
@@ -34,7 +30,7 @@ builder.AddTankaGraphQL()
         // Add source generator generated types for queries and mutations
         options.AddGeneratedTypes(types =>
         {
-            types.AddTankaGraphQLSamplesChatApiTypes();
+            types.AddTankaGraphQLSamplesChatApiSchemaTypes();
         });
         
         options.PostConfigure(configure =>
@@ -48,66 +44,12 @@ builder.AddTankaGraphQL()
                                """);
         });
 
-        options.PostConfigure(configure =>
-        {
-            //todo: add support to code generator
-            configure.Builder.Schema.Add("""
-                                         union CommandResult = AddChannelResult | AddMessageResult
-                                         """);
-        });
-
-        // Manually configure subscription types as the SG does not support it yet
-        //TODO: Add subscription support to the code generator
         options.Configure(configure =>
         {
-            ExecutableSchemaBuilder schema = configure.Builder;
-
-            schema.Add("""
-                       interface ChannelEvent {
-                           channelId: Int!
-                           eventType: String!
-                       }
-
-                       type MessageChannelEvent implements ChannelEvent
-                       """);
-
-            schema.Add(new ObjectResolversConfiguration(
-                "MessageChannelEvent",
-                new FieldsWithResolvers
-                {
-                    { "channelId: Int!", (MessageChannelEvent objectValue) => objectValue.ChannelId },
-                    { "eventType: String!", (MessageChannelEvent objectValue) => objectValue.EventType },
-                    { "message: Message!", (MessageChannelEvent objectValue) => objectValue.Message }
-                }));
-
-            schema.Add("Subscription",
-                new FieldsWithResolvers
-                {
-                    {
-                        "channel_events(id: Int!): ChannelEvent", (ResolverContext context) =>
-                        {
-                            context.ResolvedValue = context.ObjectValue;
-                            context.ResolveAbstractType = (definition, value) => value switch
-                            {
-                                MessageChannelEvent => context.Schema.GetRequiredNamedType<ObjectDefinition>(
-                                    "MessageChannelEvent"),
-                                _ => throw new InvalidOperationException("Unknown ChannelEvent type")
-                            };
-                        }
-                    }
-                },
-                new FieldsWithSubscribers
-                {
-                    {
-                        "channel_events(id: Int!): ChannelEvent", b => b.Run((context, unsubscribe) =>
-                        {
-                            var events = context.GetRequiredService<IChannelEvents>();
-                            int id = context.GetArgument<int>("id");
-                            context.ResolvedValue = events.Subscribe(id, unsubscribe);
-                            return default;
-                        })
-                    }
-                });
+            //todo: sg union types
+            configure.Builder.Add("""
+                                  union CommandResult = AddChannelResult | AddMessageResult
+                                  """);
         });
     });
 

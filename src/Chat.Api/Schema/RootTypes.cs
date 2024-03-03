@@ -1,18 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
+using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
 using Tanka.GraphQL.Server;
 using Tanka.GraphQL.TypeSystem;
 using Tanka.GraphQL.ValueResolution;
 
-namespace Tanka.GraphQL.Samples.Chat.Api;
+namespace Tanka.GraphQL.Samples.Chat.Api.Schema;
 
 [ObjectType]
-public static class Query
+public static partial class Query
 {
     public static async Task<IEnumerable<Channel>> Channels(
         [FromServices] IDbContextFactory<ChatContext> dbFactory
@@ -23,7 +23,7 @@ public static class Query
     }
 
     public static async Task<Channel?> Channel(
-        [FromArguments]int id,
+        [FromArguments] int id,
         [FromServices] IDbContextFactory<ChatContext> dbFactory
     )
     {
@@ -35,13 +35,13 @@ public static class Query
 }
 
 [ObjectType]
-public static class Mutation
+public static partial class Mutation
 {
     public static async Task<CommandResult> Execute(
         ResolverContext context,
         [FromServices] IDbContextFactory<ChatContext> dbFactory,
         [FromServices] IChannelEvents events,
-        [FromArguments]ChannelCommand command
+        [FromArguments] ChannelCommand command
         )
     {
         context.ResolveAbstractType = (definition, value) => value switch
@@ -50,19 +50,19 @@ public static class Mutation
             AddMessageResult => context.Schema.GetRequiredNamedType<ObjectDefinition>("AddMessageResult"),
             _ => throw new InvalidOperationException($"Unknown type {definition.Name}")
         };
-        
+
         var user = context.GetUser();
 
         if (user.Identity?.IsAuthenticated == false)
             throw new InvalidOperationException($"Forbidden: user is not authenticated.");
 
         await using var db = await dbFactory.CreateDbContextAsync();
-        
+
         if (command.AddMessage is not null)
         {
             var text = command.AddMessage.Content;
             var channelId = command.AddMessage.ChannelId;
-            
+
             var message = new Message
             {
                 Text = text,
@@ -79,7 +79,11 @@ public static class Mutation
             await db.Messages.AddAsync(message);
             await db.SaveChangesAsync();
 
-            await events.Publish(new MessageChannelEvent(channelId, nameof(MessageChannelEvent), message), CancellationToken.None);
+            await events.Publish(new MessageChannelEvent()
+            {
+                ChannelId = channelId,
+                Message = message
+            }, CancellationToken.None);
             return new AddMessageResult(message);
         }
 
@@ -99,109 +103,15 @@ public static class Mutation
 }
 
 [ObjectType]
-public class Channel
+public partial class Subscription
 {
-    public int Id { get; set; }
-
-    [MaxLength(1024)]
-    public required string Name { get; init; }
-
-    [MaxLength(2048)]
-    public required string Description { get; init; }
-
-    public async Task<IEnumerable<Message>> Messages(
-        [FromServices] IDbContextFactory<ChatContext> dbFactory
-        )
+    public static IAsyncEnumerable<IChannelEvent> ChannelEvents(
+        SubscriberContext context,
+        [FromArguments]int id,
+        CancellationToken cancellationToken
+    )
     {
-        await using var db = await dbFactory.CreateDbContextAsync();
-        var messages = await db.Messages            
-            .Where(message => message.ChannelId == Id)
-            .ToListAsync();
-
-        return messages;
+        var events = context.GetRequiredService<IChannelEvents>();
+        return events.Subscribe(id, cancellationToken);
     }
-}
-
-[ObjectType]
-public class Message 
-{
-    public int Id { get; set; }
-
-    [MaxLength(100)]
-    public required string TimestampMs { get; set; }
-
-    [MaxLength(4048)]
-    public required string Text { get; init; }
-
-    public Sender Sender { get; set; } = null!;
-
-    public required int ChannelId { get; init; }
-}
-
-[ObjectType]
-[Owned]
-public class Sender
-{
-    [MaxLength(100)]
-    public string Id { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string Login { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
-
-    [MaxLength(2048)]
-    public string AvatarUrl { get; set; } = string.Empty;
-}
-
-public abstract class CommandResult
-{
-
-}
-
-[ObjectType]
-public class AddChannelResult : CommandResult
-{
-    public AddChannelResult(Channel channel)
-    {
-        Channel = channel;
-    }
-
-    public Channel Channel { get; }
-}
-
-[ObjectType]
-public class AddMessageResult : CommandResult
-{
-    public AddMessageResult(Message message)
-    {
-        Message = message;
-    }
-
-    public Message Message { get; }
-}
-
-[InputType]
-public partial class ChannelCommand
-{
-    public AddMessageCommand? AddMessage { get; set; }
-
-    public AddChannelCommand? AddChannel { get; set; }
-}
-
-[InputType]
-public partial class AddMessageCommand
-{
-    public int ChannelId { get; set; }
-
-    public string Content { get; set; } = string.Empty;
-}
-
-[InputType]
-public partial class AddChannelCommand
-{
-    public string Name { get; set; } = string.Empty;
-
-    public string Description { get; set; } = string.Empty;
 }

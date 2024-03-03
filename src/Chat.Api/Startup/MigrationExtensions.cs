@@ -15,8 +15,8 @@ public static class MigrationExtensions
             await db.Database.EnsureCreatedAsync();
 
             await db.Channels.AddRangeAsync(
-                new Channel { Name = "General", Description = "" },
-                new Channel { Name = "Tanka", Description = "" }
+                new Schema.Channel { Name = "General", Description = "" },
+                new Schema.Channel { Name = "Tanka", Description = "" }
             );
 
             await db.SaveChangesAsync();

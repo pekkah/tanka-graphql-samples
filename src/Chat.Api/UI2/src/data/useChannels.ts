@@ -57,7 +57,7 @@ export function useChannel(id: number) {
 
 const EventsSubscriptionQuery = graphql(`
   subscription Events($id: Int!) {
-    channel_events(id: $id) {
+    channelEvents(id: $id) {
       __typename
       ... on MessageChannelEvent {
         __typename
@@ -80,6 +80,7 @@ const EventsSubscriptionQuery = graphql(`
 `);
 
 export function useChannelWithNewMessages(id: number) {
+  console.log('useChannelWithNewMessages', id);
   const initialQuery = useQuery({
     query: ChannelByIdQuery,
     variables: { id },

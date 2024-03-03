@@ -8,7 +8,7 @@ public class ChatContext : DbContext
     {
     }
 
-    public DbSet<Channel> Channels => Set<Channel>();
+    public DbSet<Schema.Channel> Channels => Set<Schema.Channel>();
 
-    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Schema.Message> Messages => Set<Schema.Message>();
 }

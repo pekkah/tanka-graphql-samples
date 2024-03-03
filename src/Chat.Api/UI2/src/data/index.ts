@@ -18,13 +18,14 @@ const client = new Client({
     cacheExchange({
       updates: {
         Subscription: {
-          channel_events: (result, args, cache, info) => {
+          channelEvents: (result, args, cache, info) => {
             
-            if (result.channel_events["__typename"] !== "MessageChannelEvent") {
+            if (result.channelEvents["__typename"] !== "MessageChannelEvent") {
+              console.log(result.channelEvents);
               return;
             }
 
-            const message = result.channel_events["message"];
+            const message = result.channelEvents["message"];
             const variables = {id: args.id};
 
             cache.updateQuery({query: ChannelByIdQuery, variables }, (data) => {
@@ -36,7 +37,6 @@ const client = new Client({
                 data.channel.messages.push(message);
               }
 
-              console.log("data", data)
               return data;
             });
           }

@@ -16,25 +16,25 @@
 
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.21.0" />
-        <PackageReference Include="Octokit" Version="9.1.0" />
+        <PackageReference Include="Octokit" Version="10.0.0" />
         <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
         <PackageReference Include="System.Linq.Async" Version="6.0.1" />
         <PackageReference Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
-        <PackageReference Include="Tanka.GraphQL" Version="3.0.0-beta.109" />
-        <PackageReference Include="Tanka.GraphQL.Extensions.Experimental" Version="3.0.0-beta.109" />
-        <PackageReference Include="Tanka.GraphQL.Language" Version="3.0.0-beta.109" />
-        <PackageReference Include="Tanka.GraphQL.Server" Version="3.0.0-beta.109" />
-        <PackageReference Include="Tanka.GraphQL.Server.SourceGenerators" Version="3.0.0-beta.109" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.1" />
+        <PackageReference Include="Tanka.GraphQL" Version="3.0.0-beta.123" />
+        <PackageReference Include="Tanka.GraphQL.Extensions.Experimental" Version="3.0.0-beta.123" />
+        <PackageReference Include="Tanka.GraphQL.Language" Version="3.0.0-beta.123" />
+        <PackageReference Include="Tanka.GraphQL.Server" Version="3.0.0-beta.123" />
+        <PackageReference Include="Tanka.GraphQL.Server.SourceGenerators" Version="3.0.0-beta.123" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.2" />
 
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
 
         <PackageReference Include="Vite.AspNetCore" Version="1.12.0" />
     </ItemGroup>

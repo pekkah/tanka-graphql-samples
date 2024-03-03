@@ -1,21 +1,22 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Threading.Channels;
+
+using Tanka.GraphQL.Samples.Chat.Api.Schema;
 
 namespace Tanka.GraphQL.Samples.Chat.Api;
 
 public interface IChannelEvents
 {
-    ValueTask Publish<T>(T channelEvent, CancellationToken cancellationToken) where T : ChannelEvent;
+    ValueTask Publish<T>(T channelEvent, CancellationToken cancellationToken) where T : IChannelEvent;
 
-    IAsyncEnumerable<ChannelEvent> Subscribe(int channelId, CancellationToken cancellationToken);
+    IAsyncEnumerable<IChannelEvent> Subscribe(int channelId, CancellationToken cancellationToken);
 }
 
 public class ChannelEvents : IChannelEvents
 {
     private readonly ConcurrentDictionary<int, ChannelBroadcaster> _broadcasters = new();
 
-    public async ValueTask Publish<T>(T channelEvent, CancellationToken cancellationToken) where T : ChannelEvent
+    public async ValueTask Publish<T>(T channelEvent, CancellationToken cancellationToken) where T : IChannelEvent
     {
         ChannelBroadcaster channelBroadcaster = _broadcasters
             .GetOrAdd(channelEvent.ChannelId, _ => new ChannelBroadcaster());
@@ -23,7 +24,7 @@ public class ChannelEvents : IChannelEvents
         await channelBroadcaster.Publish(channelEvent, cancellationToken);
     }
 
-    public async IAsyncEnumerable<ChannelEvent> Subscribe(int channelId, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<IChannelEvent> Subscribe(int channelId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChannelBroadcaster channelBroadcaster = _broadcasters
             .GetOrAdd(channelId, _ => new ChannelBroadcaster());
@@ -33,34 +34,18 @@ public class ChannelEvents : IChannelEvents
     }
 }
 
-public abstract record ChannelEvent(int ChannelId, string EventType);
-
-public record MessageChannelEvent(
-    int ChannelId,
-    string EventType,
-    Message Message) : ChannelEvent(ChannelId, EventType);
-
 public class ChannelBroadcaster
 {
-    private readonly BroadcasterChannel<ChannelEvent> _broadcaster = new();
+    private readonly EventAggregator<IChannelEvent> _broadcaster = new();
 
 
-    public async Task Publish<T>(T ev, CancellationToken cancellationToken) where T : ChannelEvent
+    public async Task Publish<T>(T ev, CancellationToken cancellationToken) where T : IChannelEvent
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        await _broadcaster.WriteAsync(ev);
+        await _broadcaster.Publish(ev, cancellationToken);
     }
 
-    public IAsyncEnumerable<ChannelEvent> Subscribe(CancellationToken cancellationToken)
+    public IAsyncEnumerable<IChannelEvent> Subscribe(CancellationToken cancellationToken)
     {
-        var output = System.Threading.Channels.Channel.CreateUnbounded<ChannelEvent>();
-        var unsubscribe = _broadcaster.Subscribe(output.Writer);
-
-        cancellationToken.Register(() =>
-        {
-            unsubscribe.Dispose();
-        });
-
-        return output.Reader.ReadAllAsync(CancellationToken.None);
-    }
+        return _broadcaster.Subscribe(cancellationToken);
+    } 
 }
