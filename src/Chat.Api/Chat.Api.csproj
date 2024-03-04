@@ -40,10 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove="UI2\package.json" />
-        <Content Remove="UI2\package-lock.json" />
-        <Content Remove="UI2\tsconfig.json" />
-        <Content Include="wwwroot\.vite\**" />
+        <Content Include="wwwroot\.vite\manifest.json" Condition=" '$(Configuration)' == 'Release' "/>
     </ItemGroup>
 
 
