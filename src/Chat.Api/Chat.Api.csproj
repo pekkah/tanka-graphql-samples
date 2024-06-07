@@ -21,7 +21,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.21.0" />
         <PackageReference Include="Octokit" Version="10.0.0" />
         <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
