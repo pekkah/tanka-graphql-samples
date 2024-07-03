@@ -23,7 +23,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.21.0" />
-        <PackageReference Include="Octokit" Version="10.0.0" />
+        <PackageReference Include="Octokit" Version="13.0.1" />
         <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
         <PackageReference Include="System.Linq.Async" Version="6.0.1" />
         <PackageReference Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
