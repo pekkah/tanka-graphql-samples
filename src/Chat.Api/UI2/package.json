@@ -19,7 +19,7 @@
 	"devDependencies": {
 		"@graphql-codegen/cli": "^5.0.2",
 		"@graphql-codegen/client-preset": "^4.2.4",
-		"@preact/preset-vite": "^2.8.1",
+		"@preact/preset-vite": "^2.9.3",
 		"@tailwindcss/typography": "^0.5.10",
 		"autoprefixer": "^10.4.18",
 		"cross-env": "^7.0.3",
