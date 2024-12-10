@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.GitHub" Version="8.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,7 +31,7 @@
         <PackageReference Include="Tanka.GraphQL.Extensions.Experimental" Version="3.0.0" />
         <PackageReference Include="Tanka.GraphQL.Language" Version="3.0.0" />
         <PackageReference Include="Tanka.GraphQL.Server" Version="3.0.0-beta.123" />
-        <PackageReference Include="Tanka.GraphQL.Server.SourceGenerators" Version="3.0.0-beta.123" PrivateAssets="all" />
+        <PackageReference Include="Tanka.GraphQL.Server.SourceGenerators" Version="3.0.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.6" />
 
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.6" />
