@@ -27,9 +27,8 @@ public static class AuthenticationExtensions
             })
             .AddGitHub("github", options =>
             {
-                options.ClientId = builder.Configuration["GitHub:ClientId"] ?? throw new InvalidOperationException();
-                options.ClientSecret = builder.Configuration["GitHub:ClientSecret"] ??
-                                       throw new InvalidOperationException();
+                options.ClientId = builder.Configuration["GitHub:ClientId"] ?? "development-client-id";
+                options.ClientSecret = builder.Configuration["GitHub:ClientSecret"] ?? "development-client-secret";
                 options.Scope.Add("user:email");
 
                 options.ClaimActions.Clear();

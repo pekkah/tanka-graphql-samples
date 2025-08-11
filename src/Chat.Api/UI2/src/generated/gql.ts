@@ -11,8 +11,15 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * 3. It does not support dead code elimination, so it will add unused operations.
  *
  * Therefore it is highly recommended to use the babel or swc plugin for production.
+ * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
-const documents = {
+type Documents = {
+    "\n  mutation AddMessage($command: ChannelCommand!) {\n    execute(command: $command) {\n      __typename\n      ... on AddMessageResult {\n        message {\n          id\n          text\n          timestampMs\n          sender {\n            id\n            name\n          }\n        }\n      }\n    }\n  }\n": typeof types.AddMessageDocument,
+    "\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n": typeof types.ChannelsDocument,
+    "\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n      messages {\n        id\n        text\n        timestampMs\n        sender {\n          id\n          name\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n": typeof types.ChannelByIdDocument,
+    "\n  subscription Events($id: Int!) {\n    channelEvents(id: $id) {\n      __typename\n      ... on MessageChannelEvent {\n        __typename\n        message {\n          __typename\n          id\n          text\n          timestampMs\n          sender {\n            __typename\n            id\n            name\n            avatarUrl\n            login\n          }\n        }\n      }\n    }\n  }\n": typeof types.EventsDocument,
+};
+const documents: Documents = {
     "\n  mutation AddMessage($command: ChannelCommand!) {\n    execute(command: $command) {\n      __typename\n      ... on AddMessageResult {\n        message {\n          id\n          text\n          timestampMs\n          sender {\n            id\n            name\n          }\n        }\n      }\n    }\n  }\n": types.AddMessageDocument,
     "\n  query Channels {\n    channels {\n      id\n      name\n    }\n  }\n": types.ChannelsDocument,
     "\n  query ChannelById($id: Int!) {\n    channel(id: $id) {\n      id\n      name\n      description\n      messages {\n        id\n        text\n        timestampMs\n        sender {\n          id\n          name\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n": types.ChannelByIdDocument,

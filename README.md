@@ -2,20 +2,21 @@
 
 Simple chat application with channels and messages.
 
-Use
-s queries, mutations and subscriptions. Subscriptions use `graphql-ws` -protocol.
+Uses queries, mutations and subscriptions. Subscriptions use `graphql-ws` -protocol.
 
 ## Running the app
 
-App is built with Asp.NET Core backend and Preact frontend. Backend acts as both API and host
+App is built with ASP.NET Core backend and Preact frontend. Backend acts as both API and host
 for the frontend. 
 
 
 ### Prerequisites
 
+- .NET 9.0 SDK or later
+- Node.js 22.12.0 or later (required for Vite 7)
 - Application uses GitHub authentication and you must provide your own ClientId and ClientSecret
 in the `appsettings.Local.json` -configuration file. 
-- Application uses Node.js and npm to build the frontend. You must have Node.js installed on your machine.
+- Application uses Node.js and npm to build the frontend
 
 
 ### Running the app
@@ -25,7 +26,7 @@ dotnet build -c Release
 dotnet run -c Release --launch-profile ChatProduction --project .\src\Chat.Api\
 ```
 
-This will build the backend and frontend and run the app in "Production" -environment.
+This will build the backend and frontend and run the app in "Production" -environment on https://localhost:8001.
 
 
 ## Development
@@ -39,7 +40,7 @@ This will build the backend and frontend and run the app in "Production" -enviro
 You can develop the app in two ways:
 - Run Vite manually from command prompt: set the Vite:AutoRun false in your configuration and launch Vite manually 
 `npm run dev` in the `src\Chat.Api\UI2` -folder.
-- Let Visual Studoo start Vite automatically: set the Vite:AutoRun true in your configuration.
+- Let Visual Studio start Vite automatically: set the Vite:AutoRun true in your configuration.
 
 Running Vite manually is faster, but you need to remember to start it before running the app. 
 Letting Visual Studio start Vite automatically is slower as Vite is started and stopped when you launch the app.

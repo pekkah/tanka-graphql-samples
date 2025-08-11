@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Security.Claims;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 using Tanka.GraphQL.Fields;
 using Tanka.GraphQL.Language.Nodes.TypeSystem;
@@ -107,7 +108,7 @@ public partial class Subscription
 {
     public static IAsyncEnumerable<IChannelEvent> ChannelEvents(
         SubscriberContext context,
-        [FromArguments]int id,
+        [FromArguments] int id,
         CancellationToken cancellationToken
     )
     {

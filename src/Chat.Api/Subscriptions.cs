@@ -29,7 +29,7 @@ public class ChannelEvents : IChannelEvents
         ChannelBroadcaster channelBroadcaster = _broadcasters
             .GetOrAdd(channelId, _ => new ChannelBroadcaster());
 
-        await foreach(var ev in channelBroadcaster.Subscribe(cancellationToken))
+        await foreach (var ev in channelBroadcaster.Subscribe(cancellationToken))
             yield return ev;
     }
 }
@@ -47,5 +47,5 @@ public class ChannelBroadcaster
     public IAsyncEnumerable<IChannelEvent> Subscribe(CancellationToken cancellationToken)
     {
         return _broadcaster.Subscribe(cancellationToken);
-    } 
+    }
 }
