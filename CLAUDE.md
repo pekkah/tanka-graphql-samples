@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a sample chat application demonstrating the Tanka GraphQL library capabilities. It features a .NET 8 backend with ASP.NET Core and a Preact frontend, implementing real-time chat with GraphQL queries, mutations, and subscriptions using the `graphql-ws` protocol.
+This is a sample chat application demonstrating the Tanka GraphQL library capabilities. It features a .NET 9.0 backend with ASP.NET Core and a Preact frontend, implementing real-time chat with GraphQL queries, mutations, and subscriptions using the `graphql-ws` protocol.
 
 ## Essential Commands
 
