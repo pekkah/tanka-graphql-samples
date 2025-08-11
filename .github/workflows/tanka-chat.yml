@@ -31,9 +31,9 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: '22.12.0'
         cache: 'npm'
-        cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/UI2/package-lock.json'
+        cache-dependency-path: 'src/Chat.Api/UI2/package-lock.json'
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
@@ -42,7 +42,7 @@ jobs:
         cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/**.csproj'
     - name: Install Node.js dependencies
       run: npm ci
-      working-directory: ${{ env.WORKING_DIRECTORY }}/UI2
+      working-directory: src/Chat.Api/UI2
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Build
