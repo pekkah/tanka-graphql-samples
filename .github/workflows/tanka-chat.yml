@@ -40,6 +40,9 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
         cache: true
         cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/**.csproj'
+    - name: Install Node.js dependencies
+      run: npm ci
+      working-directory: ${{ env.WORKING_DIRECTORY }}/UI2
     - name: Restore
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Build
