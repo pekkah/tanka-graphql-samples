@@ -23,7 +23,7 @@ public partial class Channel
         )
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-        var messages = await db.Messages            
+        var messages = await db.Messages
             .Where(message => message.ChannelId == Id)
             .ToListAsync();
 
@@ -32,7 +32,7 @@ public partial class Channel
 }
 
 [ObjectType]
-public partial class Message 
+public partial class Message
 {
     public int Id { get; set; }
 

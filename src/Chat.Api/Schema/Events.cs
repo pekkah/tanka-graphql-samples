@@ -12,6 +12,6 @@ public partial interface IChannelEvent
 public partial class MessageChannelEvent : IChannelEvent
 {
     public required int ChannelId { get; set; }
-    
+
     public required Message Message { get; set; }
 }

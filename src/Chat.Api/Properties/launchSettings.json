@@ -3,31 +3,31 @@
     "Chat": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:8000",
+      "launchUrl": "https://localhost:8001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:8000",
+      "applicationUrl": "https://localhost:8001",
       "dotnetRunMessages": true
     },
     "WSL": {
       "commandName": "WSL2",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:8000/",
+      "launchUrl": "https://localhost:8001/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:8000"
+        "ASPNETCORE_URLS": "https://localhost:8001"
       },
       "distributionName": ""
     },
     "ChatProduction": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:8000",
+      "launchUrl": "https://localhost:8001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production"
       },
-      "applicationUrl": "https://localhost:8000",
+      "applicationUrl": "https://localhost:8001",
       "dotnetRunMessages": true
     }
   }
