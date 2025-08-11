@@ -54,11 +54,4 @@
         <Exec Command="npm run build" WorkingDirectory="$(ViteAppDir)" />
     </Target>
 
-    <!-- Fix for .NET 9 StaticWebAssets compression conflicts -->
-    <Target Name="RemoveConflictingAssets" BeforeTargets="ResolveStaticWebAssetsConfiguration">
-        <ItemGroup>
-            <StaticWebAsset Remove="@(StaticWebAsset)" Condition="'%(Extension)' == '.gz'" />
-            <StaticWebAsset Remove="@(StaticWebAsset)" Condition="'%(Extension)' == '.br'" />
-        </ItemGroup>
-    </Target>
 </Project>
