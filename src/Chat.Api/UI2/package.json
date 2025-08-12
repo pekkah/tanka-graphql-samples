@@ -8,7 +8,7 @@
 		"codegen": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
-		"@preact/signals": "^1.2.2",
+		"@preact/signals": "^2.2.1",
 		"@urql/exchange-graphcache": "^7.2.4",
 		"@urql/preact": "^4.0.4",
 		"graphql-ws": "^5.15.0",
